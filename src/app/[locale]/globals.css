@@ -1,0 +1,157 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Mobile optimizations */
+html {
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+}
+
+input, 
+button, 
+select, 
+textarea {
+  font-size: 16px; /* Prevents iOS zoom on focus */
+}
+
+/* Enhanced select styling for better text visibility */
+select {
+  min-width: 120px; /* Ensure minimum width for text visibility */
+  background-position: right 0.5rem center;
+  background-repeat: no-repeat;
+  background-size: 1.5em 1.5em;
+  padding-right: 2.5rem;
+}
+
+/* Improve select option styling */
+select option {
+  padding: 8px 12px;
+  font-size: 14px;
+  line-height: 1.4;
+  background-color: white;
+  color: #374151;
+}
+
+/* Better focus states for select elements */
+select:focus {
+  outline: 2px solid rgba(16, 185, 129, 0.5);
+  outline-offset: 2px;
+  border-color: #10b981;
+}
+
+/* Custom scrollbar styles */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a1a1a1;
+}
+
+/* Improved mobile tap targets */
+@media (max-width: 640px) {
+  button, 
+  a,
+  select {
+    min-height: 44px; /* Apple's recommended minimum touch target size */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  /* Fix for text links that don't need larger tap target */
+  a.text-link {
+    min-height: unset;
+    display: inline;
+  }
+
+  /* Mobile select improvements */
+  select {
+    min-width: 140px; /* Larger minimum width on mobile */
+    font-size: 16px; /* Prevent zoom on iOS */
+  }
+}
+
+/* Toast container customization */
+.toast-container-custom {
+  width: auto !important;
+  max-width: 90vw !important;
+}
+
+/* For mobile devices */
+@media (max-width: 640px) {
+  .toast-container-custom .Toastify__toast {
+    margin-bottom: 0.5rem;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 14px;
+  }
+  
+  .toast-container-custom .Toastify__toast-body {
+    padding: 0;
+  }
+  
+  .Toastify__close-button {
+    padding: 6px;
+  }
+}
+
+/* Prevent content shift on modals */
+.modal-open {
+  overflow: hidden;
+  padding-right: 17px; /* Width of scrollbar to prevent layout shift */
+}
+
+/* Mobile-specific text adjustments */
+@media (max-width: 640px) {
+  h1 {
+    font-size: 1.75rem !important;
+  }
+  
+  h2 {
+    font-size: 1.5rem !important;
+  }
+  
+  h3 {
+    font-size: 1.25rem !important;
+  }
+}
+
+/* Better focus states for accessibility */
+a:focus,
+button:focus,
+input:focus,
+select:focus,
+textarea:focus {
+  outline: 2px solid rgba(59, 130, 246, 0.5);
+  outline-offset: 2px;
+}
+
+/* Dropdown and select improvements for better text visibility */
+.dropdown-content,
+.select-dropdown {
+  min-width: 200px;
+  max-width: 400px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Ensure proper text wrapping in dropdowns */
+.dropdown-item {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
+} 
