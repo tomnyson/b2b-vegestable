@@ -15,7 +15,8 @@
     "language": "Language",
     "currency": "Currency",
     "cart": "Cart",
-    "invoices": "Invoices"
+    "invoices": "Invoices",
+    "dashboard": "Dashboard"
   },
   "actions": {
     "logout": "Logout",

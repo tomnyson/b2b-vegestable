@@ -249,20 +249,20 @@ export default function StorePage() {
         newQuantity += prev[existingItemIndex].quantity;
       }
       
-      // Check against stock if available
-      if (product.stock !== undefined) {
-        if (newQuantity > product.stock) {
-          // Show toast warning if exceeding stock
-          toast.warning(t('messages.stockWarning', { stock: product.stock, product: product.name_en }));
-          newQuantity = product.stock;
-        }
+      // // Check against stock if available
+      // if (product.stock !== undefined) {
+      //   if (newQuantity > product.stock) {
+      //     // Show toast warning if exceeding stock
+      //     toast.warning(t('messages.stockWarning', { stock: product.stock, product: product.name_en }));
+      //     newQuantity = product.stock;
+      //   }
         
-        // If completely out of stock
-        if (product.stock <= 0) {
-          toast.error(t('messages.outOfStockError', { product: product.name_en }));
-          return prev; // Don't modify cart
-        }
-      }
+      //   // If completely out of stock
+      //   if (product.stock <= 0) {
+      //     toast.error(t('messages.outOfStockError', { product: product.name_en }));
+      //     return prev; // Don't modify cart
+      //   }
+      // }
       
       if (existingItemIndex >= 0) {
         // Update quantity if already in cart
@@ -290,14 +290,14 @@ export default function StorePage() {
           let newQuantity = Math.max(1, quantity);
           
           // Check against stock limits if available
-          if (item.product.stock !== undefined) {
-            const maxAllowed = item.product.stock;
+          // if (item.product.stock !== undefined) {
+          //   const maxAllowed = item.product.stock;
             
-            if (newQuantity > maxAllowed) {
-              toast.warning(t('messages.stockWarning', { stock: maxAllowed, product: item.product.name_en }));
-              newQuantity = maxAllowed;
-            }
-          }
+          //   if (newQuantity > maxAllowed) {
+          //     toast.warning(t('messages.stockWarning', { stock: maxAllowed, product: item.product.name_en }));
+          //     newQuantity = maxAllowed;
+          //   }
+          // }
           
           return { ...item, quantity: newQuantity };
         }
@@ -313,9 +313,10 @@ export default function StorePage() {
   );
 
   // Handle search input
+
   const handleSearch = (term: string) => {
     setSearchTerm(term);
-    setIsSearching(true);
+    setCurrentPage(1); // Reset to first page on new search
   };
 
   // Handle customer info change

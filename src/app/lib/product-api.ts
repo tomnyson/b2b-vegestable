@@ -322,11 +322,6 @@ export async function decreaseProductStock(productId: string, quantity: number):
       throw new Error(`Product ${productId} not found`);
     }
     
-    // Check if we have enough stock
-    if (product.stock < quantity) {
-      throw new Error(`Insufficient stock for product ${productId}. Available: ${product.stock}, Requested: ${quantity}`);
-    }
-    
     // Calculate new stock
     const newStock = product.stock - quantity;
     

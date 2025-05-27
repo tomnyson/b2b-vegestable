@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import { Product } from '../../lib/product-api';
 import { formatPriceSync } from '../../lib/settings-api';
@@ -19,6 +19,18 @@ interface ProductListProps {
   popularProductIds?: string[]; // Optional array of popular product IDs
   currency?: string; // Currency code
   isSearching?: boolean; // Optional prop to show search loading state
+}
+
+// Custom debounce function
+function debounce<T extends (...args: any[]) => any>(
+  func: T,
+  wait: number
+): (...args: Parameters<T>) => void {
+  let timeout: NodeJS.Timeout;
+  return (...args: Parameters<T>) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func(...args), wait);
+  };
 }
 
 const ProductList: React.FC<ProductListProps> = ({
@@ -40,6 +52,19 @@ const ProductList: React.FC<ProductListProps> = ({
   // State for quantity inputs
   const [quantities, setQuantities] = useState<Record<string, number>>({});
 
+  // Debounced search with 50ms delay
+  const debouncedSearch = useCallback(
+    debounce((term: string) => {
+      onSearch(term);
+    }, 50),
+    [onSearch]
+  );
+
+  // Handle search input change
+  const handleSearchChange = (value: string) => {
+    debouncedSearch(value);
+  };
+
   // Get or set quantity for a product
   const getQuantity = (productId: string): number => {
     return quantities[productId] || 1;
@@ -48,14 +73,6 @@ const ProductList: React.FC<ProductListProps> = ({
   // Handle quantity change
   const handleQuantityChange = (productId: string, newQuantity: number) => {
     const product = products.find(p => p.id === productId);
-    if (product && product.stock !== undefined) {
-      // Ensure quantity doesn't exceed available stock
-      newQuantity = Math.min(Math.max(1, newQuantity), product.stock);
-    } else {
-      // If no stock info available, just ensure it's at least 1
-      newQuantity = Math.max(1, newQuantity);
-    }
-
     setQuantities({
       ...quantities,
       [productId]: newQuantity
@@ -138,7 +155,9 @@ const ProductList: React.FC<ProductListProps> = ({
               type="text"
               placeholder={t('products.searchPlaceholder')}
               value={searchTerm}
-              onChange={(e) => onSearch(e.target.value)}
+              onChange={(e) => {
+                handleSearchChange(e.target.value);
+              }}
               className="block w-full pl-12 pr-4 py-3 sm:py-4 border border-gray-200 rounded-2xl text-sm sm:text-base leading-5 bg-white/80 backdrop-blur-lg placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200 shadow-lg hover:shadow-xl"
             />
             {isSearching && (
@@ -190,16 +209,16 @@ const ProductList: React.FC<ProductListProps> = ({
 
                     {/* Price and Unit */}
                     <div className="text-center sm:text-left">
-                      <div className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">{formatPriceSync(product.price, currency)}</div>
+                      {/* <div className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">{formatPriceSync(product.price, currency)}</div> */}
                       <div className="text-sm text-gray-600 font-medium">{t('products.per')} {product.unit || 'kg'}</div>
                     </div>
 
                     {/* Stock Info */}
-                    <div className="flex justify-center sm:justify-start">
+                    {/* <div className="flex justify-center sm:justify-start">
                       <span className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold bg-gradient-to-r from-emerald-100 to-teal-100 text-emerald-800 shadow-sm">
                         {product.stock !== undefined ? `${product.stock} ${t('products.available')}` : t('products.inStock')}
                       </span>
-                    </div>
+                    </div> */}
 
                     {/* Quantity Controls and Add to Cart */}
                     <div className="flex flex-col xs:flex-row items-center justify-center sm:justify-start space-y-3 xs:space-y-0 xs:space-x-3">
@@ -220,7 +239,6 @@ const ProductList: React.FC<ProductListProps> = ({
                         <button
                           onClick={() => handleQuantityChange(product.id, getQuantity(product.id) + 1)}
                           className="p-2.5 rounded-r-xl hover:bg-emerald-50 transition-all duration-200 text-gray-600 hover:text-emerald-600"
-                          disabled={product.stock !== undefined && getQuantity(product.id) >= product.stock}
                           aria-label="Increase quantity"
                         >
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -232,16 +250,14 @@ const ProductList: React.FC<ProductListProps> = ({
                       {/* Add to Cart Button */}
                       <button
                         onClick={() => handleAddToCart(product)}
-                        className={`w-full xs:w-auto px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-200 flex items-center justify-center space-x-2 transform hover:scale-105 ${product.stock !== undefined && product.stock <= 0
-                            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                            : 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white hover:from-emerald-600 hover:to-teal-700 shadow-lg hover:shadow-xl'
+                        className={`w-full xs:w-auto px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-200 flex items-center justify-center space-x-2 transform hover:scale-105 
+                             'bg-gradient-to-r from-emerald-500 to-teal-600 text-white hover:from-emerald-600 hover:to-teal-700 shadow-lg hover:shadow-xl'
                           }`}
-                        disabled={product.stock !== undefined && product.stock <= 0}
                       >
                         <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m0 0L17 18" />
                         </svg>
-                        <span className="truncate">{product.stock !== undefined && product.stock <= 0 ? t('products.outOfStock') : t('products.addToCart')}</span>
+                        <span className="truncate">{t('products.addToCart')}</span>
                       </button>
                     </div>
                   </div>
@@ -261,7 +277,7 @@ const ProductList: React.FC<ProductListProps> = ({
                         {t('labels.productName')}
                       </th>
                       <th scope="col" className="px-6 py-5 text-left text-xs font-bold text-gray-800 uppercase tracking-wider min-w-[140px]">
-                        {t('labels.price')} & {t('labels.unit')}
+                        {t('labels.unit')}
                       </th>
           
                       <th scope="col" className="px-6 py-5 text-center text-xs font-bold text-gray-800 uppercase tracking-wider min-w-[120px]">
@@ -307,7 +323,7 @@ const ProductList: React.FC<ProductListProps> = ({
                           </div>
                         </td>
                         <td className="px-6 py-5">
-                          <div className="text-lg font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent break-words">{formatPriceSync(product.price, currency)}</div>
+                          {/* <div className="text-lg font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent break-words">{formatPriceSync(product.price, currency)}</div> */}
                           <div className="text-sm text-gray-600 font-medium break-words">{t('products.per')} {product.unit || 'kg'}</div>
                         </td>
                     
@@ -329,7 +345,6 @@ const ProductList: React.FC<ProductListProps> = ({
                               <button
                                 onClick={() => handleQuantityChange(product.id, getQuantity(product.id) + 1)}
                                 className="p-2 rounded-r-lg hover:bg-gray-200 transition-colors"
-                                disabled={product.stock !== undefined && getQuantity(product.id) >= product.stock}
                                 aria-label="Increase quantity"
                               >
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -342,18 +357,14 @@ const ProductList: React.FC<ProductListProps> = ({
                         <td className="px-4 py-4 text-center">
                           <button
                             onClick={() => handleAddToCart(product)}
-                            className={`inline-flex items-center px-4 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 space-x-2 whitespace-nowrap ${product.stock !== undefined && product.stock <= 0
-                                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                : 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white hover:from-emerald-600 hover:to-teal-700 shadow-lg hover:shadow-xl'
-                              }`}
-                            disabled={product.stock !== undefined && product.stock <= 0}
+                            className={`inline-flex items-center px-4 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 space-x-2 whitespace-nowrap
+                                bg-gradient-to-r from-emerald-500 to-teal-600 text-white hover:from-emerald-600 hover:to-teal-700 shadow-lg hover:shadow-xl`
+                              }
                           >
                             <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m0 0L17 18" />
                             </svg>
-                            <span className="break-words">
-                              {product.stock !== undefined && product.stock <= 0 ? t('products.outOfStock') : t('products.addToCart')}
-                            </span>
+                            {t('products.addToCart')}
                           </button>
                         </td>
                       </tr>

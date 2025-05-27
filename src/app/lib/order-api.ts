@@ -274,8 +274,30 @@ export async function getAllOrders(params: OrderQueryParams = {}) {
     
     // Apply search if provided
     if (params.search) {
-      const searchTerm = `%${params.search}%`;
-      query = query.or(`id.ilike.${searchTerm},user_id.ilike.${searchTerm},delivery_address.ilike.${searchTerm},customer.email.ilike.${searchTerm},customer.name.ilike.${searchTerm}`);
+      const keyword = params.search.toLowerCase();
+      
+      // First, find matching customer IDs
+      const { data: matchingUsers } = await supabase
+        .from('users')
+        .select('id')
+        .or(`email.ilike.*${keyword}*,name.ilike.*${keyword}*,phone.ilike.*${keyword}*`);
+      
+      const matchingUserIds = matchingUsers?.map(user => user.id) || [];
+      
+      // Build search conditions
+      let searchConditions = [
+        `id.ilike.*${keyword}*`,
+        `delivery_address.ilike.*${keyword}*`,
+        `notes.ilike.*${keyword}*`
+      ];
+      
+      // Add user_id filter if we found matching customers
+      if (matchingUserIds.length > 0) {
+        searchConditions.push(`user_id.in.(${matchingUserIds.join(',')})`);
+      }
+      
+      // Apply the combined search filter
+      query = query.or(searchConditions.join(','));
     }
     
     // Apply sorting

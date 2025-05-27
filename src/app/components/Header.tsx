@@ -136,6 +136,19 @@ export default function Header() {
                     {t('deliveries')}
                   </Link>
                 )}
+                {
+                  userRole === 'admin' && (
+                    <Link 
+                      href="/dashboard" 
+                      className={`text-sm font-medium ${
+                        pathname === '/dashboard' 
+                          ? 'text-green-600' 
+                          : 'text-gray-700 hover:text-green-500'
+                      }`}
+                    >
+                      {t('dashboard')}
+                    </Link>
+                  )}
                 
                 <button 
                   onClick={handleSignOut}

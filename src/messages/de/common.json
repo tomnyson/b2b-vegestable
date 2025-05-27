@@ -15,7 +15,8 @@
     "signIn": "Anmelden",
     "language": "Sprache",
     "currency": "Währung",
-    "cart": "Warenkorb"
+    "cart": "Warenkorb",
+    "dashboard": "Dashboard"
     
   },
   "actions": {
@@ -822,7 +823,6 @@
     "date": "Datum",
     "customer": "Kunde",
     "total": "Gesamt",
-    "status": "Status",
     "driver": "Fahrer",
     "actions": "Aktionen",
     "guestOrder": "Gastbestellung",

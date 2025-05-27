@@ -156,18 +156,14 @@ const ShoppingCart: React.FC<ShoppingCartProps> = ({
                     <div className="flex items-start justify-between mb-2">
                       <div>
                         <h3 className="text-sm font-semibold text-gray-900 truncate">{product.name_en}</h3>
-                        <p className="text-xs text-gray-500">{product.unit || 'kg'}</p>
-                        {product.stock !== undefined && (
+                        <p className="text-xs text-gray-500">{t('cart.unitPrice')}: {product.unit || 'kg'}</p>
+                        {/* {product.stock !== undefined && (
                           <p className="text-xs text-gray-500 mt-1">
                             {product.stock <= 0 
                               ? <span className="text-red-500 font-medium">{t('products.outOfStock')}</span> 
                               : `${product.stock} ${t('products.available')}`}
                           </p>
-                        )}
-                      </div>
-                      <div className="text-right">
-                        <div className="text-lg font-bold text-emerald-600">{formatPriceSync(product.price * quantity, currency)}</div>
-                        <div className="text-xs text-gray-500">{formatPriceSync(product.price, currency)}/{t('cart.unitPrice')}</div>
+                        )} */}
                       </div>
                     </div>
 
@@ -216,10 +212,10 @@ const ShoppingCart: React.FC<ShoppingCartProps> = ({
               <span className="text-sm font-medium text-gray-700">{t('cart.totalItems')}</span>
               <span className="text-lg font-bold text-emerald-700">{items.reduce((acc, item) => acc + item.quantity, 0)}</span>
             </div>
-            <div className="flex items-center justify-between">
+            {/* <div className="flex items-center justify-between">
               <span className="text-base font-semibold text-gray-900">{t('cart.totalAmount')}</span>
               <span className="text-2xl font-bold text-emerald-600">{formatPriceSync(total, currency)}</span>
-            </div>
+            </div> */}
           </div>
 
           {/* Order Notes */}
@@ -276,15 +272,15 @@ const ShoppingCart: React.FC<ShoppingCartProps> = ({
                     <div className="flex justify-between items-start">
                       <div className="flex-1">
                         <span className="text-sm font-medium text-gray-900">{product.name_en}</span>
-                        {product.stock !== undefined && (
+                        {/* {product.stock !== undefined && (
                           <span className="text-xs text-gray-500 block mt-1">
                             ({quantity} of {product.stock} available)
                           </span>
-                        )}
+                        )} */}
                       </div>
                       <div className="text-right ml-3">
                         <span className="text-sm font-semibold text-emerald-600">{quantity} {product.unit || 'kg'}</span>
-                        <div className="text-xs text-gray-500">{formatPriceSync(product.price * quantity, currency)}</div>
+                        {/* <div className="text-xs text-gray-500">{formatPriceSync(product.price * quantity, currency)}</div> */}
                       </div>
                     </div>
                   </div>
@@ -293,12 +289,12 @@ const ShoppingCart: React.FC<ShoppingCartProps> = ({
             </div>
             
             {/* Order Summary */}
-            <div className="mb-6 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-2xl p-4 border border-emerald-100">
+            {/* <div className="mb-6 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-2xl p-4 border border-emerald-100">
               <div className="flex justify-between items-center text-base font-semibold">
                 <span className="text-gray-900">{t('cart.totalAmount')}</span>
                 <span className="text-emerald-600">{formatPriceSync(total, currency)}</span>
               </div>
-            </div>
+            </div> */}
             
             {/* Order Notes */}
             {orderNotes && (

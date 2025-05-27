@@ -15,7 +15,8 @@
     "language": "Ngôn ngữ",
     "currency": "Tiền tệ",
     "cart": "Giỏ hàng",
-    "invoices": "Hóa đơn"
+    "invoices": "Hóa đơn",
+    "dashboard": "Bảng điều khiển"
   },
   "actions": {
     "logout": "Đăng xuất",
