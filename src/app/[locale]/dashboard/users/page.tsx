@@ -706,7 +706,7 @@ export default function UsersPage() {
       {/* Modal */}
       {isModalOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-6 sm:p-8 lg:p-12"
+          className="fixed inset-0 flex items-center justify-center z-50 p-6 sm:p-8 lg:p-12"
           onClick={(e) => e.target === e.currentTarget && setIsModalOpen(false)}
         >
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[92vh] overflow-hidden flex flex-col border border-gray-100 backdrop-blur-sm">
