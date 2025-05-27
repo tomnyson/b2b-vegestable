@@ -8,6 +8,7 @@ import { supabase } from '../../../lib/supabase';
 import { exportOrderSummaryToPDF } from '../../../lib/pdf-utils';
 import { toast } from 'react-toastify';
 import RouteProtection from '../../../components/RouteProtection';
+import { getAppSettings, AppSettings } from '../../../lib/settings-api';
 
 interface ProductSummary {
   id: string;
@@ -30,6 +31,7 @@ export default function OrderSummaryPage() {
     endDate: new Date().toISOString().split('T')[0],
   });
   const [error, setError] = useState<string | null>(null);
+  const [appSettings, setAppSettings] = useState<AppSettings | null>(null);
 
   useEffect(() => {
     async function checkAuth() {
@@ -61,6 +63,20 @@ export default function OrderSummaryPage() {
     
     checkAuth();
   }, [router]);
+
+  // Load app settings on component mount
+  useEffect(() => {
+    async function loadAppSettings() {
+      try {
+        const settings = await getAppSettings();
+        setAppSettings(settings);
+      } catch (err) {
+        console.error('Error loading app settings:', err);
+      }
+    }
+    
+    loadAppSettings();
+  }, []);
 
   // Fetch summary data
   const fetchSummaryData = async () => {
@@ -169,7 +185,7 @@ export default function OrderSummaryPage() {
         title: 'Order Summary Report',
         dateRange: dateRange,
         data: summaryData,
-        companyName: 'B2B Vegetable Management System',
+        companyName: appSettings?.company_name || 'B2B Vegetable Management System',
         generatedBy: 'Admin Dashboard'
       });
 
@@ -318,7 +334,7 @@ export default function OrderSummaryPage() {
         <div className="px-6 lg:px-8 py-6 border-b border-gray-100">
           {/* Print Header - Only visible when printing */}
           <div className="print-header hidden mb-6">
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">B2B Vegetable Management System</h1>
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">{appSettings?.company_name || 'B2B Vegetable Management System'}</h1>
             <h2 className="text-xl font-semibold text-gray-800 mb-2">Order Summary Report</h2>
             <p className="text-gray-600 mb-1">
               Date Range: {new Date(dateRange.startDate).toLocaleDateString()} - {new Date(dateRange.endDate).toLocaleDateString()}

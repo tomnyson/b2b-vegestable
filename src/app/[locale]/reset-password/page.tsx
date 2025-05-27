@@ -1,12 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import React from 'react';
 import { updatePassword } from '../../lib/auth';
 import { supabase } from '../../lib/supabase';
+import { getAppSettings, AppSettings } from '../../lib/settings-api';
 
 export default function ResetPassword({ params }: { params: { locale: string } }) {
   const [formData, setFormData] = useState({
@@ -17,7 +18,9 @@ export default function ResetPassword({ params }: { params: { locale: string } }
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [sessionValid, setSessionValid] = useState(true);
+  const [appSettings, setAppSettings] = useState<AppSettings | null>(null);
   const router = useRouter();
+  const searchParams = useSearchParams();
   const t = useTranslations('resetPassword');
 
   // Check if user is authenticated with a recovery token
@@ -32,6 +35,20 @@ export default function ResetPassword({ params }: { params: { locale: string } }
     
     checkSession();
   }, [t]);
+
+  // Load app settings
+  useEffect(() => {
+    async function loadAppSettings() {
+      try {
+        const settings = await getAppSettings();
+        setAppSettings(settings);
+      } catch (err) {
+        console.error('Error loading app settings:', err);
+      }
+    }
+    
+    loadAppSettings();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -79,14 +96,22 @@ export default function ResetPassword({ params }: { params: { locale: string } }
       <div className="max-w-md w-full">
         {/* Header */}
         <div className="text-center mb-8">
-          <Link href={`/${params.locale}`} className="inline-flex items-center space-x-3 group mb-8">
-            <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 transform group-hover:scale-105">
-              <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-              </svg>
+          <Link href={`/${params.locale}`} className="flex items-center space-x-3 group">
+            <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 transform group-hover:scale-105">
+              {appSettings?.logo_url ? (
+                <img
+                  src={appSettings.logo_url}
+                  alt="Logo"
+                  className="w-full h-full object-cover rounded-xl"
+                />
+              ) : (
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+              )}
             </div>
-            <span className="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
-              B2B Vegetable
+            <span className="text-xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
+              {appSettings?.company_name || 'B2B Vegetable'}
             </span>
           </Link>
           

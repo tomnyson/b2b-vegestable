@@ -33,6 +33,7 @@ export default function UsersPage() {
 
   // Filtering state
   const [searchTerm, setSearchTerm] = useState('');
+  const [isSearching, setIsSearching] = useState(false);
 
   // Sorting state
   const [sortField, setSortField] = useState<SortField>('name');
@@ -43,6 +44,18 @@ export default function UsersPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
   const itemsPerPage = 10;
+
+  // Debounce search query
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (isSearching) {
+        setCurrentPage(1);
+        setIsSearching(false);
+      }
+    }, 500);
+    
+    return () => clearTimeout(timer);
+  }, [searchTerm, isSearching]);
 
   // Fetch users from Supabase
   useEffect(() => {
@@ -70,8 +83,10 @@ export default function UsersPage() {
       }
     }
 
-    loadUsers();
-  }, [currentPage, itemsPerPage, sortField, sortDirection, searchTerm]);
+    if (!isSearching) {
+      loadUsers();
+    }
+  }, [currentPage, itemsPerPage, sortField, sortDirection, searchTerm, isSearching]);
 
   // Handle column sorting
   const handleSort = (field: SortField) => {
@@ -246,7 +261,7 @@ export default function UsersPage() {
   // Handle search input with debounce
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
-    setCurrentPage(1); // Reset to first page on new search
+    setIsSearching(true);
   };
 
   const handleImportComplete = async (importedCount: number) => {
@@ -394,6 +409,11 @@ export default function UsersPage() {
                 onChange={handleSearchChange}
                 disabled={loading}
               />
+              {isSearching && (
+                <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
+                  <div className="animate-spin h-4 w-4 border-2 border-emerald-500 rounded-full border-t-transparent"></div>
+                </div>
+              )}
             </div>
           </div>
 

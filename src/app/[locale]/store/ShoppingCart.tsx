@@ -59,20 +59,20 @@ const ShoppingCart: React.FC<ShoppingCartProps> = ({
   // Handle checkout process
   const handleCheckout = () => {
     // Check stock availability before proceeding
-    const stockIssues = items.filter(item => {
-      if (item.product.stock !== undefined && item.product.stock < item.quantity) {
-        return true;
-      }
-      return false;
-    });
+    // const stockIssues = items.filter(item => {
+    //   if (item.product.stock !== undefined && item.product.stock < item.quantity) {
+    //     return true;
+    //   }
+    //   return false;
+    // });
 
-    if (stockIssues.length > 0) {
-      const issueMessages = stockIssues.map(item => 
-        `${item.product.name_en}: ${t('products.available')} ${item.product.stock}, ${t('cart.requested')} ${item.quantity}`
-      );
-      alert(`${t('cart.stockIssues')}:\n${issueMessages.join('\n')}`);
-      return false;
-    }
+    // if (stockIssues.length > 0) {
+    //   const issueMessages = stockIssues.map(item => 
+    //     `${item.product.name_en}: ${t('products.available')} ${item.product.stock}, ${t('cart.requested')} ${item.quantity}`
+    //   );
+    //   alert(`${t('cart.stockIssues')}:\n${issueMessages.join('\n')}`);
+    //   return false;
+    // }
 
     if (onProceedToCheckout()) {
       // Show confirmation modal instead of immediately saving
