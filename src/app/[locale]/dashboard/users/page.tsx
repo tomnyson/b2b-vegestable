@@ -3,8 +3,10 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { User, getPaginatedUsers, createUser, updateUser, deleteUser, toggleUserStatus, updateUserPassword } from '../../../lib/users-api';
+import ImportUserModal from './ImportUserModal';
+import { toast } from 'react-toastify';
 
-type SortField = 'name' | 'email' | 'phone' | 'role' | 'status';
+type SortField = 'name' | 'email' | 'phone' | 'address' | 'role' | 'status';
 type SortDirection = 'asc' | 'desc';
 
 export default function UsersPage() {
@@ -14,11 +16,16 @@ export default function UsersPage() {
   const [error, setError] = useState<string | null>(null);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     phone: '',
+    address: '',
+    city: '',
+    zip_code: '',
+    notes: '',
     password: '',
     role: 'customer' as User['role'],
     status: 'active' as User['status'],
@@ -49,7 +56,7 @@ export default function UsersPage() {
           sortDirection,
           searchTerm || undefined
         );
-        
+
         setUsers(result.users);
         setTotalPages(result.totalPages);
         setTotalCount(result.totalCount);
@@ -107,14 +114,14 @@ export default function UsersPage() {
     e.preventDefault();
     try {
       setLoading(true);
-      
+
       if (editingUser) {
         // Update existing user
         const { password, ...updateData } = formData;
-        
+
         // First update user data
         await updateUser(editingUser.id, updateData);
-        
+
         // Then update password if provided
         if (password) {
           try {
@@ -133,7 +140,7 @@ export default function UsersPage() {
         }
         await createUser(formData);
       }
-      
+
       // Refresh user list
       const result = await getPaginatedUsers(
         currentPage,
@@ -142,20 +149,24 @@ export default function UsersPage() {
         sortDirection,
         searchTerm || undefined
       );
-      
+
       setUsers(result.users);
       setTotalPages(result.totalPages);
       setTotalCount(result.totalCount);
-      
+
       setIsModalOpen(false);
       setEditingUser(null);
-      setFormData({ 
-        name: '', 
-        email: '', 
-        phone: '', 
+      setFormData({
+        name: '',
+        email: '',
+        phone: '',
+        address: '',
+        city: '',
+        zip_code: '',
+        notes: '',
         password: '',
         role: 'customer',
-        status: 'active' 
+        status: 'active'
       });
     } catch (err) {
       console.error('Error saving user:', err);
@@ -171,6 +182,10 @@ export default function UsersPage() {
       name: user.name,
       email: user.email,
       phone: user.phone || '',
+      address: user.address || '',
+      city: user.city || '',
+      zip_code: user.zip_code || '',
+      notes: user.notes || '',
       password: '',
       role: user.role,
       status: user.status,
@@ -183,7 +198,7 @@ export default function UsersPage() {
       try {
         setLoading(true);
         await deleteUser(id);
-        
+
         // Refresh user list
         const result = await getPaginatedUsers(
           currentPage,
@@ -192,7 +207,7 @@ export default function UsersPage() {
           sortDirection,
           searchTerm || undefined
         );
-        
+
         setUsers(result.users);
         setTotalPages(result.totalPages);
         setTotalCount(result.totalCount);
@@ -209,7 +224,7 @@ export default function UsersPage() {
     try {
       setLoading(true);
       await toggleUserStatus(id, currentStatus);
-      
+
       // Refresh user list
       const result = await getPaginatedUsers(
         currentPage,
@@ -218,7 +233,7 @@ export default function UsersPage() {
         sortDirection,
         searchTerm || undefined
       );
-      
+
       setUsers(result.users);
     } catch (err) {
       console.error('Error toggling user status:', err);
@@ -234,6 +249,28 @@ export default function UsersPage() {
     setCurrentPage(1); // Reset to first page on new search
   };
 
+  const handleImportComplete = async (importedCount: number) => {
+    try {
+      // Refresh user list after import
+      const result = await getPaginatedUsers(
+        currentPage,
+        itemsPerPage,
+        sortField,
+        sortDirection,
+        searchTerm || undefined
+      );
+
+      setUsers(result.users);
+      setTotalPages(result.totalPages);
+      setTotalCount(result.totalCount);
+
+      toast.success(`Successfully imported ${importedCount} users!`);
+    } catch (err) {
+      console.error('Error refreshing users after import:', err);
+      toast.error('Import completed but failed to refresh user list');
+    }
+  };
+
   // Render sort indicator
   const renderSortIcon = (field: SortField) => {
     if (sortField !== field) {
@@ -243,7 +280,7 @@ export default function UsersPage() {
         </svg>
       );
     }
-    
+
     return sortDirection === 'asc' ? (
       <svg className="w-4 h-4 text-emerald-600 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
@@ -294,14 +331,28 @@ export default function UsersPage() {
               Manage user accounts and access permissions
             </p>
           </div>
-          <div className="mt-4 lg:mt-0">
+          <div className="mt-4 lg:mt-0 flex flex-col sm:flex-row gap-3">
+            <button
+              onClick={() => setIsImportModalOpen(true)}
+              disabled={loading}
+              className="px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-2xl hover:from-blue-600 hover:to-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl font-medium flex items-center space-x-2 disabled:opacity-50"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
+              </svg>
+              <span>Import CSV</span>
+            </button>
             <button
               onClick={() => {
                 setEditingUser(null);
-                setFormData({ 
-                  name: '', 
-                  email: '', 
-                  phone: '', 
+                setFormData({
+                  name: '',
+                  email: '',
+                  phone: '',
+                  address: '',
+                  city: '',
+                  zip_code: '',
+                  notes: '',
                   password: '',
                   role: 'customer',
                   status: 'active'
@@ -351,7 +402,7 @@ export default function UsersPage() {
             <div className="text-2xl font-bold text-emerald-700">{totalCount}</div>
             <div className="text-sm text-gray-600">{t('totalUsers')}</div>
           </div>
-          
+
           <div className="bg-gradient-to-br from-teal-50 to-cyan-50 rounded-2xl p-4">
             <div className="text-2xl font-bold text-teal-700">{users.filter(u => u.status === 'active').length}</div>
             <div className="text-sm text-gray-600">{t('activeUsers')}</div>
@@ -377,28 +428,30 @@ export default function UsersPage() {
                         <p className="text-sm text-gray-600">{user.email}</p>
                       </div>
                       <span
-                        className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                          user.status === 'active'
+                        className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${user.status === 'active'
                             ? 'bg-emerald-100 text-emerald-800'
                             : 'bg-red-100 text-red-800'
-                        }`}
+                          }`}
                       >
                         {user.status === 'active' ? t('active') : t('inactive')}
                       </span>
                     </div>
-                    
+
                     <div className="grid grid-cols-2 gap-4 text-sm text-gray-600">
                       <div>
                         <span className="font-medium">{t('phone')}:</span> {user.phone || '-'}
                       </div>
                       <div>
+                        <span className="font-medium">{t('address')}:</span> {user.address || '-'}
+                      </div>
+                      <div>
                         <span className="font-medium">{t('role')}:</span> {
-                          user.role === 'customer' ? t('customer') : 
-                          user.role === 'driver' ? t('driver') : t('admin')
+                          user.role === 'customer' ? t('customer') :
+                            user.role === 'driver' ? t('driver') : t('admin')
                         }
                       </div>
                     </div>
-                    
+
                     <div className="flex flex-wrap gap-2">
                       <button
                         onClick={() => handleEdit(user)}
@@ -441,7 +494,7 @@ export default function UsersPage() {
           <table className="min-w-full divide-y divide-gray-100">
             <thead className="bg-gradient-to-r from-emerald-50 to-teal-50">
               <tr>
-                <th 
+                <th
                   className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-emerald-100 transition-colors duration-200"
                   onClick={() => handleSort('name')}
                 >
@@ -450,7 +503,7 @@ export default function UsersPage() {
                     {renderSortIcon('name')}
                   </div>
                 </th>
-                <th 
+                <th
                   className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-emerald-100 transition-colors duration-200"
                   onClick={() => handleSort('email')}
                 >
@@ -459,7 +512,7 @@ export default function UsersPage() {
                     {renderSortIcon('email')}
                   </div>
                 </th>
-                <th 
+                <th
                   className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-emerald-100 transition-colors duration-200"
                   onClick={() => handleSort('phone')}
                 >
@@ -468,7 +521,16 @@ export default function UsersPage() {
                     {renderSortIcon('phone')}
                   </div>
                 </th>
-                <th 
+                <th
+                  className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-emerald-100 transition-colors duration-200"
+                  onClick={() => handleSort('address')}
+                >
+                  <div className="flex items-center">
+                    {t('address')}
+                    {renderSortIcon('address')}
+                  </div>
+                </th>
+                <th
                   className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-emerald-100 transition-colors duration-200"
                   onClick={() => handleSort('role')}
                 >
@@ -477,7 +539,7 @@ export default function UsersPage() {
                     {renderSortIcon('role')}
                   </div>
                 </th>
-                <th 
+                <th
                   className="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-emerald-100 transition-colors duration-200"
                   onClick={() => handleSort('status')}
                 >
@@ -505,18 +567,20 @@ export default function UsersPage() {
                       {user.phone || '-'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                    {user.address ? (user.address.length >50 ? `${user.address.substring(0, 50)}...` : user.address) : '-'}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                       <span className="px-3 py-1 bg-gray-100 text-gray-800 rounded-full text-xs font-medium">
-                        {user.role === 'customer' ? t('customer') : 
-                         user.role === 'driver' ? t('driver') : t('admin')}
+                        {user.role === 'customer' ? t('customer') :
+                          user.role === 'driver' ? t('driver') : t('admin')}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-center">
                       <span
-                        className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                          user.status === 'active'
+                        className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${user.status === 'active'
                             ? 'bg-emerald-100 text-emerald-800'
                             : 'bg-red-100 text-red-800'
-                        }`}
+                          }`}
                       >
                         {user.status === 'active' ? t('active') : t('inactive')}
                       </span>
@@ -585,32 +649,30 @@ export default function UsersPage() {
             <button
               onClick={prevPage}
               disabled={currentPage <= 1 || loading}
-              className={`px-4 py-2 rounded-xl border font-medium transition-all duration-200 ${
-                currentPage <= 1 || loading
+              className={`px-4 py-2 rounded-xl border font-medium transition-all duration-200 ${currentPage <= 1 || loading
                   ? 'border-gray-200 text-gray-400 cursor-not-allowed bg-gray-50'
                   : 'border-emerald-300 text-emerald-700 hover:bg-emerald-50 hover:border-emerald-400'
-              }`}
+                }`}
             >
               <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
               {t('previous')}
             </button>
-            
+
             <div className="flex items-center space-x-1">
               <span className="px-4 py-2 text-sm font-medium text-gray-700">
                 {t('page')} {currentPage} {t('of')} {totalPages || 1}
               </span>
             </div>
-            
+
             <button
               onClick={nextPage}
               disabled={currentPage >= totalPages || loading}
-              className={`px-4 py-2 rounded-xl border font-medium transition-all duration-200 ${
-                currentPage >= totalPages || loading
+              className={`px-4 py-2 rounded-xl border font-medium transition-all duration-200 ${currentPage >= totalPages || loading
                   ? 'border-gray-200 text-gray-400 cursor-not-allowed bg-gray-50'
                   : 'border-emerald-300 text-emerald-700 hover:bg-emerald-50 hover:border-emerald-400'
-              }`}
+                }`}
             >
               {t('next')}
               <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -623,143 +685,248 @@ export default function UsersPage() {
 
       {/* Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white/90 backdrop-blur-lg rounded-3xl shadow-2xl border border-white/20 p-6 lg:p-8 max-w-md w-full max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl lg:text-2xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
-                {editingUser ? t('editUser') : t('addNewUser')}
+        <div
+          className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-6 sm:p-8 lg:p-12"
+          onClick={(e) => e.target === e.currentTarget && setIsModalOpen(false)}
+        >
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[92vh] overflow-hidden flex flex-col border border-gray-100 backdrop-blur-sm">
+            {/* Header */}
+            <div className="modal-header flex justify-between items-center border-b border-gray-200 p-6 bg-gradient-to-r from-emerald-50 to-teal-50">
+              <h2 className="text-2xl font-bold text-gray-800">
+                👤 {editingUser ? t('editUser') : t('addNewUser')}
               </h2>
               <button
-                type="button"
                 onClick={() => setIsModalOpen(false)}
-                className="text-gray-400 hover:text-gray-600 p-2 hover:bg-gray-100 rounded-xl transition-colors"
+                className="text-gray-500 hover:text-gray-700 p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200"
                 disabled={loading}
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
             </div>
-            
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">{t('name')}</label>
-                <input
-                  type="text"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-2xl bg-white/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200"
-                  required
-                  disabled={loading}
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">{t('email')}</label>
-                <input
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-2xl bg-white/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200"
-                  required
-                  disabled={loading}
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">{t('phone')}</label>
-                <input
-                  type="tel"
-                  value={formData.phone}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-2xl bg-white/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200"
-                  disabled={loading}
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">{t('password')}</label>
-                <input
-                  type="text"
-                  value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-2xl bg-white/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200"
-                  disabled={loading}
-                  placeholder={editingUser ? t('passwordPlaceholder') : ""}
-                  required={!editingUser}
-                />
-                <div className="mt-2 flex justify-end">
-                  <button
-                    type="button"
-                    onClick={generateRandomPassword}
-                    disabled={loading}
-                    className="inline-flex items-center px-3 py-2 border border-emerald-300 text-xs font-medium rounded-xl text-emerald-700 bg-emerald-50 hover:bg-emerald-100 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all duration-200"
-                  >
-                    <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+
+            {/* Content */}
+            <div className="flex-1 overflow-y-auto p-6 lg:p-8">
+              <form onSubmit={handleSubmit} className="space-y-8">
+                {/* Personal Information Section */}
+                <div className="bg-blue-50 rounded-xl p-5">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                    👤 Personal Information
+                  </h3>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">{t('name')} *</label>
+                      <input
+                        type="text"
+                        value={formData.name}
+                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        className="w-full px-4 py-3 border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200"
+                        required
+                        disabled={loading}
+                        placeholder="Enter full name"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">{t('email')} *</label>
+                      <input
+                        type="email"
+                        value={formData.email}
+                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                        className="w-full px-4 py-3 border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200"
+                        required
+                        disabled={loading}
+                        placeholder="Enter email address"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">{t('phone')}</label>
+                      <input
+                        type="tel"
+                        value={formData.phone}
+                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                        className="w-full px-4 py-3 border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200"
+                        disabled={loading}
+                        placeholder="Enter phone number"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">{t('role')} *</label>
+                      <select
+                        value={formData.role}
+                        onChange={(e) => setFormData({ ...formData, role: e.target.value as User['role'] })}
+                        className="w-full px-4 py-3 border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200"
+                        disabled={loading}
+                      >
+                        <option value="customer">{t('customer')}</option>
+                        <option value="driver">{t('driver')}</option>
+                        <option value="admin">{t('admin')}</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Address Information Section */}
+                <div className="bg-green-50 rounded-xl p-5">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                    🏠 Address Information
+                  </h3>
+
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">{t('address')}</label>
+                      <input
+                        type="text"
+                        value={formData.address}
+                        onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                        className="w-full px-4 py-3 border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200"
+                        disabled={loading}
+                        placeholder="Enter street address (optional)"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">{t('city')}</label>
+                        <input
+                          type="text"
+                          value={formData.city}
+                          onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                          className="w-full px-4 py-3 border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200"
+                          disabled={loading}
+                          placeholder="Enter city (optional)"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">{t('zipCode')}</label>
+                        <input
+                          type="text"
+                          value={formData.zip_code}
+                          onChange={(e) => setFormData({ ...formData, zip_code: e.target.value })}
+                          className="w-full px-4 py-3 border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200"
+                          disabled={loading}
+                          placeholder="Enter zip code (optional)"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">{t('notes')}</label>
+                      <textarea
+                        value={formData.notes}
+                        onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                        rows={3}
+                        className="w-full px-4 py-3 border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200 resize-none"
+                        disabled={loading}
+                        placeholder="Enter additional notes (optional)"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Security & Access Section */}
+                <div className="bg-purple-50 rounded-xl p-5">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                    🔒 Security & Access
+                  </h3>
+
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        {t('password')} {!editingUser && '*'}
+                      </label>
+                      <div className="relative">
+                        <input
+                          type="text"
+                          value={formData.password}
+                          onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                          className="w-full px-4 py-3 pr-32 border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200"
+                          disabled={loading}
+                          placeholder={editingUser ? t('passwordPlaceholder') : "Enter secure password"}
+                          required={!editingUser}
+                        />
+                        <button
+                          type="button"
+                          onClick={generateRandomPassword}
+                          disabled={loading}
+                          className="absolute right-2 top-1/2 transform -translate-y-1/2 inline-flex items-center px-3 py-1.5 border border-emerald-300 text-xs font-medium rounded-lg text-emerald-700 bg-emerald-50 hover:bg-emerald-100 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all duration-200 hover:scale-105"
+                        >
+                          <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                          </svg>
+                          Generate
+                        </button>
+                      </div>
+                    </div>
+
+                    {editingUser && (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">{t('status')}</label>
+                        <select
+                          value={formData.status}
+                          onChange={(e) => setFormData({ ...formData, status: e.target.value as User['status'] })}
+                          className="w-full px-4 py-3 border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200"
+                          disabled={loading}
+                        >
+                          <option value="active">{t('active')}</option>
+                          <option value="inactive">{t('inactive')}</option>
+                        </select>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </form>
+            </div>
+
+            {/* Footer */}
+            <div className="modal-footer border-t border-gray-200 p-6 bg-gray-50 flex flex-col sm:flex-row justify-between gap-4">
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="px-6 py-3 border-2 border-gray-300 rounded-xl text-gray-700 hover:bg-white hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all duration-200 font-medium"
+                disabled={loading}
+              >
+                ❌ {t('cancel')}
+              </button>
+
+              <button
+                onClick={handleSubmit}
+                disabled={loading}
+                className={`px-6 py-3 flex items-center justify-center space-x-2 rounded-xl font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 
+                  ${loading
+                    ? 'bg-emerald-400 cursor-not-allowed'
+                    : 'bg-emerald-600 hover:bg-emerald-700 hover:shadow-lg'} 
+                  text-white`}
+              >
+                {loading ? (
+                  <>
+                    <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
-                    {t('generateRandom')}
-                  </button>
-                </div>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">{t('role')}</label>
-                <select
-                  value={formData.role}
-                  onChange={(e) => setFormData({ ...formData, role: e.target.value as User['role'] })}
-                  className="w-full min-w-[160px] px-4 py-3 border border-gray-300 rounded-2xl bg-white/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200"
-                  disabled={loading}
-                >
-                  <option value="customer">{t('customer')}</option>
-                  <option value="driver">{t('driver')}</option>
-                  <option value="admin">{t('admin')}</option>
-                </select>
-              </div>
-              
-              {editingUser && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">{t('status')}</label>
-                  <select
-                    value={formData.status}
-                    onChange={(e) => setFormData({ ...formData, status: e.target.value as User['status'] })}
-                    className="w-full min-w-[160px] px-4 py-3 border border-gray-300 rounded-2xl bg-white/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200"
-                    disabled={loading}
-                  >
-                    <option value="active">{t('active')}</option>
-                    <option value="inactive">{t('inactive')}</option>
-                  </select>
-                </div>
-              )}
-              
-              <div className="flex flex-col-reverse lg:flex-row lg:justify-end lg:space-x-3 space-y-3 space-y-reverse lg:space-y-0 pt-6">
-                <button
-                  type="button"
-                  onClick={() => setIsModalOpen(false)}
-                  className="w-full lg:w-auto px-6 py-3 text-sm font-medium text-gray-700 bg-gray-100 rounded-2xl hover:bg-gray-200 disabled:opacity-50 transition-all duration-200"
-                  disabled={loading}
-                >
-                  {t('cancel')}
-                </button>
-                <button
-                  type="submit"
-                  className="w-full lg:w-auto px-6 py-3 text-sm font-medium text-white bg-gradient-to-r from-emerald-500 to-teal-600 rounded-2xl hover:from-emerald-600 hover:to-teal-700 disabled:opacity-50 disabled:from-gray-400 disabled:to-gray-500 shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center space-x-2"
-                  disabled={loading}
-                >
-                  {loading ? (
-                    <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                      <span>{t('processing')}</span>
-                    </>
-                  ) : (
-                    <span>{editingUser ? t('update') : t('add')}</span>
-                  )}
-                </button>
-              </div>
-            </form>
+                    <span>{t('processing')}</span>
+                  </>
+                ) : (
+                  <>
+                    <span>{editingUser ? '✏️ ' + t('update') : '➕ ' + t('add')}</span>
+                  </>
+                )}
+              </button>
+            </div>
           </div>
         </div>
       )}
+
+      {/* Import Modal */}
+      <ImportUserModal
+        isOpen={isImportModalOpen}
+        onClose={() => setIsImportModalOpen(false)}
+        onImportComplete={handleImportComplete}
+      />
     </div>
   );
 } 

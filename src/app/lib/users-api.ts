@@ -5,6 +5,10 @@ export interface User {
   name: string;
   email: string;
   phone: string;
+  address?: string;
+  notes?: string;
+  zip_code?: string;
+  city?: string;
   role: 'admin' | 'customer' | 'driver';
   status: 'active' | 'inactive';
   created_at?: string;
@@ -53,7 +57,7 @@ export async function getUserById(id: string) {
  * Create a new user
  */
 export async function createUser(userData: CreateUserData & { password: string }) {
-  const { email, password, name, phone, role, status, assigned_route } = userData;
+  const { email, password, name, phone, address, city, zip_code, notes, role, status, assigned_route } = userData;
 
   // Input validation
   if (!email) throw new Error('Email is required');
@@ -84,6 +88,10 @@ export async function createUser(userData: CreateUserData & { password: string }
         email,
         name,
         phone,
+        address,
+        city,
+        zip_code,
+        notes,
         role: role || 'customer', // Default to customer if not specified
         status: status || 'active', // Default to active if not specified
         created_at: new Date().toISOString(),

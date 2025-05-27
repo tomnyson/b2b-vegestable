@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
+import { getAppSettings, AppSettings } from '../../lib/settings-api';
 import { 
   Chart as ChartJS, 
   CategoryScale, 
@@ -82,6 +83,7 @@ export default function DashboardPage() {
   const [error, setError] = useState<string | null>(null);
   const [timeRange, setTimeRange] = useState(30); // Days
   const [userTimezone, setUserTimezone] = useState('');
+  const [appSettings, setAppSettings] = useState<AppSettings | null>(null);
   const t = useTranslations('dashboard');
 
   // Set user timezone
@@ -97,12 +99,13 @@ export default function DashboardPage() {
         setError(null);
         
         // Fetch all data in parallel
-        const [counts, history, products, dashSummary, todayData] = await Promise.all([
+        const [counts, history, products, dashSummary, todayData, settings] = await Promise.all([
           getOrderCountsByStatus(),
           getOrdersHistory(timeRange),
           getTopSellingProducts(10),
           getDashboardSummary(),
-          getTodaysOrders(userTimezone)
+          getTodaysOrders(userTimezone),
+          getAppSettings()
         ]);
         
         setOrderCounts(counts);
@@ -110,6 +113,7 @@ export default function DashboardPage() {
         setTopProducts(products);
         setSummary(dashSummary);
         setTodayOrders(todayData);
+        setAppSettings(settings);
       } catch (err: any) {
         console.error('Error fetching dashboard data:', err);
         setError(err.message || 'Failed to load dashboard data');
@@ -246,7 +250,7 @@ export default function DashboardPage() {
               {t('title')}
             </h1>
             <p className="mt-2 text-gray-600 text-lg">
-              Welcome to your B2B Vegetable management dashboard
+              Welcome to {appSettings?.company_name ? `${appSettings.company_name}'s` : 'your'} B2B Vegetable management dashboard
             </p>
           </div>
           <div className="mt-4 lg:mt-0 flex items-center space-x-2 text-sm text-gray-500">
@@ -292,7 +296,7 @@ export default function DashboardPage() {
               </div>
             </div>
             
-            <div className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-xl border border-white/20 p-6 group hover:shadow-2xl transition-all duration-300">
+            {/* <div className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-xl border border-white/20 p-6 group hover:shadow-2xl transition-all duration-300">
               <div className="flex items-center">
                 <div className="p-3 bg-gradient-to-br from-teal-500 to-cyan-600 rounded-xl">
                   <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -304,7 +308,7 @@ export default function DashboardPage() {
                   <p className="text-2xl font-bold text-gray-900">{formatCurrency(summary.total_revenue)}</p>
                 </div>
               </div>
-            </div>
+            </div> */}
             
             <div className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-xl border border-white/20 p-6 group hover:shadow-2xl transition-all duration-300">
               <div className="flex items-center">
@@ -336,7 +340,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Today's Orders Chart */}
-          <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl border border-white/20 p-6 lg:p-8">
+          {/* <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl border border-white/20 p-6 lg:p-8">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-bold text-gray-900">
                 {t('todaysOrders')}
@@ -445,10 +449,10 @@ export default function DashboardPage() {
                 </div>
               </div>
             </div>
-          </div>
+          </div> */}
 
           {/* Time Range Selector & Order History */}
-          <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl border border-white/20 p-6 lg:p-8">
+          {/* <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl border border-white/20 p-6 lg:p-8">
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-6">
               <h2 className="text-xl lg:text-2xl font-bold text-gray-900 mb-4 lg:mb-0">{t('orderHistory')}</h2>
               <div className="flex flex-wrap gap-2">
@@ -548,7 +552,7 @@ export default function DashboardPage() {
                 )}
               </div>
             </div>
-          </div>
+          </div> */}
           
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Order Status Chart */}

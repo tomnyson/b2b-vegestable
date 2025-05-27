@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { getUser, signOut, getUserProfile } from '../../lib/auth';
+import { getAppSettings, AppSettings } from '../lib/settings-api';
 import { useState, useEffect } from 'react';
 import LanguageSwitcher from './LanguageSwitcher';
 
@@ -15,11 +16,16 @@ export default function Header() {
   const [userRole, setUserRole] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [appSettings, setAppSettings] = useState<AppSettings | null>(null);
   
   useEffect(() => {
     async function checkAuth() {
       try {
-        const userData = await getUser();
+        const [userData, settings] = await Promise.all([
+          getUser(),
+          getAppSettings()
+        ]);
+        
         if (userData) {
           setUser(userData);
           
@@ -29,6 +35,8 @@ export default function Header() {
             setUserRole(profile.role);
           }
         }
+        
+        setAppSettings(settings);
       } catch (error) {
         console.error('Error checking auth:', error);
       } finally {
@@ -59,7 +67,16 @@ export default function Header() {
         <div className="flex items-center justify-between">
           {/* Logo */}
           <Link href="/" className="text-xl font-bold text-green-600 flex items-center">
-            <span className="mr-2">🥬</span> B2B Vegetable
+            {appSettings?.logo_url ? (
+              <img 
+                src={appSettings.logo_url} 
+                alt="Logo" 
+                className="w-8 h-8 mr-2 object-cover rounded-lg"
+              />
+            ) : (
+              <span className="mr-2">🥬</span>
+            )}
+            {appSettings?.company_name || 'B2B Vegetable'}
           </Link>
           
           {/* Mobile menu button */}
@@ -139,7 +156,7 @@ export default function Header() {
                 {t('signIn')}
               </Link>
             )}
-
+            
             {/* Language Switcher */}
             <LanguageSwitcher className="mx-2" />
           </nav>

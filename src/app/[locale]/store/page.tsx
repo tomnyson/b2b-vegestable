@@ -27,6 +27,7 @@ export default function StorePage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
+  const [isSearching, setIsSearching] = useState(false);
   const [popularProductIds, setPopularProductIds] = useState<string[]>([]);
   const itemsPerPage = 8;
 
@@ -64,8 +65,7 @@ export default function StorePage() {
         itemsPerPage,
         'name_en',
         'asc',
-        searchTerm || undefined,
-        undefined
+        searchTerm || undefined
       );
       
       setProducts(result.products);
@@ -77,6 +77,18 @@ export default function StorePage() {
       setLoading(false);
     }
   };
+
+  // Debounce search query
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (isSearching) {
+        setCurrentPage(1);
+        setIsSearching(false);
+      }
+    }, 500);
+    
+    return () => clearTimeout(timer);
+  }, [searchTerm, isSearching]);
 
   // Fetch user data when the component mounts
   useEffect(() => {
@@ -139,8 +151,10 @@ export default function StorePage() {
 
   // Load products when the component mounts
   useEffect(() => {
-    loadProducts();
-  }, [currentPage, searchTerm]); // eslint-disable-line react-hooks/exhaustive-deps
+    if (!isSearching) {
+      loadProducts();
+    }
+  }, [currentPage, searchTerm, isSearching]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Check for pending cart from Buy Again feature
   useEffect(() => {
@@ -301,7 +315,7 @@ export default function StorePage() {
   // Handle search input
   const handleSearch = (term: string) => {
     setSearchTerm(term);
-    setCurrentPage(1); // Reset to first page on new search
+    setIsSearching(true);
   };
 
   // Handle customer info change
@@ -474,6 +488,7 @@ export default function StorePage() {
                   onAddToCart={addToCart}
                   popularProductIds={popularProductIds}
                   currency={currency}
+                  isSearching={isSearching}
                 />
               </div>
             </div>

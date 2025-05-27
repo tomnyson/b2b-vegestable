@@ -2,10 +2,9 @@
 
 import { useState, ChangeEvent, FormEvent } from "react";
 import { toast } from 'react-toastify';
+import { useTranslations } from 'next-intl';
 import { createProduct } from '../../../lib/product-api';
 import { uploadImage } from '../../../lib/storage-utils';
-
-const TABS = ["Details", "English", "Vietnamese", "Turkish"];
 
 export default function AddProductModal({
   open,
@@ -16,6 +15,10 @@ export default function AddProductModal({
   onClose: () => void;
   onSubmit: (data: any) => void;
 }) {
+  const t = useTranslations('products');
+  const tc = useTranslations('common');
+  
+  const TABS = [t('tabDetails'), t('tabEnglish'), t('tabVietnamese'), t('tabTurkish')];
   const [activeTab, setActiveTab] = useState(0);
   const [sku, setSku] = useState("");
   const [unit, setUnit] = useState("");
@@ -68,14 +71,14 @@ export default function AddProductModal({
     try {
       // Validate form
       if (!productNameEn) {
-        setError('Product name in English is required');
-        toast.error('Product name in English is required');
+        setError(t('productNameEnRequired'));
+        toast.error(t('productNameEnRequired'));
         return;
       }
       
       if (!unit) {
-        setError('Unit is required');
-        toast.error('Unit is required');
+        setError(t('unitRequired'));
+        toast.error(t('unitRequired'));
         return;
       }
 
@@ -94,7 +97,7 @@ export default function AddProductModal({
       const product = await createProduct(productData, imageFile);
       
       // Show success toast
-      toast.success(`Product "${product.name_en}" created successfully`);
+      toast.success(`${t('productCreatedSuccess')}: "${product.name_en}"`);
       
       // Call onSubmit with the created product data
       onSubmit(product);
@@ -105,7 +108,7 @@ export default function AddProductModal({
     } catch (err: any) {
       console.error('Error creating product:', err);
       setError(err.message);
-      toast.error(`Error creating product: ${err.message}`);
+      toast.error(`${t('productCreateError')}: ${err.message}`);
     } finally {
       setLoading(false);
     }
@@ -126,9 +129,9 @@ export default function AddProductModal({
         >
           &times;
         </button>
-        <h2 className="text-xl font-bold mb-1">Add New Product</h2>
+        <h2 className="text-xl font-bold mb-1">{t('addNewProduct')}</h2>
         <p className="text-gray-500 mb-4 text-sm">
-          Add a new vegetable product to your catalog with multilingual support.
+          {t('addProductDescription')}
         </p>
 
         {error && (
@@ -159,23 +162,23 @@ export default function AddProductModal({
         {activeTab === 0 && (
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700">SKU</label>
+              <label className="block text-sm font-medium text-gray-700">{t('sku')}</label>
               <input
                 type="text"
                 className={inputClass}
-                placeholder="Stock Keeping Unit (optional)"
+                placeholder={t('skuPlaceholder')}
                 value={sku}
                 onChange={e => setSku(e.target.value)}
                 disabled={loading}
               />
-              <span className="text-xs text-gray-400">Stock Keeping Unit (optional)</span>
+              <span className="text-xs text-gray-400">{t('skuHelp')}</span>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">Unit</label>
+              <label className="block text-sm font-medium text-gray-700">{tc('labels.unit')}</label>
               <input
                 type="text"
                 className={inputClass}
-                placeholder="e.g. kg, box, bunch..."
+                placeholder={t('unitPlaceholder')}
                 value={unit}
                 onChange={e => setUnit(e.target.value)}
                 required
@@ -184,7 +187,7 @@ export default function AddProductModal({
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700">Price</label>
+                <label className="block text-sm font-medium text-gray-700">{tc('labels.price')}</label>
                 <input
                   type="number"
                   step="0.01"
@@ -196,7 +199,7 @@ export default function AddProductModal({
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Stock Quantity</label>
+                <label className="block text-sm font-medium text-gray-700">{t('stockQuantity')}</label>
                 <input
                   type="number"
                   className={inputClass}
@@ -208,7 +211,7 @@ export default function AddProductModal({
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Product Image</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('productImage')}</label>
               <div className="relative flex items-center justify-center bg-gray-100 rounded-lg h-36 mb-2 border border-dashed border-gray-300">
                 {image ? (
                   <>
@@ -225,7 +228,7 @@ export default function AddProductModal({
                 ) : (
                   <label className="flex flex-col items-center justify-center w-full h-full cursor-pointer">
                     <span className="text-3xl text-gray-300 mb-2">&#128247;</span>
-                    <span className="text-xs text-gray-400">Click to upload</span>
+                    <span className="text-xs text-gray-400">{t('clickToUpload')}</span>
                     <input
                       type="file"
                       accept="image/*"
@@ -239,9 +242,9 @@ export default function AddProductModal({
             </div>
             <div className="flex items-center justify-between bg-gray-50 rounded-lg p-3">
               <div>
-                <span className="block font-medium text-sm">Active Status</span>
+                <span className="block font-medium text-sm">{t('activeStatus')}</span>
                 <span className="block text-xs text-gray-400">
-                  When disabled, this product will not be shown in the customer store.
+                  {t('activeStatusHelp')}
                 </span>
               </div>
               <button
@@ -265,14 +268,14 @@ export default function AddProductModal({
                 }}
                 disabled={loading}
               >
-                Cancel
+                {tc('actions.cancel')}
               </button>
               <button
                 type="submit"
                 className="px-4 py-2 rounded bg-green-600 text-white font-semibold hover:bg-green-700 disabled:bg-green-300"
                 disabled={loading}
               >
-                {loading ? 'Adding...' : 'Add Product'}
+                {loading ? t('adding') : t('addProduct')}
               </button>
             </div>
           </form>
@@ -281,11 +284,11 @@ export default function AddProductModal({
         {activeTab === 1 && (
           <div className="space-y-4 pt-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700">Product Name (English)</label>
+              <label className="block text-sm font-medium text-gray-700">{t('productNameEnglish')}</label>
               <input
                 type="text"
                 className={inputClass}
-                placeholder="Enter product name in English"
+                placeholder={t('productNameEnglishPlaceholder')}
                 value={productNameEn}
                 onChange={e => setProductNameEn(e.target.value)}
                 required
@@ -298,11 +301,11 @@ export default function AddProductModal({
         {activeTab === 2 && (
           <div className="space-y-4 pt-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700">Product Name (Vietnamese)</label>
+              <label className="block text-sm font-medium text-gray-700">{t('productNameVietnamese')}</label>
               <input
                 type="text"
                 className={inputClass}
-                placeholder="Nhập tên sản phẩm bằng tiếng Việt"
+                placeholder={t('productNameVietnamesePlaceholder')}
                 value={productNameVi}
                 onChange={e => setProductNameVi(e.target.value)}
                 disabled={loading}
@@ -314,11 +317,11 @@ export default function AddProductModal({
         {activeTab === 3 && (
           <div className="space-y-4 pt-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700">Product Name (Turkish)</label>
+              <label className="block text-sm font-medium text-gray-700">{t('productNameTurkish')}</label>
               <input
                 type="text"
                 className={inputClass}
-                placeholder="Türkçe ürün adını girin"
+                placeholder={t('productNameTurkishPlaceholder')}
                 value={productNameTr}
                 onChange={e => setProductNameTr(e.target.value)}
                 disabled={loading}

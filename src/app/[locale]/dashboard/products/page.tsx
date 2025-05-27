@@ -3,8 +3,10 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import { useTranslations } from 'next-intl';
+import RouteProtection from '../../../components/RouteProtection';
 import AddProductModal from './AddProductModal';
 import EditProductModal from './EditProductModal';
+import ImportProductModal from './ImportProductModal';
 import { Product, getPaginatedProducts, deleteProduct, toggleProductStatus } from '../../../lib/product-api';
 
 type SortField = 'name_en' | 'unit' | 'price' | 'stock';
@@ -17,10 +19,12 @@ export default function ProductsPage() {
   const [error, setError] = useState<string | null>(null);
   const [isAddModalOpen, setAddModalOpen] = useState(false);
   const [isEditModalOpen, setEditModalOpen] = useState(false);
+  const [isImportModalOpen, setImportModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
   // Filtering state
   const [searchTerm, setSearchTerm] = useState('');
+  const [isSearching, setIsSearching] = useState(false);
 
   // Sorting state
   const [sortField, setSortField] = useState<SortField>('name_en');
@@ -31,6 +35,18 @@ export default function ProductsPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
   const itemsPerPage = 10;
+
+  // Debounce search query
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (isSearching) {
+        setCurrentPage(1);
+        setIsSearching(false);
+      }
+    }, 500);
+    
+    return () => clearTimeout(timer);
+  }, [searchTerm, isSearching]);
 
   // Fetch products from Supabase
   useEffect(() => {
@@ -57,8 +73,10 @@ export default function ProductsPage() {
       }
     }
 
-    fetchProducts();
-  }, [currentPage, itemsPerPage, sortField, sortDirection, searchTerm]);
+    if (!isSearching) {
+      fetchProducts();
+    }
+  }, [currentPage, itemsPerPage, sortField, sortDirection, searchTerm, isSearching]);
 
   // Handle column sorting
   const handleSort = (field: SortField) => {
@@ -90,7 +108,7 @@ export default function ProductsPage() {
   // Handle search input
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
-    setCurrentPage(1); // Reset to first page on new search
+    setIsSearching(true);
   };
 
   const handleAddProduct = async (data: any) => {
@@ -218,6 +236,29 @@ export default function ProductsPage() {
     setEditModalOpen(true);
   };
 
+  const handleImportComplete = async (importedCount: number) => {
+    try {
+      // Refresh products list after import
+      const result = await getPaginatedProducts(
+        currentPage,
+        itemsPerPage,
+        sortField,
+        sortDirection,
+        searchTerm || undefined
+      );
+      
+      setProducts(result.products);
+      setTotalPages(result.totalPages);
+      setTotalCount(result.totalCount);
+      
+      // Close the import modal
+      setImportModalOpen(false);
+    } catch (err: any) {
+      console.error('Error refreshing products after import:', err);
+              toast.error(`${t('refreshError')}: ${err.message}`);
+    }
+  };
+
   const renderSortIcon = (field: SortField) => {
     if (sortField !== field) {
       return (
@@ -269,7 +310,8 @@ export default function ProductsPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <RouteProtection>
+      <div className="space-y-6">
       {/* Header */}
       <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl border border-white/20 p-6 lg:p-8">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
@@ -278,10 +320,19 @@ export default function ProductsPage() {
               {t('title')}
             </h1>
             <p className="mt-2 text-gray-600 text-lg">
-              Manage your vegetable inventory and product catalog
+              {t('subtitle')}
             </p>
           </div>
-          <div className="mt-4 lg:mt-0">
+          <div className="mt-4 lg:mt-0 flex flex-col sm:flex-row gap-3">
+            <button
+              onClick={() => setImportModalOpen(true)}
+               className="px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-2xl hover:from-emerald-600 hover:to-teal-700 transition-all duration-200 shadow-lg hover:shadow-xl font-medium flex items-center space-x-2"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
+              </svg>
+              <span>{t('importCSV')}</span>
+            </button>
             <button
               onClick={() => setAddModalOpen(true)}
               className="px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-2xl hover:from-emerald-600 hover:to-teal-700 transition-all duration-200 shadow-lg hover:shadow-xl font-medium flex items-center space-x-2"
@@ -317,6 +368,11 @@ export default function ProductsPage() {
                 value={searchTerm}
                 onChange={handleSearchChange}
               />
+              {isSearching && (
+                <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
+                  <div className="animate-spin h-4 w-4 border-2 border-emerald-500 rounded-full border-t-transparent"></div>
+                </div>
+              )}
             </div>
           </div>
 
@@ -370,12 +426,12 @@ export default function ProductsPage() {
                         <div>
                           <span className="font-medium">{t('unit')}:</span> {product.unit}
                         </div>
-                        <div>
+                        {/* <div>
                           <span className="font-medium">{t('price')}:</span> ${product.price.toFixed(2)}
-                        </div>
-                        <div>
+                        </div> */}
+                        {/* <div>
                           <span className="font-medium">{t('stock')}:</span> {product.stock}
-                        </div>
+                        </div> */}
                       </div>
                       
                       <div className="flex flex-wrap gap-2">
@@ -436,7 +492,7 @@ export default function ProductsPage() {
                     {renderSortIcon('unit')}
                   </div>
                 </th>
-                <th 
+                {/* <th 
                   className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-emerald-100 transition-colors duration-200"
                   onClick={() => handleSort('price')}
                 >
@@ -444,8 +500,8 @@ export default function ProductsPage() {
                     {t('price')}
                     {renderSortIcon('price')}
                   </div>
-                </th>
-                <th 
+                </th> */}
+                {/* <th 
                   className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-emerald-100 transition-colors duration-200"
                   onClick={() => handleSort('stock')}
                 >
@@ -453,7 +509,7 @@ export default function ProductsPage() {
                     {t('stock')}
                     {renderSortIcon('stock')}
                   </div>
-                </th>
+                </th> */}
                 <th className="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">
                   {t('status')}
                 </th>
@@ -481,12 +537,12 @@ export default function ProductsPage() {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 font-medium">
                       {product.unit}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-semibold">
+                    {/* <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-semibold">
                       ${product.price.toFixed(2)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-semibold">
+                    </td> */}
+                    {/* <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-semibold">
                       {product.stock.toLocaleString()}
-                    </td>
+                    </td> */}
                     <td className="px-6 py-4 whitespace-nowrap text-center">
                       <span
                         className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
@@ -609,6 +665,14 @@ export default function ProductsPage() {
         onSubmit={handleUpdateProduct}
         product={selectedProduct}
       />
+
+      {/* Import Product Modal */}
+      <ImportProductModal
+        isOpen={isImportModalOpen}
+        onClose={() => setImportModalOpen(false)}
+        onImportComplete={handleImportComplete}
+      />
     </div>
+    </RouteProtection>
   );
 } 

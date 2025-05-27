@@ -9,6 +9,16 @@ export interface AppSettings {
   company_name?: string;
   support_email?: string;
   support_phone?: string;
+  // Menu page toggles
+  enable_overview?: boolean;
+  enable_products?: boolean;
+  enable_orders?: boolean;
+  enable_order_summary?: boolean;
+  enable_invoices?: boolean;
+  enable_users?: boolean;
+  enable_drivers?: boolean;
+  enable_settings?: boolean;
+  enable_store?: boolean;
   created_at?: string;
   updated_at?: string;
 }
@@ -164,6 +174,43 @@ export const SUPPORTED_CURRENCIES = [
  */
 export function getCurrencyInfo(currencyCode: string) {
   return SUPPORTED_CURRENCIES.find(currency => currency.code === currencyCode) || SUPPORTED_CURRENCIES[0];
+}
+
+/**
+ * Get default menu settings (all enabled by default)
+ */
+export function getDefaultMenuSettings() {
+  return {
+    enable_overview: true,
+    enable_products: true,
+    enable_orders: true,
+    enable_order_summary: true,
+    enable_users: true,
+    enable_drivers: true,
+    enable_settings: true,
+    enable_store: true,
+  };
+}
+
+/**
+ * Check if a specific menu page is enabled
+ */
+export async function isMenuPageEnabled(pageName: keyof ReturnType<typeof getDefaultMenuSettings>): Promise<boolean> {
+  try {
+    const settings = await getAppSettings();
+    if (!settings) {
+      // If no settings exist, default to enabled
+      const defaults = getDefaultMenuSettings();
+      return defaults[pageName];
+    }
+    
+    // If setting is undefined, default to enabled
+    return settings[pageName] !== false;
+  } catch (error) {
+    console.error('Error checking menu page status:', error);
+    // Default to enabled on error
+    return true;
+  }
 }
 
 /**

@@ -1,0 +1,6 @@
+name,email,role,phone_number,address,notes
+John Doe,john.doe@example.com,customer,+1234567890,123 Main St,Regular customer with login
+Jane Smith,,admin,+1234567891,456 Oak Ave,Admin user without login
+Bob Wilson,bob.wilson@example.com,driver,+1234567892,789 Pine Rd,Delivery driver with login
+Alice Johnson,,customer,+1234567893,321 Elm St,VIP customer without login
+Mike Brown,mike.brown@example.com,customer,+1234567894,654 Maple Ave,New customer with login 

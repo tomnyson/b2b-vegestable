@@ -1,0 +1,11 @@
+name_en,name_vi,name_tr,description,price,unit,sku,category,stock,is_active
+Tomato,Cà chua,Domates,Fresh red tomatoes,2.50,kg,TOM001,Vegetables,100,true
+Carrot,Cà rốt,Havuç,Fresh orange carrots,1.80,kg,CAR001,Vegetables,150,true
+Apple,Táo,Elma,Red apples,3.00,kg,APP001,Fruits,80,true
+Lettuce,Xà lách,Marul,Fresh green lettuce,1.20,head,LET001,Vegetables,200,true
+Banana,Chuối,Muz,Yellow bananas,2.00,kg,BAN001,Fruits,120,true
+Onion,Hành tây,Soğan,White onions,1.50,kg,ONI001,Vegetables,180,true
+Orange,Cam,Portakal,Fresh oranges,2.80,kg,ORA001,Fruits,90,true
+Potato,Khoai tây,Patates,Fresh potatoes,1.00,kg,POT001,Vegetables,250,true
+Cucumber,Dưa chuột,Salatalık,Fresh cucumbers,1.30,piece,CUC001,Vegetables,150,true
+Grapes,Nho,Üzüm,Purple grapes,4.50,kg,GRA001,Fruits,60,true 

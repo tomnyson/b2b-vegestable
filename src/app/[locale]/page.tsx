@@ -4,16 +4,33 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import LanguageSwitcher from '../components/LanguageSwitcher';
+import { getAppSettings, AppSettings } from '../lib/settings-api';
 
 export default function HomePage({ params }: { params: { locale: string } }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrollY, setScrollY] = useState(0);
+  const [appSettings, setAppSettings] = useState<AppSettings | null>(null);
   const t = useTranslations('home');
 
   useEffect(() => {
     const handleScroll = () => setScrollY(window.scrollY);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Load app settings for branding
+  useEffect(() => {
+    async function loadSettings() {
+      try {
+        const settings = await getAppSettings();
+        setAppSettings(settings);
+      } catch (error) {
+        console.error('Error loading app settings:', error);
+        // Continue with default values if settings fail to load
+      }
+    }
+    
+    loadSettings();
   }, []);
 
   const features = [
@@ -92,13 +109,21 @@ export default function HomePage({ params }: { params: { locale: string } }) {
           <div className="flex justify-between items-center h-16 lg:h-20">
             {/* Logo */}
             <Link href={`/${params.locale}`} className="flex items-center space-x-3 group">
-              <div className="w-10 h-10 lg:w-12 lg:h-12 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 transform group-hover:scale-105">
-                <svg className="w-6 h-6 lg:w-7 lg:h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-                </svg>
+              <div className="w-10 h-10 lg:w-12 lg:h-12 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 transform group-hover:scale-105 overflow-hidden">
+                {appSettings?.logo_url ? (
+                  <img 
+                    src={appSettings.logo_url} 
+                    alt="Logo" 
+                    className="w-full h-full object-cover rounded-xl"
+                  />
+                ) : (
+                  <svg className="w-6 h-6 lg:w-7 lg:h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                  </svg>
+                )}
               </div>
               <span className="text-xl lg:text-2xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
-                B2B Vegetable
+                {appSettings?.company_name || 'B2B Vegetable'}
               </span>
             </Link>
 
@@ -314,12 +339,20 @@ export default function HomePage({ params }: { params: { locale: string } }) {
             {/* Company Info */}
             <div className="lg:col-span-2">
               <Link href={`/${params.locale}`} className="flex items-center space-x-3 mb-4">
-                <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center">
-                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-                  </svg>
+                <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center overflow-hidden">
+                  {appSettings?.logo_url ? (
+                    <img 
+                      src={appSettings.logo_url} 
+                      alt="Logo" 
+                      className="w-full h-full object-cover rounded-xl"
+                    />
+                  ) : (
+                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
+                  )}
                 </div>
-                <span className="text-xl font-bold">B2B Vegetable</span>
+                <span className="text-xl font-bold">{appSettings?.company_name || 'B2B Vegetable'}</span>
               </Link>
               <p className="text-gray-400 mb-4 leading-relaxed">
                 {t('footer.description')}

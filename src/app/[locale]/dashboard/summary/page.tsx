@@ -1,10 +1,13 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { getUser, getUserProfile } from '../../../lib/auth';
 import { supabase } from '../../../lib/supabase';
+import { exportOrderSummaryToPDF } from '../../../lib/pdf-utils';
+import { toast } from 'react-toastify';
+import RouteProtection from '../../../components/RouteProtection';
 
 interface ProductSummary {
   id: string;
@@ -154,6 +157,29 @@ export default function OrderSummaryPage() {
     fetchSummaryData();
   };
 
+  // Handle PDF export
+  const handleExportPDF = () => {
+    try {
+      if (summaryData.length === 0) {
+        toast.warning('No data to export. Please adjust your date range.');
+        return;
+      }
+
+      exportOrderSummaryToPDF({
+        title: 'Order Summary Report',
+        dateRange: dateRange,
+        data: summaryData,
+        companyName: 'B2B Vegetable Management System',
+        generatedBy: 'Admin Dashboard'
+      });
+
+      toast.success('PDF exported successfully!');
+    } catch (error: any) {
+      console.error('Error exporting PDF:', error);
+      toast.error('Failed to export PDF. Please try again.');
+    }
+  };
+
   // Loading state
   if (isLoading && summaryData.length === 0) {
     return (
@@ -181,7 +207,30 @@ export default function OrderSummaryPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <RouteProtection>
+      <style jsx global>{`
+        @media print {
+          body * {
+            visibility: hidden;
+          }
+          .print-area, .print-area * {
+            visibility: visible;
+          }
+          .print-area {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+          }
+          .no-print {
+            display: none !important;
+          }
+          .print-header {
+            display: block !important;
+          }
+        }
+      `}</style>
+      <div className="space-y-6">
       {/* Header */}
       <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl border border-white/20 p-6 lg:p-8">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
@@ -203,7 +252,7 @@ export default function OrderSummaryPage() {
       </div>
 
       {/* Date Range Filter */}
-      <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl border border-white/20 p-6 lg:p-8">
+      <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl border border-white/20 p-6 lg:p-8 no-print">
         <h2 className="text-xl font-semibold text-gray-900 mb-6 flex items-center">
           <svg className="w-5 h-5 mr-2 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -265,22 +314,38 @@ export default function OrderSummaryPage() {
       </div>
 
       {/* Summary Content */}
-      <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl border border-white/20 overflow-hidden">
+      <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl border border-white/20 overflow-hidden print-area">
         <div className="px-6 lg:px-8 py-6 border-b border-gray-100">
+          {/* Print Header - Only visible when printing */}
+          <div className="print-header hidden mb-6">
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">B2B Vegetable Management System</h1>
+            <h2 className="text-xl font-semibold text-gray-800 mb-2">Order Summary Report</h2>
+            <p className="text-gray-600 mb-1">
+              Date Range: {new Date(dateRange.startDate).toLocaleDateString()} - {new Date(dateRange.endDate).toLocaleDateString()}
+            </p>
+            <p className="text-gray-600 text-sm">
+              Generated on: {new Date().toLocaleString()} | Total Products: {summaryData.length}
+            </p>
+            <hr className="mt-4 mb-4" />
+          </div>
+          
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
             <div>
               <h2 className="text-xl lg:text-2xl font-bold text-gray-900">{t('productQuantitiesSummary')}</h2>
               <p className="text-gray-600 mt-1">{t('totalQuantitiesNeeded')}</p>
             </div>
-            <button
-              onClick={() => window.print()}
-              className="mt-4 lg:mt-0 px-6 py-3 bg-gray-100 text-gray-700 rounded-2xl hover:bg-gray-200 transition-all duration-200 shadow-lg font-medium flex items-center space-x-2"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-              </svg>
-              <span>{t('printSummary')}</span>
-            </button>
+            <div className="mt-4 lg:mt-0 flex flex-col sm:flex-row gap-3 no-print">
+              <button
+                onClick={handleExportPDF}
+                disabled={summaryData.length === 0}
+                className="px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-2xl hover:from-emerald-600 hover:to-teal-700 transition-all duration-200 shadow-lg font-medium flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <span>Export PDF</span>
+              </button>
+            </div>
           </div>
         </div>
         
@@ -364,5 +429,6 @@ export default function OrderSummaryPage() {
         )}
       </div>
     </div>
+    </RouteProtection>
   );
 } 

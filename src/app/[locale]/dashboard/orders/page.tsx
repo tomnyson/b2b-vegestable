@@ -1,13 +1,15 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
+import RouteProtection from '../../../components/RouteProtection';
 import { getAllOrders, Order, updateOrderStatus, assignDriverToOrder, getOrderById } from '../../../lib/order-api';
 import { getDrivers } from '../../../lib/driver-api';
 import OrderDetailModal from './OrderDetailModal';
 
 export default function OrdersPage() {
   const t = useTranslations('orders');
+  const tCommon = useTranslations('common');
   const [orders, setOrders] = useState<Order[]>([]);
   const [drivers, setDrivers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -180,9 +182,10 @@ export default function OrdersPage() {
       </div>
     );
   }
-
+console.log('order',orders)
   return (
-    <div className="space-y-6">
+    <RouteProtection>
+      <div className="space-y-6">
       {/* Header */}
       <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl border border-white/20 p-6 lg:p-8">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
@@ -248,10 +251,10 @@ export default function OrdersPage() {
               className="w-full px-4 py-3 border border-gray-300 rounded-2xl bg-white/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200"
             >
               <option value="">{t('allOrders')}</option>
-              <option value="pending">{t('pending')}</option>
-              <option value="processing">{t('processing')}</option>
-              <option value="completed">{t('completed')}</option>
-              <option value="cancelled">{t('cancelled')}</option>
+              <option value="pending">{t('status.pending')}</option>
+              <option value="processing">{t('status.processing')}</option>
+              <option value="completed">{t('status.completed')}</option>
+              <option value="cancelled">{t('status.cancelled')}</option>
             </select>
           </div>
         </div>
@@ -319,16 +322,16 @@ export default function OrdersPage() {
                 <h3 className="text-lg font-semibold text-gray-900">{t('orders')}</h3>
               </div>
               <div className="divide-y divide-gray-100">
-                {orders.map((order) => (
+                {orders.map((order, index) => (
                   <div key={order.id} className="p-6 hover:bg-emerald-50/50 transition-colors duration-200">
                     <div className="space-y-4">
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-sm font-medium text-gray-500">{t('orderId')}</p>
-                          <p className="font-semibold text-gray-900">{order.id?.substring(0, 8)}...</p>
+                          <p className="text-sm font-medium text-gray-500">STT</p>
+                          <p className="font-semibold text-gray-900">#{((currentPage - 1) * itemsPerPage) + index + 1}</p>
                         </div>
                         <span className={getStatusBadge(order.status)}>
-                          {t(order.status)}
+                          {t(`status.${order.status}`)}
                         </span>
                       </div>
                       
@@ -345,22 +348,22 @@ export default function OrdersPage() {
                       
                       <div>
                         <p className="font-medium text-gray-500 text-sm">{t('customer')}:</p>
-                        <p className="text-gray-900">{order.user_id ? order.user_id : t('guestOrder')}</p>
+                        <p className="text-gray-900">{order.customer?.email || (order.user_id ? order.user_id : t('guestOrder'))}</p>
                         <p className="text-gray-500 text-xs mt-1">{order.delivery_address}</p>
                       </div>
                       
                       <div className="space-y-3">
                         <div>
-                          <label className="block text-xs font-medium text-gray-500 mb-1">{t('status')}</label>
+                          <label className="block text-xs font-medium text-gray-500 mb-1">{tCommon('labels.status')}</label>
                           <select
                             className="w-full min-w-[140px] px-3 py-2 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
                             value={order.status}
                             onChange={(e) => handleStatusChange(order.id!, e.target.value as Order['status'])}
                           >
-                            <option value="pending">{t('pending')}</option>
-                            <option value="processing">{t('processing')}</option>
-                            <option value="completed">{t('completed')}</option>
-                            <option value="cancelled">{t('cancelled')}</option>
+                            <option value="pending">{t('status.pending')}</option>
+                            <option value="processing">{t('status.processing')}</option>
+                            <option value="completed">{t('status.completed')}</option>
+                            <option value="cancelled">{t('status.cancelled')}</option>
                           </select>
                         </div>
                         
@@ -399,7 +402,7 @@ export default function OrdersPage() {
                 <thead className="bg-gradient-to-r from-emerald-50 to-teal-50">
                   <tr>
                     <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                      {t('orderId')}
+                      STT
                     </th>
                     <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                       {t('date')}
@@ -407,11 +410,11 @@ export default function OrdersPage() {
                     <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                       {t('customer')}
                     </th>
-                    <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                    {/* <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                       {t('total')}
-                    </th>
+                    </th> */}
                     <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                      {t('status')}
+                      {tCommon('labels.status')}
                     </th>
                     <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                       {t('driver')}
@@ -422,21 +425,21 @@ export default function OrdersPage() {
                   </tr>
                 </thead>
                 <tbody className="bg-white/50 divide-y divide-gray-100">
-                  {orders.map((order) => (
+                  {orders.map((order, index) => (
                     <tr key={order.id} className="hover:bg-emerald-50/50 transition-colors duration-200">
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
-                        {order.id?.substring(0, 8)}...
+                        #{((currentPage - 1) * itemsPerPage) + index + 1}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                         {formatDate(order.order_date)}
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-600 max-w-xs">
-                        <div className="font-medium text-gray-900">{order.user_id ? order.user_id : t('guestOrder')}</div>
+                        <div className="font-medium text-gray-900">{order.customer?.email || (order.user_id ? order.user_id : t('guestOrder'))}</div>
                         <div className="text-xs text-gray-500 truncate">{order.delivery_address}</div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-semibold">
+                      {/* <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-semibold">
                         ${order.total_amount.toFixed(2)}
-                      </td>
+                      </td> */}
                       <td className="px-6 py-4 whitespace-nowrap">
                         <select
                           className={`min-w-[120px] px-3 py-1.5 text-xs font-medium rounded-xl border-0 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all duration-200 ${
@@ -448,10 +451,10 @@ export default function OrdersPage() {
                           value={order.status}
                           onChange={(e) => handleStatusChange(order.id!, e.target.value as Order['status'])}
                         >
-                          <option value="pending">{t('pending')}</option>
-                          <option value="processing">{t('processing')}</option>
-                          <option value="completed">{t('completed')}</option>
-                          <option value="cancelled">{t('cancelled')}</option>
+                          <option value="pending">{t('status.pending')}</option>
+                          <option value="processing">{t('status.processing')}</option>
+                          <option value="completed">{t('status.completed')}</option>
+                          <option value="cancelled">{t('status.cancelled')}</option>
                         </select>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm">
@@ -541,10 +544,16 @@ export default function OrdersPage() {
       )}
 
       {/* Order Detail Modal */}
-      <OrderDetailModal
-        order={selectedOrder}
-        onClose={() => setDetailModalOpen(false)}
-      />
+      {detailModalOpen && selectedOrder && (
+        <OrderDetailModal
+          order={selectedOrder}
+          onClose={() => {
+            console.log('onClose');
+            setDetailModalOpen(false);
+            setSelectedOrder(null);
+          }}
+        />
+      )}
 
       {/* Loading overlay for order details */}
       {loadingOrderDetails && (
@@ -556,5 +565,6 @@ export default function OrdersPage() {
         </div>
       )}
     </div>
+    </RouteProtection>
   );
 } 

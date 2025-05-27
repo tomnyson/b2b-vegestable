@@ -4,6 +4,9 @@ import { Product } from '../../../lib/product-api';
 import { sendInvoiceEmail } from '../../../lib/email-api';
 import { supabase } from '../../../lib/supabase';
 import { AppSettings, getAppSettings, SUPPORTED_CURRENCIES } from '../../../lib/settings-api';
+import { getUserById } from '../../../lib/users-api';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 interface OrderDetailModalProps {
   order: Order | null;
@@ -18,6 +21,15 @@ interface ExtendedCustomer {
   phone?: string;
   profile_image?: string;
   address?: string;
+}
+
+// Driver interface
+interface Driver {
+  id: string;
+  email?: string;
+  name?: string;
+  phone?: string;
+  role: string;
 }
 
 // Ensure type safety with product info
@@ -46,6 +58,28 @@ export default function OrderDetailModal({ order, onClose }: OrderDetailModalPro
   const [emailError, setEmailError] = useState<string | null>(null);
   const [appSettings, setAppSettings] = useState<AppSettings | null>(null);
   const [isLoadingSettings, setIsLoadingSettings] = useState(true);
+  const [driver, setDriver] = useState<Driver | null>(null);
+  const [isLoadingDriver, setIsLoadingDriver] = useState(false);
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+
+  // Handle escape key to close modal
+  useEffect(() => {
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [onClose]);
+
+  // Handle backdrop click to close modal
+  const handleBackdropClick = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (event.target === event.currentTarget) {
+      onClose();
+    }
+  };
   
   // Load application settings
   useEffect(() => {
@@ -63,85 +97,282 @@ export default function OrderDetailModal({ order, onClose }: OrderDetailModalPro
     loadSettings();
   }, []);
 
-  // When the component mounts, fetch customer details if not already available
+  // Load driver information if assigned
   useEffect(() => {
-    async function fetchCustomerDetails() {
-      if (!order || !order.user_id || order.customer) return;
-      
+    async function loadDriver() {
+      if (!order?.assigned_driver_id) {
+        setDriver(null);
+        return;
+      }
+
+      setIsLoadingDriver(true);
       try {
-        const { data, error } = await supabase
-          .from('users')
-          .select('id, email, name, phone, address')
-          .eq('id', order.user_id)
-          .single();
-          
-        if (error) throw error;
-        
-        if (data) {
-          // Manually add the customer data to our order object
-          order.customer = {
-            id: data.id,
-            email: data.email,
-            name: `${data.name}`,
-            phone: data.phone,
-            address: data.address
-          };
-        }
-      } catch (err) {
-        console.error('Error fetching customer details:', err);
+        const driverData = await getUserById(order.assigned_driver_id);
+        setDriver(driverData);
+      } catch (error) {
+        console.error('Error loading driver details:', error);
+        setDriver(null);
+      } finally {
+        setIsLoadingDriver(false);
       }
     }
-    
-    fetchCustomerDetails();
-  }, [order]);
 
-  // Simple print function that uses the browser's native print
-  const handlePrintRequest = () => {
+    loadDriver();
+  }, [order?.assigned_driver_id]);
+
+  // Customer data is now fetched via API join, no need for separate fetch
+
+  // PDF generation and download function using jsPDF
+  const handlePrintRequest = async () => {
     // First switch to invoice tab to make it visible
     setActiveTab('invoice');
     
     // Use setTimeout to let the DOM update
-    setTimeout(() => {
+    setTimeout(async () => {
       if (!invoiceRef.current) {
         console.error("Invoice ref not available");
         return;
       }
       
       try {
-        // Create a print-specific stylesheet
-        const printStyle = document.createElement('style');
-        printStyle.textContent = `
-          @media print {
-            body * {
-              visibility: hidden;
-            }
-            .invoice-content, .invoice-content * {
-              visibility: visible !important;
-            }
-            .invoice-content {
-              position: absolute;
-              left: 0;
-              top: 0;
-              width: 100%;
-              padding: 20px;
-            }
-          }
-        `;
-        document.head.appendChild(printStyle);
-
-        // Execute print
-        window.print();
+        // Show loading state
+        setIsGeneratingPdf(true);
+        console.log("Generating PDF...");
         
-        // Cleanup after printing
-        setTimeout(() => {
-          document.head.removeChild(printStyle);
-        }, 500);
+                 // Add comprehensive CSS override to prevent oklch color issues and improve PDF layout
+         const overrideStyle = document.createElement('style');
+         overrideStyle.setAttribute('data-pdf-override', 'true');
+         overrideStyle.textContent = `
+           * {
+             color: black !important;
+             background-color: white !important;
+             border-color: #d1d5db !important;
+             outline-color: transparent !important;
+             text-decoration-color: currentColor !important;
+             caret-color: currentColor !important;
+             accent-color: #3b82f6 !important;
+             --tw-bg-opacity: 1 !important;
+             --tw-text-opacity: 1 !important;
+             --tw-border-opacity: 1 !important;
+             line-height: 1.6 !important;
+             font-family: 'Arial', 'Helvetica', sans-serif !important;
+           }
+           
+           .invoice-content {
+             padding: 30px !important;
+             max-width: 800px !important;
+             margin: 0 auto !important;
+             line-height: 1.8 !important;
+           }
+           
+           h1, h2, h3 {
+             line-height: 1.4 !important;
+             margin-bottom: 16px !important;
+             margin-top: 20px !important;
+           }
+           
+           h1 {
+             font-size: 28px !important;
+             font-weight: bold !important;
+             margin-bottom: 8px !important;
+           }
+           
+           h2 {
+             font-size: 18px !important;
+             font-weight: 600 !important;
+             margin-bottom: 12px !important;
+           }
+           
+           p {
+             line-height: 1.8 !important;
+             margin-bottom: 8px !important;
+             font-size: 14px !important;
+           }
+           
+           .grid {
+             display: grid !important;
+             gap: 20px !important;
+             margin-bottom: 24px !important;
+           }
+           
+           .grid-cols-2 {
+             grid-template-columns: 1fr 1fr !important;
+           }
+           
+           .bg-gray-100 { 
+             background-color: #f8f9fa !important; 
+             padding: 12px !important;
+             border-radius: 4px !important;
+           }
+           .bg-gray-50 { 
+             background-color: #f9fafb !important; 
+             padding: 8px !important;
+           }
+           .text-gray-700 { color: #374151 !important; }
+           .text-gray-900 { color: #111827 !important; }
+           .text-gray-600 { color: #4b5563 !important; }
+           .text-gray-500 { color: #6b7280 !important; }
+           .font-bold { font-weight: bold !important; }
+           .font-medium { font-weight: 500 !important; }
+           .font-semibold { font-weight: 600 !important; }
+           .border-b { border-bottom: 1px solid #d1d5db !important; }
+           .border-gray-300 { border-color: #d1d5db !important; }
+           .border-gray-200 { border-color: #e5e7eb !important; }
+           
+           table { 
+             border-collapse: collapse !important; 
+             width: 100% !important;
+             margin: 20px 0 !important;
+             font-size: 14px !important;
+           }
+           
+           th { 
+             background-color: #f8f9fa !important;
+             border: 1px solid #d1d5db !important; 
+             padding: 12px 8px !important;
+             text-align: left !important;
+             font-weight: 600 !important;
+             line-height: 1.5 !important;
+           }
+           
+           td { 
+             border: 1px solid #d1d5db !important; 
+             padding: 12px 8px !important;
+             line-height: 1.6 !important;
+             vertical-align: top !important;
+           }
+           
+           .text-right {
+             text-align: right !important;
+           }
+           
+           .text-left {
+             text-align: left !important;
+           }
+           
+           .text-center {
+             text-align: center !important;
+           }
+           
+           .mb-8 {
+             margin-bottom: 32px !important;
+           }
+           
+           .mb-2 {
+             margin-bottom: 8px !important;
+           }
+           
+           .mt-2 {
+             margin-top: 8px !important;
+           }
+           
+           .flex {
+             display: flex !important;
+           }
+           
+           .justify-between {
+             justify-content: space-between !important;
+           }
+           
+           .items-start {
+             align-items: flex-start !important;
+           }
+           
+           img {
+             max-height: 60px !important;
+             width: auto !important;
+             margin-bottom: 12px !important;
+           }
+           
+           .invoice-header {
+             margin-bottom: 30px !important;
+             padding-bottom: 20px !important;
+             border-bottom: 2px solid #e5e7eb !important;
+           }
+           
+           .invoice-footer {
+             margin-top: 30px !important;
+             padding-top: 20px !important;
+             border-top: 1px solid #e5e7eb !important;
+             text-align: center !important;
+             line-height: 1.6 !important;
+           }
+         `;
+        document.head.appendChild(overrideStyle);
+        
+        // Wait for styles to be applied
+        await new Promise(resolve => setTimeout(resolve, 200));
+        
+        // Configure html2canvas options for better quality
+        const canvas = await html2canvas(invoiceRef.current, {
+          scale: 1.5, // Reduced scale to avoid memory issues
+          useCORS: true,
+          allowTaint: true,
+          backgroundColor: '#ffffff',
+          width: invoiceRef.current.scrollWidth,
+          height: invoiceRef.current.scrollHeight,
+          windowWidth: 1200,
+          windowHeight: 800,
+          onclone: (clonedDoc) => {
+            // Additional cleanup in the cloned document
+            const allElements = clonedDoc.querySelectorAll('*');
+            allElements.forEach((el: any) => {
+              // Remove any style attributes that might contain oklch
+              if (el.style) {
+                // Clear problematic CSS properties
+                el.style.removeProperty('color');
+                el.style.removeProperty('background-color');
+                el.style.removeProperty('border-color');
+                // Set safe defaults
+                el.style.color = 'black';
+                el.style.backgroundColor = 'white';
+                el.style.borderColor = '#d1d5db';
+              }
+            });
+          }
+        });
+        
+                 // Remove override style
+         document.head.removeChild(overrideStyle);
+
+        // Get canvas dimensions
+        const imgWidth = 210; // A4 width in mm
+        const pageHeight = 295; // A4 height in mm
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+        let heightLeft = imgHeight;
+
+        // Create PDF document
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        let position = 0;
+
+        // Add first page
+        pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+
+        // Add additional pages if content is longer than one page
+        while (heightLeft >= 0) {
+          position = heightLeft - imgHeight;
+          pdf.addPage();
+          pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, position, imgWidth, imgHeight);
+          heightLeft -= pageHeight;
+        }
+
+        // Generate filename with order ID and current date
+        const currentDate = new Date().toISOString().split('T')[0];
+        const filename = `invoice-${order?.id || 'unknown'}-${currentDate}.pdf`;
+
+        // Download the PDF
+        pdf.save(filename);
+        
+        console.log(`PDF generated and downloaded: ${filename}`);
         
       } catch (err) {
-        console.error("Error while printing:", err);
-        alert("There was an error when trying to print. Please try again.");
+        console.error("Error generating PDF:", err);
+        alert("There was an error generating the PDF. Please try again.");
+      } finally {
+        setIsGeneratingPdf(false);
       }
-    }, 500); // Increased timeout for DOM to update
+    }, 300);
   };
 
   // Send invoice email function
@@ -151,25 +382,8 @@ export default function OrderDetailModal({ order, onClose }: OrderDetailModalPro
       return;
     }
 
-    // Get customer email from order or from user input
+    // Get customer email from order (now includes joined user data)
     let customerEmail = order.customer?.email;
-    
-    // If no email found, try to get it from user table if we have user ID
-    if (!customerEmail && order.user_id) {
-      try {
-        const { data: userData } = await supabase
-          .from('users')
-          .select('email')
-          .eq('id', order.user_id)
-          .single();
-        
-        if (userData?.email) {
-          customerEmail = userData.email;
-        }
-      } catch (err) {
-        console.error('Failed to fetch user email:', err);
-      }
-    }
     
     // If still no email, prompt the user
     if (!customerEmail) {
@@ -281,46 +495,59 @@ export default function OrderDetailModal({ order, onClose }: OrderDetailModalPro
   const totalWithVat = order.total_amount + vatAmount;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
+    <div 
+      className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-6 sm:p-8 lg:p-12"
+      onClick={handleBackdropClick}
+    >
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-5xl max-h-[92vh] overflow-hidden flex flex-col border border-gray-100 backdrop-blur-sm">
         {/* Header */}
-        <div className="modal-header flex justify-between items-center border-b p-4">
-          <h2 className="text-xl font-semibold">Order {order.id?.substring(0, 8)}</h2>
+        <div className="modal-header flex justify-between items-center border-b border-gray-200 p-6 bg-gradient-to-r from-emerald-50 to-teal-50">
+          <h2 className="text-2xl font-bold text-gray-800">📋 Order Details</h2>
           <button
             onClick={onClose}
-            className="text-gray-500 hover:text-gray-700"
+            className="text-gray-500 hover:text-gray-700 p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200"
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
         </div>
 
         {/* Tabs */}
-        <div className="modal-tabs flex border-b">
+        <div className="modal-tabs flex border-b border-gray-200 bg-gray-50 px-6">
           <button
-            className={`py-2 px-4 font-medium ${activeTab === 'details' ? 'text-green-600 border-b-2 border-green-600' : 'text-gray-600'}`}
+            className={`py-4 px-6 font-semibold text-sm transition-all duration-200 ${
+              activeTab === 'details' 
+                ? 'text-emerald-600 border-b-3 border-emerald-600 bg-white -mb-px rounded-t-lg' 
+                : 'text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-t-lg'
+            }`}
             onClick={() => setActiveTab('details')}
           >
-            Order Details
+            📋 Order Details
           </button>
           <button
-            className={`py-2 px-4 font-medium ${activeTab === 'invoice' ? 'text-green-600 border-b-2 border-green-600' : 'text-gray-600'}`}
+            className={`py-4 px-6 font-semibold text-sm transition-all duration-200 ml-2 ${
+              activeTab === 'invoice' 
+                ? 'text-emerald-600 border-b-3 border-emerald-600 bg-white -mb-px rounded-t-lg' 
+                : 'text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-t-lg'
+            }`}
             onClick={() => setActiveTab('invoice')}
           >
-            Invoice
+            🧾 Invoice
           </button>
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto p-4">
+        <div className="flex-1 overflow-y-auto p-6 lg:p-8">
           {/* Details tab content */}
           <div className={`${activeTab === 'details' ? 'block' : 'hidden'}`}>
-            <div className="space-y-6">
+            <div className="space-y-8">
               {/* Order Info */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <h3 className="text-sm font-medium text-gray-500">Order Information</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
+                <div className="bg-gray-50 rounded-xl p-5">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                    📦 Order Information
+                  </h3>
                   <p className="mt-1"><span className="font-medium">Date:</span> {formatDate(order.order_date)}</p>
                   <p><span className="font-medium">Status:</span> 
                     <span className={`ml-1 px-2 py-0.5 text-xs font-medium rounded-full ${getStatusColor(order.status)}`}>
@@ -334,8 +561,10 @@ export default function OrderDetailModal({ order, onClose }: OrderDetailModalPro
                   </p>
                 </div>
 
-                <div>
-                  <h3 className="text-sm font-medium text-gray-500">Customer Information</h3>
+                <div className="bg-blue-50 rounded-xl p-5">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                    👤 Customer Information
+                  </h3>
                   {order.customer ? (
                     <>
                       <p className="mt-1">
@@ -344,11 +573,9 @@ export default function OrderDetailModal({ order, onClose }: OrderDetailModalPro
                       <p>
                         <span className="font-medium">Email:</span> {order.customer?.email || 'N/A'}
                       </p>
-                      {order.customer.phone && (
-                        <p>
-                          <span className="font-medium">Phone:</span> {order.customer.phone}
-                        </p>
-                      )}
+                      <p>
+                        <span className="font-medium">Phone:</span> {order.customer.phone || 'N/A'}
+                      </p>
                       {order.customer.address && (
                         <p>
                           <span className="font-medium">Address:</span> {order.customer.address}
@@ -360,33 +587,64 @@ export default function OrderDetailModal({ order, onClose }: OrderDetailModalPro
                       {order.user_id && (
                         <p className="text-gray-700">Account: {order.user_id}</p>
                       )}
+                      <p>
+                        <span className="font-medium">Phone:</span> N/A
+                      </p>
                     </>
                   )}
                 </div>
               </div>
 
-              <div>
-                <h3 className="text-sm font-medium text-gray-500">Delivery Information</h3>
+              <div className="bg-green-50 rounded-xl p-5">
+                <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                  🚚 Delivery Information
+                </h3>
                 <p className="mt-1"><span className="font-medium">Address:</span> {order.delivery_address || 'Not specified'}</p>
-                {order.assigned_driver_id && (
-                  <p><span className="font-medium">Driver ID:</span> {order.assigned_driver_id}</p>
+                
+                {/* Customer Phone */}
+                <p className="mt-1">
+                  <span className="font-medium">Customer Phone:</span> {order.customer?.phone || 'N/A'}
+                </p>
+                
+                {/* Driver Information */}
+                {order.assigned_driver_id ? (
+                  <div className="mt-3 border-t border-green-200 pt-3">
+                    <p className="font-medium text-gray-700 mb-2">📱 Assigned Driver:</p>
+                    {isLoadingDriver ? (
+                      <p className="text-gray-500 text-sm">Loading driver information...</p>
+                    ) : driver ? (
+                      <div className="ml-4 space-y-1">
+                        <p><span className="font-medium">Name:</span> {driver.name || 'N/A'}</p>
+                        <p><span className="font-medium">Email:</span> {driver.email || 'N/A'}</p>
+                        <p><span className="font-medium">Phone:</span> {driver.phone || 'N/A'}</p>
+                      </div>
+                    ) : (
+                      <p className="text-gray-500 text-sm ml-4">Driver information not available</p>
+                    )}
+                  </div>
+                ) : (
+                  <p className="mt-3 pt-3 border-t border-green-200"><span className="font-medium">Driver:</span> Not assigned</p>
                 )}
+                
                 {order.notes && (
-                  <p><span className="font-medium">Notes:</span> {order.notes}</p>
+                  <div className="mt-3 border-t border-green-200 pt-3">
+                    <p><span className="font-medium">Notes:</span> {order.notes}</p>
+                  </div>
                 )}
               </div>
 
               {/* Order Items */}
-              <div>
-                <h3 className="text-sm font-medium text-gray-500 mb-2">Order Items</h3>
-                <div className="border rounded-md overflow-hidden">
+              <div className="bg-purple-50 rounded-xl p-5">
+                <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                  🛒 Order Items
+                </h3>
+                <div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
                   <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
                       <tr>
                         <th scope="col" className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Product</th>
                         <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Unit Price</th>
                         <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Quantity</th>
-                        <th scope="col" className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">Subtotal</th>
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
@@ -401,18 +659,10 @@ export default function OrderDetailModal({ order, onClose }: OrderDetailModalPro
                           <td className="px-4 py-2 text-sm text-gray-500 text-right">
                             {item.quantity}
                           </td>
-                          <td className="px-4 py-2 text-sm font-medium text-gray-900 text-right">
-                            ${(item.unit_price * item.quantity).toFixed(2)}
-                          </td>
+                         
                         </tr>
                       ))}
                     </tbody>
-                    <tfoot className="bg-gray-50">
-                      <tr>
-                        <td colSpan={3} className="px-4 py-2 text-sm font-medium text-gray-900 text-right">Total</td>
-                        <td className="px-4 py-2 text-sm font-bold text-gray-900 text-right">${order.total_amount.toFixed(2)}</td>
-                      </tr>
-                    </tfoot>
                   </table>
                 </div>
               </div>
@@ -423,7 +673,7 @@ export default function OrderDetailModal({ order, onClose }: OrderDetailModalPro
           <div className={`${activeTab === 'invoice' ? 'block' : 'hidden'}`}>
             <div ref={invoiceRef} className="invoice-content p-6 print:p-0 print:shadow-none">
               <div className="max-w-3xl mx-auto bg-white print:shadow-none">
-                <div className="flex justify-between items-start mb-8">
+                <div className="invoice-header flex justify-between items-start mb-8">
                   <div>
                     <h1 className="text-2xl font-bold text-gray-900">INVOICE</h1>
                     <p className="text-gray-700"># {order.id}</p>
@@ -489,10 +739,6 @@ export default function OrderDetailModal({ order, onClose }: OrderDetailModalPro
                       <p className="text-gray-900">{new Date(order.order_date).toLocaleDateString()}</p>
                       <p className="text-gray-600">Order Status:</p>
                       <p className="text-gray-900">{order.status.toUpperCase()}</p>
-                      <p className="text-gray-600">Payment Status:</p>
-                      <p className="text-gray-900">{order.payment_status.toUpperCase()}</p>
-                      <p className="text-gray-600">Currency:</p>
-                      <p className="text-gray-900">{appSettings?.default_currency || 'USD'}</p>
                     </div>
                   </div>
                 </div>
@@ -501,9 +747,8 @@ export default function OrderDetailModal({ order, onClose }: OrderDetailModalPro
                   <thead>
                     <tr className="bg-gray-100">
                       <th className="py-2 px-4 border-b text-left">Item</th>
-                      <th className="py-2 px-4 border-b text-right">Unit Price</th>
+                      <th className="py-2 px-4 border-b text-left">SKU</th>
                       <th className="py-2 px-4 border-b text-right">Quantity</th>
-                      <th className="py-2 px-4 border-b text-right">Amount</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -512,34 +757,13 @@ export default function OrderDetailModal({ order, onClose }: OrderDetailModalPro
                         <td className="py-2 px-4 border-b">
                           {getProductName(item)}
                         </td>
-                        <td className="py-2 px-4 border-b text-right">
-                          {currencySymbol}{item.unit_price.toFixed(2)}
-                        </td>
+                        <td className="py-2 px-4 border-b text-left">{item.product?.sku}</td>
                         <td className="py-2 px-4 border-b text-right">
                           {item.quantity}
-                        </td>
-                        <td className="py-2 px-4 border-b text-right">
-                          {currencySymbol}{(item.unit_price * item.quantity).toFixed(2)}
                         </td>
                       </tr>
                     ))}
                   </tbody>
-                  <tfoot>
-                    <tr className="bg-gray-50">
-                      <td colSpan={3} className="py-2 px-4 text-right">Subtotal</td>
-                      <td className="py-2 px-4 text-right">{currencySymbol}{order.total_amount.toFixed(2)}</td>
-                    </tr>
-                    {appSettings?.vat_percentage ? (
-                      <tr className="bg-gray-50">
-                        <td colSpan={3} className="py-2 px-4 text-right">VAT ({appSettings.vat_percentage}%)</td>
-                        <td className="py-2 px-4 text-right">{currencySymbol}{vatAmount.toFixed(2)}</td>
-                      </tr>
-                    ) : null}
-                    <tr className="bg-gray-100 font-bold">
-                      <td colSpan={3} className="py-2 px-4 text-right">Total</td>
-                      <td className="py-2 px-4 text-right">{currencySymbol}{(appSettings?.vat_percentage ? totalWithVat : order.total_amount).toFixed(2)}</td>
-                    </tr>
-                  </tfoot>
                 </table>
                 
                 <div className="mb-8">
@@ -547,7 +771,7 @@ export default function OrderDetailModal({ order, onClose }: OrderDetailModalPro
                   <p className="text-gray-700">{order.notes || 'No additional notes'}</p>
                 </div>
                 
-                <div className="text-center text-gray-600 text-sm">
+                <div className="invoice-footer text-center text-gray-600 text-sm">
                   <p>Thank you for your business!</p>
                   {appSettings?.company_name && <p>© {new Date().getFullYear()} {appSettings.company_name}</p>}
                 </div>
@@ -558,35 +782,35 @@ export default function OrderDetailModal({ order, onClose }: OrderDetailModalPro
 
         {/* Status Messages */}
         {emailSent && (
-          <div className="mx-4 mb-2 p-2 bg-green-50 text-green-700 rounded-md text-center">
-            Invoice email sent successfully!
+          <div className="mx-6 mb-4 p-4 bg-green-50 text-green-700 rounded-xl text-center font-medium border border-green-200">
+            ✅ Invoice email sent successfully!
           </div>
         )}
 
         {emailError && (
-          <div className="mx-4 mb-2 p-2 bg-red-50 text-red-700 rounded-md text-center">
-            Error: {emailError}
+          <div className="mx-6 mb-4 p-4 bg-red-50 text-red-700 rounded-xl text-center font-medium border border-red-200">
+            ❌ Error: {emailError}
           </div>
         )}
 
         {/* Footer */}
-        <div className="modal-footer border-t p-4 flex justify-between">
+        <div className="modal-footer border-t border-gray-200 p-6 bg-gray-50 flex flex-col sm:flex-row justify-between gap-4">
           <button
             onClick={onClose}
-            className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-green-500"
+            className="px-6 py-3 border-2 border-gray-300 rounded-xl text-gray-700 hover:bg-white hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all duration-200 font-medium"
           >
-            Close
+            ❌ Close
           </button>
           
-          <div className="flex space-x-2">
+          <div className="flex flex-col sm:flex-row gap-3">
             <button
               onClick={handleSendInvoiceEmail}
               disabled={sendingEmail}
-              className={`px-4 py-2 flex items-center space-x-1 rounded-md 
+              className={`px-6 py-3 flex items-center justify-center space-x-2 rounded-xl font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 
                 ${sendingEmail 
                   ? 'bg-blue-400 cursor-not-allowed'
-                  : 'bg-blue-600 hover:bg-blue-700'} 
-                text-white focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                  : 'bg-blue-600 hover:bg-blue-700 hover:shadow-lg'} 
+                text-white`}
             >
               {sendingEmail ? (
                 <>
@@ -598,19 +822,31 @@ export default function OrderDetailModal({ order, onClose }: OrderDetailModalPro
                 </>
               ) : (
                 <>
-                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                  </svg>
-                  <span>Email Invoice</span>
+                  <span>📧 Email Invoice</span>
                 </>
               )}
             </button>
             
-            <button
+                        <button
               onClick={handlePrintRequest}
-              className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
+              disabled={isGeneratingPdf}
+              className={`px-6 py-3 rounded-xl font-medium flex items-center justify-center space-x-2 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 ${
+                isGeneratingPdf 
+                  ? 'bg-emerald-400 cursor-not-allowed text-white'
+                  : 'bg-emerald-600 text-white hover:bg-emerald-700 hover:shadow-lg'
+              }`}
             >
-              Print Invoice
+              {isGeneratingPdf ? (
+                <>
+                  <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  <span>Generating PDF...</span>
+                </>
+              ) : (
+                <span>📄 Download PDF</span>
+              )}
             </button>
           </div>
         </div>

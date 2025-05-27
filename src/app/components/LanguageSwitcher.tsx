@@ -66,11 +66,11 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
   };
 
   return (
-    <div className={`relative language-switcher ${className}`}>
+    <div className={`relative language-switcher z-[1000] ${className}`}>
       {/* Language Toggle Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center space-x-2 px-4 py-2.5 bg-white/80 backdrop-blur-sm border border-gray-200 rounded-xl hover:bg-white hover:border-gray-300 transition-all duration-200 shadow-sm min-w-[120px]"
+        className="flex items-center space-x-2 px-4 py-2.5 bg-white/80 backdrop-blur-sm border border-gray-200 rounded-xl hover:bg-white hover:border-gray-300 transition-all duration-200 shadow-sm min-w-[120px] relative z-[1000]"
         aria-label="Select Language"
       >
         <span className="text-lg">
@@ -91,7 +91,7 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
 
       {/* Language Dropdown */}
       {isOpen && (
-        <div className="absolute top-full right-0 mt-2 w-64 bg-white/95 backdrop-blur-lg border border-gray-200 rounded-2xl shadow-2xl z-50 overflow-hidden">
+        <div className="top-[calc(100%+0.5rem)] right-0 mt-2 w-64 bg-white/95 backdrop-blur-lg border border-gray-200 rounded-2xl shadow-2xl z-[1001] overflow-hidden">
           <div className="py-2">
             <div className="px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider border-b border-gray-100">
               {t('language')}

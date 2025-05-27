@@ -1,0 +1,6 @@
+name,email,role,phone_number,address,notes
+John Doe,john.doe@test.com,customer,+1234567890,123 Main St,Customer with login access
+Jane Smith,,admin,+1234567891,456 Oak Ave,Admin without login access
+Bob Wilson,bob.wilson@test.com,driver,+1234567892,789 Pine Rd,Driver with login access
+Alice Johnson,,customer,+1234567893,321 Elm St,Customer without login access
+Mike Brown,,driver,+1234567894,654 Maple Ave,Driver without login access 

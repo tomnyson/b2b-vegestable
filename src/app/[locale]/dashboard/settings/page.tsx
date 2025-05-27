@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import { getUser, getUserProfile } from '../../../lib/auth';
-import { AppSettings, getAppSettings, updateAppSettings, uploadLogo, SUPPORTED_LANGUAGES, SUPPORTED_CURRENCIES } from '../../../lib/settings-api';
+import { AppSettings, getAppSettings, updateAppSettings, uploadLogo, SUPPORTED_LANGUAGES, SUPPORTED_CURRENCIES, getDefaultMenuSettings } from '../../../lib/settings-api';
 
 export default function AdminSettingsPage() {
   const router = useRouter();
@@ -27,6 +27,16 @@ export default function AdminSettingsPage() {
   const [companyName, setCompanyName] = useState('');
   const [supportEmail, setSupportEmail] = useState('');
   const [supportPhone, setSupportPhone] = useState('');
+  
+  // Menu configuration state
+  const [enableOverview, setEnableOverview] = useState(true);
+  const [enableProducts, setEnableProducts] = useState(true);
+  const [enableOrders, setEnableOrders] = useState(true);
+  const [enableOrderSummary, setEnableOrderSummary] = useState(true);
+  const [enableUsers, setEnableUsers] = useState(true);
+  const [enableDrivers, setEnableDrivers] = useState(true);
+  const [enableSettings, setEnableSettings] = useState(true);
+  const [enableStore, setEnableStore] = useState(true);
   
   // Logo preview
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
@@ -64,6 +74,17 @@ export default function AdminSettingsPage() {
           setSupportEmail(appSettings.support_email || '');
           setSupportPhone(appSettings.support_phone || '');
           setLogoPreview(appSettings.logo_url || null);
+          
+          // Initialize menu settings with defaults if not set
+          const defaults = getDefaultMenuSettings();
+          setEnableOverview(appSettings.enable_overview ?? defaults.enable_overview);
+          setEnableProducts(appSettings.enable_products ?? defaults.enable_products);
+          setEnableOrders(appSettings.enable_orders ?? defaults.enable_orders);
+          setEnableOrderSummary(appSettings.enable_order_summary ?? defaults.enable_order_summary);
+          setEnableUsers(appSettings.enable_users ?? defaults.enable_users);
+          setEnableDrivers(appSettings.enable_drivers ?? defaults.enable_drivers);
+          setEnableSettings(appSettings.enable_settings ?? defaults.enable_settings);
+          setEnableStore(appSettings.enable_store ?? defaults.enable_store);
         }
       } catch (error) {
         console.error('Error loading settings:', error);
@@ -118,7 +139,16 @@ export default function AdminSettingsPage() {
         default_currency: currency,
         company_name: companyName,
         support_email: supportEmail,
-        support_phone: supportPhone
+        support_phone: supportPhone,
+        // Menu configuration
+        enable_overview: enableOverview,
+        enable_products: enableProducts,
+        enable_orders: enableOrders,
+        enable_order_summary: enableOrderSummary,
+        enable_users: enableUsers,
+        enable_drivers: enableDrivers,
+        enable_settings: enableSettings,
+        enable_store: enableStore
       });
       
       setSettings(updatedSettings);
@@ -347,6 +377,150 @@ export default function AdminSettingsPage() {
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"
                 placeholder={t('supportPhonePlaceholder')}
               />
+            </div>
+          </div>
+        </div>
+        
+        {/* Menu Configuration */}
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <h2 className="text-lg font-medium text-gray-900 mb-4">{t('menuConfiguration')}</h2>
+          <p className="text-sm text-gray-600 mb-6">{t('menuConfigurationDescription')}</p>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Overview Page */}
+            <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+              <div className="flex-1">
+                <h3 className="text-sm font-medium text-gray-900">{t('enableOverview')}</h3>
+                <p className="text-xs text-gray-500 mt-1">{t('overviewDescription')}</p>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer ml-4">
+                <input
+                  type="checkbox"
+                  checked={enableOverview}
+                  onChange={(e) => setEnableOverview(e.target.checked)}
+                  className="sr-only peer"
+                />
+                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
+              </label>
+            </div>
+
+            {/* Products Page */}
+            <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+              <div className="flex-1">
+                <h3 className="text-sm font-medium text-gray-900">{t('enableProducts')}</h3>
+                <p className="text-xs text-gray-500 mt-1">{t('productsDescription')}</p>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer ml-4">
+                <input
+                  type="checkbox"
+                  checked={enableProducts}
+                  onChange={(e) => setEnableProducts(e.target.checked)}
+                  className="sr-only peer"
+                />
+                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
+              </label>
+            </div>
+
+            {/* Orders Page */}
+            <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+              <div className="flex-1">
+                <h3 className="text-sm font-medium text-gray-900">{t('enableOrders')}</h3>
+                <p className="text-xs text-gray-500 mt-1">{t('ordersDescription')}</p>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer ml-4">
+                <input
+                  type="checkbox"
+                  checked={enableOrders}
+                  onChange={(e) => setEnableOrders(e.target.checked)}
+                  className="sr-only peer"
+                />
+                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
+              </label>
+            </div>
+
+            {/* Order Summary Page */}
+            <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+              <div className="flex-1">
+                <h3 className="text-sm font-medium text-gray-900">{t('enableOrderSummary')}</h3>
+                <p className="text-xs text-gray-500 mt-1">{t('orderSummaryDescription')}</p>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer ml-4">
+                <input
+                  type="checkbox"
+                  checked={enableOrderSummary}
+                  onChange={(e) => setEnableOrderSummary(e.target.checked)}
+                  className="sr-only peer"
+                />
+                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
+              </label>
+            </div>
+
+            {/* Users Page */}
+            <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+              <div className="flex-1">
+                <h3 className="text-sm font-medium text-gray-900">{t('enableUsers')}</h3>
+                <p className="text-xs text-gray-500 mt-1">{t('usersDescription')}</p>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer ml-4">
+                <input
+                  type="checkbox"
+                  checked={enableUsers}
+                  onChange={(e) => setEnableUsers(e.target.checked)}
+                  className="sr-only peer"
+                />
+                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
+              </label>
+            </div>
+
+            {/* Drivers Page */}
+            <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+              <div className="flex-1">
+                <h3 className="text-sm font-medium text-gray-900">{t('enableDrivers')}</h3>
+                <p className="text-xs text-gray-500 mt-1">{t('driversDescription')}</p>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer ml-4">
+                <input
+                  type="checkbox"
+                  checked={enableDrivers}
+                  onChange={(e) => setEnableDrivers(e.target.checked)}
+                  className="sr-only peer"
+                />
+                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
+              </label>
+            </div>
+
+            {/* Settings Page */}
+            <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+              <div className="flex-1">
+                <h3 className="text-sm font-medium text-gray-900">{t('enableSettings')}</h3>
+                <p className="text-xs text-gray-500 mt-1">{t('settingsDescription')}</p>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer ml-4">
+                <input
+                  type="checkbox"
+                  checked={enableSettings}
+                  onChange={(e) => setEnableSettings(e.target.checked)}
+                  className="sr-only peer"
+                />
+                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
+              </label>
+            </div>
+
+            {/* Store Page */}
+            <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+              <div className="flex-1">
+                <h3 className="text-sm font-medium text-gray-900">{t('enableStore')}</h3>
+                <p className="text-xs text-gray-500 mt-1">{t('storeDescription')}</p>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer ml-4">
+                <input
+                  type="checkbox"
+                  checked={enableStore}
+                  onChange={(e) => setEnableStore(e.target.checked)}
+                  className="sr-only peer"
+                />
+                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
+              </label>
             </div>
           </div>
         </div>

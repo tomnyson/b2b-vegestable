@@ -11,7 +11,7 @@ export interface Product {
   unit: string;
   sku: string;
   image_url?: string;
-  category?: string;
+  // category?: string; // Removed - column doesn't exist in database
   is_active: boolean;
   stock: number;
   created_at?: string;
@@ -158,6 +158,73 @@ export async function toggleProductStatus(id: string, currentStatus: boolean): P
 }
 
 /**
+ * Batch create multiple products (for CSV import)
+ * @param productsData Array of product data to create
+ */
+export async function batchCreateProducts(
+  productsData: CreateProductData[]
+): Promise<{ success: Product[]; errors: Array<{ index: number; error: string; data: CreateProductData }> }> {
+  const result = { 
+    success: [] as Product[], 
+    errors: [] as Array<{ index: number; error: string; data: CreateProductData }> 
+  };
+  
+  // Process products in batches of 10 to avoid overwhelming the database
+  const batchSize = 10;
+  for (let i = 0; i < productsData.length; i += batchSize) {
+    const batch = productsData.slice(i, i + batchSize);
+    
+    try {
+      const { data, error } = await supabase
+        .from('products')
+        .insert(batch)
+        .select();
+      
+      if (error) {
+        // If batch insert fails, try individual inserts to identify specific errors
+        for (let j = 0; j < batch.length; j++) {
+          try {
+            const { data: singleData, error: singleError } = await supabase
+              .from('products')
+              .insert([batch[j]])
+              .select();
+            
+            if (singleError) {
+              result.errors.push({ 
+                index: i + j, 
+                error: singleError.message, 
+                data: batch[j] 
+              });
+            } else if (singleData?.[0]) {
+              result.success.push(singleData[0] as Product);
+            }
+          } catch (singleErr: any) {
+            result.errors.push({ 
+              index: i + j, 
+              error: singleErr.message || 'Unknown error', 
+              data: batch[j] 
+            });
+          }
+        }
+      } else if (data) {
+        result.success.push(...(data as Product[]));
+      }
+    } catch (batchErr: any) {
+      // If batch processing fails entirely, mark all items in this batch as errors
+      for (let j = 0; j < batch.length; j++) {
+        result.errors.push({ 
+          index: i + j, 
+          error: batchErr.message || 'Batch processing failed', 
+          data: batch[j] 
+        });
+      }
+    }
+  }
+  
+  return result;
+}
+
+/**
  * Get paginated products with optional filters
  */
 export async function getPaginatedProducts(
@@ -165,17 +232,17 @@ export async function getPaginatedProducts(
   pageSize: number, 
   sortField: keyof Product = 'name_en', 
   sortDirection: 'asc' | 'desc' = 'asc',
-  filter?: string,
-  categoryFilter?: string
+  filter?: string
+  // categoryFilter?: string // Removed - category column doesn't exist in database
 ) {
   let query = supabase
     .from('products')
     .select('*', { count: 'exact' });
   
   // Apply category filter if provided
-  if (categoryFilter) {
-    query = query.eq('category', categoryFilter);
-  }
+  // if (categoryFilter) {
+  //   query = query.eq('category', categoryFilter);
+  // }
   
   // Apply search filter if provided
   if (filter) {

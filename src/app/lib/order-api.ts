@@ -126,10 +126,19 @@ export async function createOrder(orderData: CreateOrderData): Promise<Order> {
  */
 export async function getUserOrders(userId: string): Promise<Order[]> {
   try {
-    // First, get the orders
+    // First, get the orders with user information
     const { data: orders, error: ordersError } = await supabase
       .from('orders')
-      .select('*')
+      .select(`
+        *,
+        customer:users!user_id(
+          id,
+          email,
+          name,
+          phone,
+          address
+        )
+      `)
       .eq('user_id', userId)
       .order('order_date', { ascending: false });
 
@@ -180,10 +189,19 @@ export async function createGuestOrder(orderData: Omit<CreateOrderData, 'user_id
  */
 export async function getOrderById(orderId: string): Promise<Order | null> {
   try {
-    // Get the order
+    // Get the order with user information
     const { data: order, error: orderError } = await supabase
       .from('orders')
-      .select('*')
+      .select(`
+        *,
+        customer:users!user_id(
+          id,
+          email,
+          name,
+          phone,
+          address
+        )
+      `)
       .eq('id', orderId)
       .single();
     
@@ -226,7 +244,16 @@ export async function getAllOrders(params: OrderQueryParams = {}) {
   try {
     let query = supabase
       .from('orders')
-      .select('*', { count: 'exact' });
+      .select(`
+        *,
+        customer:users!user_id(
+          id,
+          email,
+          name,
+          phone,
+          address
+        )
+      `, { count: 'exact' });
     
     // Apply filters
     if (params.status) {
@@ -248,7 +275,7 @@ export async function getAllOrders(params: OrderQueryParams = {}) {
     // Apply search if provided
     if (params.search) {
       const searchTerm = `%${params.search}%`;
-      query = query.or(`id.ilike.${searchTerm},user_id.ilike.${searchTerm},delivery_address.ilike.${searchTerm}`);
+      query = query.or(`id.ilike.${searchTerm},user_id.ilike.${searchTerm},delivery_address.ilike.${searchTerm},customer.email.ilike.${searchTerm},customer.name.ilike.${searchTerm}`);
     }
     
     // Apply sorting
@@ -629,7 +656,13 @@ export async function getDriverOrders(driverId: string): Promise<Order[]> {
       .from('orders')
       .select(`
         *,
-        customer:user_id(id, email, name, phone)
+        customer:users!user_id(
+          id,
+          email,
+          name,
+          phone,
+          address
+        )
       `)
       .eq('assigned_driver_id', driverId)
       .order('order_date', { ascending: false });
