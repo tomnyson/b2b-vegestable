@@ -115,7 +115,7 @@ export async function uploadLogo(file: File): Promise<string> {
     // Upload the file to Supabase Storage
     const { error: uploadError } = await supabase
       .storage
-      .from('app-assets')
+      .from('products')
       .upload(filePath, file, {
         cacheControl: '3600',
         upsert: false
@@ -129,7 +129,7 @@ export async function uploadLogo(file: File): Promise<string> {
     // Get the public URL
     const { data } = supabase
       .storage
-      .from('app-assets')
+      .from('products')
       .getPublicUrl(filePath);
     
     const publicUrl = data.publicUrl;

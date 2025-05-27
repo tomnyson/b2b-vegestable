@@ -622,76 +622,109 @@
   },
   "home": {
     "navigation": {
-      "features": "Funktionen",
-      "about": "Über uns",
+      "aboutUs": "Über uns",
+      "products": "Produkte",
+      "delivery": "Lieferung",
       "contact": "Kontakt",
-      "signIn": "Anmelden",
-      "getStarted": "Loslegen"
+      "login": "Anmelden"
     },
     "hero": {
-      "title": "Frisches Gemüse für",
-      "titleHighlight": "Ihr Unternehmen",
-      "subtitle": "Optimieren Sie Ihre Gemüsebeschaffung mit unserer B2B-Plattform. Erhalten Sie frische, hochwertige Produkte für Ihr Restaurant, Hotel oder Unternehmen mit unserer zuverlässigen Lieferkette.",
-      "startFreeTrial": "Kostenlose Testversion starten",
-      "browseProducts": "Produkte durchsuchen"
+      "title": "Metin Can Delicatessen",
+      "subtitle": "Asiatische & frische Produkte für Ihr Restaurant",
+      "viewProducts": "Produkte ansehen",
+      "contactUs": "Kontakt"
     },
-    "heroCard": {
-      "qualityAssured": "Qualität garantiert",
-      "fastDelivery": "Schnelle Lieferung",
-      "supportAvailable": "Support verfügbar"
-    },
-    "stats": {
-      "happyClients": "Zufriedene Kunden",
-      "ordersDelivered": "Bestellungen geliefert",
-      "uptime": "Verfügbarkeit",
-      "support": "Support"
-    },
-    "features": {
-      "title": "Warum unsere Plattform wählen?",
-      "subtitle": "Speziell für Unternehmen entwickelt, die zuverlässige, frische Gemüselieferungen mit modernen Tools zur nahtlosen Verwaltung benötigen.",
-      "fastDelivery": {
-        "title": "Schnelle Lieferung",
-        "description": "Lieferung am selben Tag für frisches Gemüse, damit Ihr Geschäft reibungslos läuft."
+    "about": {
+      "title": "Über uns",
+      "subtitle": "Metin Can Delicatessen hat jahrelange Erfahrung im Markt für asiatische Produkte. Wir liefern asiatische Produkte mit außergewöhnlichem Geschmack und frisches Gemüse.",
+      "freshProducts": {
+        "title": "Frische Produkte",
+        "description": "Wir wählen Produkte direkt aus den besten landwirtschaftlichen Gebieten und besten Lieferanten aus."
       },
-      "qualityAssured": {
-        "title": "Qualität garantiert",
-        "description": "Premium-Qualität Gemüse direkt von vertrauenswürdigen Bauernhöfen und Lieferanten bezogen."
+      "asianFood": {
+        "title": "Asiatische Küche",
+        "description": "Alles von Bok Choy und Mangos bis hin zu Currypaste und asiatischen Saucen."
       },
-      "competitivePricing": {
-        "title": "Wettbewerbsfähige Preise",
-        "description": "Beste Großhandelspreise mit flexiblen Zahlungsbedingungen für Großbestellungen."
-      },
-      "smartAnalytics": {
-        "title": "Intelligente Analysen",
-        "description": "Verfolgen Sie Ihre Bestellungen, Lagerbestände und Geschäftseinblicke mit unserem erweiterten Dashboard."
-      },
-      "teamManagement": {
-        "title": "Team-Management",
-        "description": "Verwalten Sie mehrere Benutzer, Rollen und Berechtigungen für Ihre gesamte Organisation."
-      },
-      "support247": {
-        "title": "24/7 Support",
-        "description": "Rund um die Uhr Kundensupport, um Ihnen bei Fragen oder Problemen zu helfen."
+      "cateringDelivery": {
+        "title": "Catering-Lieferservice",
+        "description": "Wir liefern unsere frischen Produkte an Ihr Restaurant, Hotel, Ihre Kantine oder andere Unternehmen."
       }
     },
-    "cta": {
-      "title": "Bereit, Ihr Unternehmen zu transformieren?",
-      "subtitle": "Schließen Sie sich Hunderten von Unternehmen an, die bereits unsere Plattform nutzen, um ihren Gemüsebeschaffungsprozess zu optimieren.",
-      "getStartedToday": "Heute starten",
-      "signInToAccount": "In Konto anmelden"
+    "products": {
+      "title": "Unsere Produkte",
+      "subtitle": "Wir bieten eine große Auswahl an saisonalem Gemüse und frischen Spezialitäten, immer frisch und von höchster Qualität.",
+      "seasonalVegetables": "Saisonales Gemüse",
+      "seasonalVegetablesDesc": "Frisches Gemüse der Saison direkt vom Feld",
+      "saladsHerbs": "Salate & Kräuter",
+      "saladsHerbsDesc": "Knackige Salate und aromatische Kräuter",
+      "asianNoodles": "Asiatische Nudeln",
+      "asianNoodlesDesc": "Vielfältige Nudelsorten für authentische asiatische Gerichte",
+      "seasonalFruit": "Obst der Saison",
+      "seasonalFruitDesc": "Süßes und saftiges Obst aus eigenem Anbau",
+      "sweetChiliSauce": "Süße Chilisoße für Huhn",
+      "sweetChiliSauceDesc": "Verfügbar in 800ml Flaschen oder 4500ml Kanistern",
+      "hoisinOysterSauce": "Hoisin & Austern Sauce",
+      "hoisinOysterSauceDesc": "Klassische Lee Kum Kee Saucen für authentische asiatische Gerichte",
+      "soySauce": "Sojasauce",
+      "soySauceDesc": "Helle und dunkle Sojasauce in Großgebinden für Restaurants",
+      "thaiSpecialties": "Thai Spezialitäten",
+      "thaiSpecialtiesDesc": "Süße Chili Sauce und Fischsauce für authentische Thai-Küche"
+    },
+    "delivery": {
+      "title": "Unser Lieferservice",
+      "subtitle": "Wir liefern unsere frischen Produkte an Ihr Restaurant, Hotel, Ihre Kantine oder andere Unternehmen in ganz den Niederlanden mit zuverlässiger und frischer Logistik.",
+      "fastDelivery": {
+        "title": "Schnelle Lieferung",
+        "description": "Wir liefern unsere frischen Produkte schnell und pünktlich an Ihr Restaurant."
+      },
+      "topRestaurants": {
+        "title": "Top-Restaurants",
+        "description": "Zusammenarbeit mit Premium-Kunden in der ganzen Stadt und der umliegenden Provinz."
+      },
+      "qualityDelivery": {
+        "title": "Qualitätslieferung",
+        "description": "Qualitätsdirektlieferungen aus Asien auf Ihren Teller. Wir liefern frische Zutaten."
+      },
+      "fleetCaption": "Unsere zuverlässige Lieferfahrzeugflotte vor unserem Gebäude"
+    },
+    "webApp": {
+      "title": "Unsere Bestell-WebApp",
+      "description": "Bestellen Sie jetzt ganz bequem über unsere hauseigene moderne Web-Anwendung. Einfach auf unserer Website bestellen und wir liefern Ihre Produkte direkt zu Ihnen nach Hause oder ins Geschäft.",
+      "orderNow": "Jetzt bestellen",
+      "learnMore": "Mehr erfahren"
+    },
+    "openingHours": {
+      "title": "Öffnungszeiten",
+      "subtitle": "Besuchen Sie uns im Geschäft zwischen den unten angegebenen Öffnungszeiten",
+      "mondayFriday": "Montag - Freitag",
+      "saturday": "Samstag",
+      "sunday": "Sonntag",
+      "closed": "Geschlossen",
+      "hours": "8:00 - 16:30"
+    },
+    "contact": {
+      "title": "Kontakt",
+      "subtitle": "Kontaktieren Sie uns bezüglich Preisen und Verfügbarkeit oder benötigen Sie einen Lieferservice? Hauptsitz in...",
+      "writeToUs": "Schreiben Sie uns",
+      "contactDetails": "Unsere Kontaktdaten",
+      "address": "Adresse",
+      "phone": "Telefon",
+      "email": "E-Mail",
+      "name": "Name",
+      "namePlaceholder": "Ihr Name",
+      "emailPlaceholder": "Ihre E-Mail",
+      "phonePlaceholder": "Ihre Telefonnummer",
+      "message": "Nachricht",
+      "messagePlaceholder": "Ihre Nachricht",
+      "sendMessage": "Nachricht senden",
+      "addressDetails": "Metin Can Delicatessen West 108\n8325 PB Vollenhove, Niederlande\nNederland",
+      "phoneNumber": "+31 527-241324",
+      "emailAddress": "info@metincan.nl"
     },
     "footer": {
-      "description": "Ihr vertrauensvoller Partner für die Beschaffung von frischem Gemüse. Wir verbinden Unternehmen mit Qualitätslieferanten, um frische, zuverlässige Produktlieferungen zu gewährleisten.",
-      "quickLinks": "Schnellzugriff",
-      "browseProducts": "Produkte durchsuchen",
-      "signIn": "Anmelden",
-      "register": "Registrieren",
-      "support": "Support",
-      "helpCenter": "Hilfe-Center",
-      "contactUs": "Kontakt",
-      "termsOfService": "Nutzungsbedingungen",
+      "copyright": "© 2024 Metin Can Delicatessen. Alle Rechte vorbehalten.",
       "privacyPolicy": "Datenschutzrichtlinie",
-      "copyright": "© 2024 B2B Gemüse Plattform. Alle Rechte vorbehalten."
+      "termsOfService": "Nutzungsbedingungen"
     }
   },
   "currency": {

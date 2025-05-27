@@ -643,76 +643,109 @@
   },
   "home": {
     "navigation": {
-      "features": "Tính năng",
-      "about": "Giới thiệu",
+      "aboutUs": "Giới thiệu",
+      "products": "Sản phẩm",
+      "delivery": "Giao hàng",
       "contact": "Liên hệ",
-      "signIn": "Đăng nhập",
-      "getStarted": "Bắt đầu"
+      "login": "Đăng nhập"
     },
     "hero": {
-      "title": "Rau củ tươi cho",
-      "titleHighlight": "Doanh nghiệp của bạn",
-      "subtitle": "Tối ưu hóa việc mua sắm rau củ với nền tảng B2B của chúng tôi. Nhận sản phẩm tươi, chất lượng cao được giao đến nhà hàng, khách sạn hoặc doanh nghiệp của bạn với chuỗi cung ứng đáng tin cậy.",
-      "startFreeTrial": "Bắt đầu dùng thử miễn phí",
-      "browseProducts": "Duyệt sản phẩm"
+      "title": "Metin Can Delicatessen",
+      "subtitle": "Sản phẩm Á Đông & tươi sống cho nhà hàng của bạn",
+      "viewProducts": "Xem sản phẩm",
+      "contactUs": "Liên hệ"
     },
-    "heroCard": {
-      "qualityAssured": "Chất lượng đảm bảo",
-      "fastDelivery": "Giao hàng nhanh",
-      "supportAvailable": "Hỗ trợ có sẵn"
-    },
-    "stats": {
-      "happyClients": "Khách hàng hài lòng",
-      "ordersDelivered": "Đơn hàng đã giao",
-      "uptime": "Thời gian hoạt động",
-      "support": "Hỗ trợ"
-    },
-    "features": {
-      "title": "Tại sao chọn nền tảng của chúng tôi?",
-      "subtitle": "Được xây dựng đặc biệt cho các doanh nghiệp cần nguồn cung cấp rau củ tươi đáng tin cậy với các công cụ hiện đại để quản lý mọi thứ một cách liền mạch.",
-      "fastDelivery": {
-        "title": "Giao hàng nhanh",
-        "description": "Giao hàng trong ngày cho rau củ tươi để giữ cho doanh nghiệp của bạn hoạt động trơn tru."
+    "about": {
+      "title": "Giới thiệu",
+      "subtitle": "Metin Can Delicatessen có nhiều năm kinh nghiệm trong thị trường sản phẩm Á Đông. Chúng tôi cung cấp sản phẩm Á Đông với hương vị đặc biệt và rau củ tươi sống.",
+      "freshProducts": {
+        "title": "Sản phẩm tươi sống",
+        "description": "Chúng tôi lựa chọn sản phẩm trực tiếp từ những vùng nông nghiệp tốt nhất và các nhà cung cấp uy tín."
       },
-      "qualityAssured": {
-        "title": "Chất lượng đảm bảo",
-        "description": "Rau củ chất lượng cao được lấy trực tiếp từ các trang trại và nhà cung cấp đáng tin cậy."
+      "asianFood": {
+        "title": "Ẩm thực Á Đông",
+        "description": "Mọi thứ từ cải bó xôi và xoài đến curry paste và tương Á Đông."
       },
-      "competitivePricing": {
-        "title": "Giá cạnh tranh",
-        "description": "Giá bán buôn tốt nhất với điều kiện thanh toán linh hoạt cho đơn hàng số lượng lớn."
-      },
-      "smartAnalytics": {
-        "title": "Phân tích thông minh",
-        "description": "Theo dõi đơn hàng, tồn kho và thông tin kinh doanh với bảng điều khiển nâng cao của chúng tôi."
-      },
-      "teamManagement": {
-        "title": "Quản lý nhóm",
-        "description": "Quản lý nhiều người dùng, vai trò và quyền cho toàn bộ tổ chức của bạn."
-      },
-      "support247": {
-        "title": "Hỗ trợ 24/7",
-        "description": "Hỗ trợ khách hàng suốt ngày đêm để giúp bạn với bất kỳ câu hỏi hoặc vấn đề nào."
+      "cateringDelivery": {
+        "title": "Dịch vụ giao hàng catering",
+        "description": "Chúng tôi giao sản phẩm tươi sống đến nhà hàng, khách sạn, căng tin hoặc doanh nghiệp của bạn."
       }
     },
-    "cta": {
-      "title": "Sẵn sàng chuyển đổi doanh nghiệp của bạn?",
-      "subtitle": "Tham gia cùng hàng trăm doanh nghiệp đã sử dụng nền tảng của chúng tôi để tối ưu hóa quy trình mua sắm rau củ.",
-      "getStartedToday": "Bắt đầu hôm nay",
-      "signInToAccount": "Đăng nhập vào tài khoản"
+    "products": {
+      "title": "Sản phẩm của chúng tôi",
+      "subtitle": "Chúng tôi cung cấp nhiều loại rau củ theo mùa và đặc sản tươi sống, luôn tươi ngon và chất lượng cao nhất.",
+      "seasonalVegetables": "Rau củ theo mùa",
+      "seasonalVegetablesDesc": "Rau củ tươi theo mùa trực tiếp từ ruộng",
+      "saladsHerbs": "Salad & Rau thơm",
+      "saladsHerbsDesc": "Salad giòn và rau thơm thơm ngon",
+      "asianNoodles": "Mì Á Đông",
+      "asianNoodlesDesc": "Nhiều loại mì khác nhau cho món Á Đông chính thống",
+      "seasonalFruit": "Trái cây theo mùa",
+      "seasonalFruitDesc": "Trái cây ngọt và mọng nước từ vườn riêng",
+      "sweetChiliSauce": "Tương ớt ngọt cho gà",
+      "sweetChiliSauceDesc": "Có sẵn trong chai 800ml hoặc can 4500ml",
+      "hoisinOysterSauce": "Tương Hoisin & Tương hàu",
+      "hoisinOysterSauceDesc": "Tương Lee Kum Kee cổ điển cho món Á Đông chính thống",
+      "soySauce": "Tương đậu nành",
+      "soySauceDesc": "Tương đậu nành sáng và đậm đặc số lượng lớn cho nhà hàng",
+      "thaiSpecialties": "Đặc sản Thái",
+      "thaiSpecialtiesDesc": "Tương ớt ngọt và nước mắm cho ẩm thực Thái chính thống"
+    },
+    "delivery": {
+      "title": "Dịch vụ giao hàng",
+      "subtitle": "Chúng tôi giao sản phẩm tươi sống đến nhà hàng, khách sạn, căng tin hoặc doanh nghiệp của bạn trên toàn Hà Lan với logistics đáng tin cậy và tươi sống.",
+      "fastDelivery": {
+        "title": "Giao hàng nhanh",
+        "description": "Chúng tôi giao sản phẩm tươi sống đến nhà hàng của bạn nhanh chóng và đúng giờ."
+      },
+      "topRestaurants": {
+        "title": "Nhà hàng hàng đầu",
+        "description": "Làm việc với khách hàng cao cấp trên toàn thành phố và tỉnh lân cận."
+      },
+      "qualityDelivery": {
+        "title": "Giao hàng chất lượng",
+        "description": "Giao hàng trực tiếp chất lượng từ Á Đông đến đĩa của bạn. Chúng tôi giao nguyên liệu tươi sống."
+      },
+      "fleetCaption": "Đội xe giao hàng đáng tin cậy của chúng tôi trước tòa nhà"
+    },
+    "webApp": {
+      "title": "Ứng dụng web đặt hàng",
+      "description": "Đặt hàng ngay bây giờ một cách thuận tiện thông qua ứng dụng web hiện đại riêng của chúng tôi. Chỉ cần đặt hàng trên website và chúng tôi sẽ giao sản phẩm trực tiếp đến nhà hoặc doanh nghiệp của bạn.",
+      "orderNow": "Đặt hàng ngay",
+      "learnMore": "Tìm hiểu thêm"
+    },
+    "openingHours": {
+      "title": "Giờ mở cửa",
+      "subtitle": "Ghé thăm cửa hàng của chúng tôi trong giờ mở cửa dưới đây",
+      "mondayFriday": "Thứ Hai - Thứ Sáu",
+      "saturday": "Thứ Bảy",
+      "sunday": "Chủ Nhật",
+      "closed": "Đóng cửa",
+      "hours": "8:00 - 16:30"
+    },
+    "contact": {
+      "title": "Liên hệ",
+      "subtitle": "Liên hệ với chúng tôi về giá cả và tình trạng sẵn có hoặc cần dịch vụ giao hàng? Trụ sở chính tại...",
+      "writeToUs": "Viết cho chúng tôi",
+      "contactDetails": "Thông tin liên hệ",
+      "address": "Địa chỉ",
+      "phone": "Điện thoại",
+      "email": "E-mail",
+      "name": "Tên",
+      "namePlaceholder": "Tên của bạn",
+      "emailPlaceholder": "Email của bạn",
+      "phonePlaceholder": "Số điện thoại của bạn",
+      "message": "Tin nhắn",
+      "messagePlaceholder": "Tin nhắn của bạn",
+      "sendMessage": "Gửi tin nhắn",
+      "addressDetails": "Metin Can Delicatessen West 108\n8325 PB Vollenhove, Hà Lan\nNederland",
+      "phoneNumber": "+31 527-241324",
+      "emailAddress": "info@metincan.nl"
     },
     "footer": {
-      "description": "Đối tác đáng tin cậy của bạn cho việc mua sắm rau củ tươi. Chúng tôi kết nối các doanh nghiệp với các nhà cung cấp chất lượng để đảm bảo giao hàng sản phẩm tươi, đáng tin cậy.",
-      "quickLinks": "Liên kết nhanh",
-      "browseProducts": "Duyệt sản phẩm",
-      "signIn": "Đăng nhập",
-      "register": "Đăng ký",
-      "support": "Hỗ trợ",
-      "helpCenter": "Trung tâm trợ giúp",
-      "contactUs": "Liên hệ",
-      "termsOfService": "Điều khoản dịch vụ",
+      "copyright": "© 2024 Metin Can Delicatessen. Tất cả quyền được bảo lưu.",
       "privacyPolicy": "Chính sách bảo mật",
-      "copyright": "© 2024 Nền tảng rau củ B2B. Tất cả quyền được bảo lưu."
+      "termsOfService": "Điều khoản dịch vụ"
     }
   },
   "currency": {

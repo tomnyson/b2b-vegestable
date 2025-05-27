@@ -706,76 +706,109 @@
   },
   "home": {
     "navigation": {
-      "features": "Features",
-      "about": "About",
+      "aboutUs": "About Us",
+      "products": "Products",
+      "delivery": "Delivery",
       "contact": "Contact",
-      "signIn": "Sign In",
-      "getStarted": "Get Started"
+      "login": "Login"
     },
     "hero": {
-      "title": "Fresh Vegetables for",
-      "titleHighlight": "Your Business",
-      "subtitle": "Streamline your vegetable procurement with our B2B platform. Get fresh, quality produce delivered to your restaurant, hotel, or business with our reliable supply chain.",
-      "startFreeTrial": "Start Your Free Trial",
-      "browseProducts": "Browse Products"
+      "title": "Metin Can Delicatessen",
+      "subtitle": "Asian & Fresh products for your restaurant",
+      "viewProducts": "View Products",
+      "contactUs": "Contact Us"
     },
-    "heroCard": {
-      "qualityAssured": "Quality Assured",
-      "fastDelivery": "Fast Delivery",
-      "supportAvailable": "Support Available"
-    },
-    "stats": {
-      "happyClients": "Happy Clients",
-      "ordersDelivered": "Orders Delivered",
-      "uptime": "Uptime",
-      "support": "Support"
-    },
-    "features": {
-      "title": "Why Choose Our Platform?",
-      "subtitle": "Built specifically for businesses that need reliable, fresh vegetable supply with modern tools to manage everything seamlessly.",
-      "fastDelivery": {
-        "title": "Fast Delivery",
-        "description": "Same-day delivery for fresh vegetables to keep your business running smoothly."
+    "about": {
+      "title": "About Us",
+      "subtitle": "Metin Can Delicatessen has years of experience in the Asian products market. We supply Asian products with an exceptional taste and fresh vegetables.",
+      "freshProducts": {
+        "title": "Fresh products",
+        "description": "We select products directly from the best agricultural areas and best suppliers."
       },
-      "qualityAssured": {
-        "title": "Quality Assured",
-        "description": "Premium quality vegetables sourced directly from trusted farms and suppliers."
+      "asianFood": {
+        "title": "Asian Food",
+        "description": "Everything from bok choy and mangoes to curry paste and Asian sauce."
       },
-      "competitivePricing": {
-        "title": "Competitive Pricing",
-        "description": "Best wholesale prices with flexible payment terms for bulk orders."
-      },
-      "smartAnalytics": {
-        "title": "Smart Analytics",
-        "description": "Track your orders, inventory, and business insights with our advanced dashboard."
-      },
-      "teamManagement": {
-        "title": "Team Management",
-        "description": "Manage multiple users, roles, and permissions for your entire organization."
-      },
-      "support247": {
-        "title": "24/7 Support",
-        "description": "Round-the-clock customer support to help you with any questions or issues."
+      "cateringDelivery": {
+        "title": "Catering delivery service",
+        "description": "We deliver our fresh products to your restaurant, hotel, canteen or other business."
       }
     },
-    "cta": {
-      "title": "Ready to Transform Your Business?",
-      "subtitle": "Join hundreds of businesses already using our platform to streamline their vegetable procurement process.",
-      "getStartedToday": "Get Started Today",
-      "signInToAccount": "Sign In to Account"
+    "products": {
+      "title": "Our products",
+      "subtitle": "We offer a wide selection of seasonal vegetables and fresh specialties, always fresh and of the highest quality.",
+      "seasonalVegetables": "Seasonal vegetables",
+      "seasonalVegetablesDesc": "Fresh seasonal vegetables directly from the field",
+      "saladsHerbs": "Salads & Herbs",
+      "saladsHerbsDesc": "Crispy salads and aromatic herbs",
+      "asianNoodles": "Asian noodles",
+      "asianNoodlesDesc": "Various noodle types for authentic Asian dishes",
+      "seasonalFruit": "Seasonal fruit",
+      "seasonalFruitDesc": "Sweet and juicy fruit from our own cultivation",
+      "sweetChiliSauce": "Sweet chili sauce for chicken",
+      "sweetChiliSauceDesc": "Available in 800ml bottles or 4500ml canisters",
+      "hoisinOysterSauce": "Hoisin & Oyster Sauce",
+      "hoisinOysterSauceDesc": "Classic Lee Kum Kee sauces for authentic Asian dishes",
+      "soySauce": "Soy sauce",
+      "soySauceDesc": "Light and dark soy sauce in bulk for restaurants",
+      "thaiSpecialties": "Thai specialties",
+      "thaiSpecialtiesDesc": "Sweet chili sauce and fish sauce for authentic Thai cuisine"
+    },
+    "delivery": {
+      "title": "Our delivery service",
+      "subtitle": "We deliver our fresh products to your restaurant, hotel, canteen or other business all over the Netherlands with reliable and fresh logistics.",
+      "fastDelivery": {
+        "title": "Fast delivery",
+        "description": "We deliver our fresh products to your restaurant fast and on time."
+      },
+      "topRestaurants": {
+        "title": "Top restaurants",
+        "description": "Working with premium clients all over the city and surrounding province."
+      },
+      "qualityDelivery": {
+        "title": "Quality Delivery",
+        "description": "Quality direct deliverables from Asia to your plate. We deliver fresh ingredients."
+      },
+      "fleetCaption": "Our reliable delivery vehicle fleet in front of our building"
+    },
+    "webApp": {
+      "title": "Our ordering web app",
+      "description": "Order now conveniently through our in-house modern web application. Simply order on our website and we deliver your products directly to your home or business.",
+      "orderNow": "Order now",
+      "learnMore": "Learn more"
+    },
+    "openingHours": {
+      "title": "Opening hours",
+      "subtitle": "Visit us in store between the below opening hours",
+      "mondayFriday": "Monday - Friday",
+      "saturday": "Saturday",
+      "sunday": "Sunday",
+      "closed": "Closed",
+      "hours": "8:00 - 16:30"
+    },
+    "contact": {
+      "title": "Contact",
+      "subtitle": "Get in touch with us regarding pricing and availability or need a delivery service? Head office in...",
+      "writeToUs": "Write to us",
+      "contactDetails": "Our contact details",
+      "address": "Address",
+      "phone": "Phone",
+      "email": "E-mail",
+      "name": "Name",
+      "namePlaceholder": "Your name",
+      "emailPlaceholder": "Your email",
+      "phonePlaceholder": "Your phone number",
+      "message": "Message",
+      "messagePlaceholder": "Your message",
+      "sendMessage": "Send message",
+      "addressDetails": "Metin Can Delicatessen West 108\n8325 PB Vollenhove, Netherlands\nNederland",
+      "phoneNumber": "+31 527-241324",
+      "emailAddress": "info@metincan.nl"
     },
     "footer": {
-      "description": "Your trusted partner for fresh vegetable procurement. We connect businesses with quality suppliers to ensure fresh, reliable produce delivery.",
-      "quickLinks": "Quick Links",
-      "browseProducts": "Browse Products",
-      "signIn": "Sign In",
-      "register": "Register",
-      "support": "Support",
-      "helpCenter": "Help Center",
-      "contactUs": "Contact Us",
-      "termsOfService": "Terms of Service",
+      "copyright": "© 2024 Metin Can Delicatessen. All rights reserved.",
       "privacyPolicy": "Privacy Policy",
-      "copyright": "© 2024 B2B Vegetable Platform. All rights reserved."
+      "termsOfService": "Terms of Service"
     }
   },
   "currency": {
