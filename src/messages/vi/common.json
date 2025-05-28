@@ -239,7 +239,34 @@
     "productNameVietnamese": "Tên sản phẩm (Tiếng Việt)",
     "productNameVietnamesePlaceholder": "Nhập tên sản phẩm bằng tiếng Việt",
     "productNameTurkish": "Tên sản phẩm (Tiếng Thổ Nhĩ Kỳ)",
-    "productNameTurkishPlaceholder": "Türkçe ürün adını girin"
+    "productNameTurkishPlaceholder": "Türkçe ürün adını girin",
+    "import": {
+      "title": "Nhập sản phẩm từ CSV",
+      "instructions": "Hướng dẫn nhập",
+      "requiredFields": "Tệp CSV phải bao gồm tiêu đề:",
+      "requiredFieldsSku": "sku, name",
+      "optionalFields": "Trường tùy chọn: unit, price, stock, description, is_active",
+      "unitDefault": "Đơn vị mặc định là 'piece' nếu không được cung cấp",
+      "priceDefault": "Giá mặc định là 0 nếu không được cung cấp",
+      "stockDefault": "Tồn kho mặc định là 0 nếu không được cung cấp",
+      "activeDefault": "is_active mặc định là true nếu không được cung cấp",
+      "downloadTemplate": "Tải xuống mẫu CSV",
+      "selectFile": "Chọn tệp CSV",
+      "preview": "Xem trước (5 hàng đầu tiên)",
+      "importResults": "Kết quả nhập",
+      "successful": "Thành công",
+      "failed": "Thất bại",
+      "errorDetails": "Chi tiết lỗi:",
+      "row": "Hàng",
+      "data": "Dữ liệu",
+      "importing": "Đang nhập...",
+      "importProducts": "Nhập sản phẩm",
+      "selectFileError": "Vui lòng chọn tệp CSV",
+      "csvParsingError": "Lỗi phân tích CSV",
+      "importFailed": "Nhập thất bại",
+      "successMessage": "Đã nhập thành công {count} sản phẩm",
+      "failureMessage": "{count} sản phẩm không thể nhập. Kiểm tra chi tiết lỗi."
+    }
   },
   "orders": {
     "title": "Quản lý đơn hàng",
@@ -311,7 +338,6 @@
       "shipped": "Đã gửi",
       "delivered": "Đã giao"
     }
-
   },
   "summary": {
     "title": "Tóm tắt đơn hàng",
@@ -380,7 +406,39 @@
     "add": "Thêm",
     "processing": "Đang xử lý...",
     "totalUsers": "Tổng người dùng",
-    "activeUsers": "Người dùng hoạt động"
+    "activeUsers": "Người dùng hoạt động",
+    "import": {
+      "title": "Nhập người dùng từ CSV",
+      "instructions": "Hướng dẫn nhập",
+      "requiredFields": "Tệp CSV phải bao gồm tiêu đề:",
+      "requiredFieldName": "name",
+      "optionalFields": "Trường tùy chọn: email, role, phone_number, address, notes, is_active",
+      "loginAccounts": "Tất cả người dùng sẽ nhận được tài khoản đăng nhập với mật khẩu ngẫu nhiên",
+      "dummyEmails": "Người dùng không có email sẽ nhận địa chỉ email giả (user_xxxxx@dummy.email)",
+      "realEmails": "Người dùng có email sẽ sử dụng email thực của họ để đăng nhập",
+      "roleDefault": "Vai trò mặc định là 'customer' nếu không được cung cấp (admin, customer, driver)",
+      "statusDefault": "Trạng thái mặc định là 'active' nếu không được cung cấp",
+      "emailUnique": "Địa chỉ email phải là duy nhất và hợp lệ khi được cung cấp",
+      "downloadTemplate": "Tải xuống mẫu CSV",
+      "selectFile": "Chọn tệp CSV",
+      "preview": "Xem trước (5 hàng đầu tiên)",
+      "emailType": "Loại email",
+      "realEmail": "Email thực",
+      "dummyEmail": "Email giả",
+      "importResults": "Kết quả nhập",
+      "successful": "Thành công",
+      "failed": "Thất bại",
+      "errorDetails": "Chi tiết lỗi:",
+      "row": "Hàng",
+      "data": "Dữ liệu",
+      "importing": "Đang nhập...",
+      "importUsers": "Nhập người dùng",
+      "selectFileError": "Vui lòng chọn tệp CSV",
+      "csvParsingError": "Lỗi phân tích CSV",
+      "importFailed": "Nhập thất bại",
+      "successMessage": "Đã nhập thành công {count} người dùng",
+      "failureMessage": "{count} người dùng không thể nhập. Kiểm tra chi tiết lỗi."
+    }
   },
   "drivers": {
     "title": "Quản lý tài xế",
@@ -920,137 +978,137 @@
       "allStatuses": "Tất cả trạng thái"
     }
   },
- "profile": {
-  "tab": "Hồ sơ",
-  "welcome": "Chào mừng",
-  "manageInfo": "Quản lý thông tin cá nhân, đơn hàng và tùy chọn của bạn.",
-  "myAccount": "Tài khoản của tôi",
-  "accountDescription": "Quản lý thông tin cá nhân, đơn hàng và tùy chọn của bạn.",
-  "welcomeBack": "Chào mừng trở lại, {email}",
-  "loading": "Đang tải hồ sơ của bạn...",
-  "add": "Thêm",
-  "selectTab": "Chọn tab",
-  "saveChanges": "Lưu thay đổi",
-  "tabs": {
-    "profile": "Hồ sơ",
-    "orders": "Đơn hàng",
-    "invoices": "Hóa đơn",
-    "settings": "Cài đặt"
-  },
-  "personalInfo": {
-    "title": "Thông tin cá nhân",
-    "name": "Họ và tên",
-    "email": "Địa chỉ Email",
-    "phone": "Số điện thoại",
-    "emailCannotBeChanged": "Địa chỉ email không thể thay đổi."
-  },
-  "addresses": {
-    "title": "Địa chỉ giao hàng",
-    "addNew": "Thêm địa chỉ mới",
-    "edit": "Chỉnh sửa",
-    "delete": "Xóa",
-    "setDefault": "Đặt làm mặc định",
+  "profile": {
+    "tab": "Hồ sơ",
+    "welcome": "Chào mừng",
+    "manageInfo": "Quản lý thông tin cá nhân, đơn hàng và tùy chọn của bạn.",
+    "myAccount": "Tài khoản của tôi",
+    "accountDescription": "Quản lý thông tin cá nhân, đơn hàng và tùy chọn của bạn.",
+    "welcomeBack": "Chào mừng trở lại, {email}",
+    "loading": "Đang tải hồ sơ của bạn...",
+    "add": "Thêm",
+    "selectTab": "Chọn tab",
+    "saveChanges": "Lưu thay đổi",
+    "tabs": {
+      "profile": "Hồ sơ",
+      "orders": "Đơn hàng",
+      "invoices": "Hóa đơn",
+      "settings": "Cài đặt"
+    },
+    "personalInfo": {
+      "title": "Thông tin cá nhân",
+      "name": "Họ và tên",
+      "email": "Địa chỉ Email",
+      "phone": "Số điện thoại",
+      "emailCannotBeChanged": "Địa chỉ email không thể thay đổi."
+    },
+    "addresses": {
+      "title": "Địa chỉ giao hàng",
+      "addNew": "Thêm địa chỉ mới",
+      "edit": "Chỉnh sửa",
+      "delete": "Xóa",
+      "setDefault": "Đặt làm mặc định",
+      "default": "Mặc định",
+      "searchPlaceholder": "Nhập địa chỉ để tìm kiếm...",
+      "suggestionHelpText": "Bắt đầu nhập để xem gợi ý địa chỉ hoặc thêm địa chỉ thủ công.",
+      "noAddresses": "Chưa có địa chỉ nào được thêm."
+    },
+    "updateTitle": "Cập nhật hồ sơ",
+    "emailAddress": "Địa chỉ Email",
+    "phoneNumber": "Số điện thoại",
+    "address": "Địa chỉ",
+    "city": "Thành phố",
+    "state": "Tỉnh/Thành",
+    "zip": "Mã bưu điện",
+    "country": "Quốc gia",
+    "fullName": "Họ và tên",
+    "deliveryAddresses": "Địa chỉ giao hàng",
+    "enterNewAddress": "Nhập địa chỉ mới",
     "default": "Mặc định",
-    "searchPlaceholder": "Nhập địa chỉ để tìm kiếm...",
-    "suggestionHelpText": "Bắt đầu nhập để xem gợi ý địa chỉ hoặc thêm địa chỉ thủ công.",
-    "noAddresses": "Chưa có địa chỉ nào được thêm."
-  },
-  "updateTitle": "Cập nhật hồ sơ",
-  "emailAddress": "Địa chỉ Email",
-  "phoneNumber": "Số điện thoại",
-  "address": "Địa chỉ",
-  "city": "Thành phố",
-  "state": "Tỉnh/Thành",
-  "zip": "Mã bưu điện",
-  "country": "Quốc gia",
-  "fullName": "Họ và tên",
-  "deliveryAddresses": "Địa chỉ giao hàng",
-  "enterNewAddress": "Nhập địa chỉ mới",
-  "default": "Mặc định",
-  "edit": "Chỉnh sửa",
-  "remove": "Xóa",
-  "emailCannotChange": "Địa chỉ email không thể thay đổi.",
-  "coordinates": "Tọa độ",
-  "addressSuggestionHelp": "Bắt đầu nhập để xem gợi ý địa chỉ hoặc thêm địa chỉ thủ công.",
-  "notifications": {
-    "tab": "Thông báo",
-    "title": "Cài đặt thông báo",
-    "orderUpdates": "Cập nhật đơn hàng",
-    "orderUpdatesDes": "Nhận thông báo về trạng thái đơn hàng của bạn.",
-    "promotions": "Khuyến mãi & Ưu đãi",
-    "promotionsDesc": "Nhận thông báo về các chương trình khuyến mãi đặc biệt.",
-    "newProducts": "Sản phẩm mới",
-    "newProductsDes": "Cập nhật những sản phẩm mới nhất.",
-    "newsletter": "Đăng ký bản tin",
-    "newsletterDesc": "Đăng ký nhận bản tin hàng tuần để nhận tin tức và cập nhật."
-  },
-  "orders": {
-    "tab": "Đơn hàng",
-    "title": "Lịch sử đơn hàng của bạn",
-    "noOrders": "Bạn chưa đặt đơn hàng nào.",
-    "viewDetails": "Xem chi tiết",
-    "buyAgain": "Mua lại",
-    "buyAgainSuccess": "Đã thêm sản phẩm vào giỏ hàng! Đang chuyển hướng đến cửa hàng...",
-    "buyAgainError": "Không thể thêm sản phẩm vào giỏ hàng. Vui lòng thử lại.",
-    "cancel": "Hủy đơn hàng",
-    "cancelSuccess": "Hủy đơn hàng thành công!",
-    "cancelError": "Không thể hủy đơn hàng. Vui lòng thử lại.",
-    "downloadInvoice": "Hóa đơn",
-    "notFound": "Không tìm thấy đơn hàng.",
-    "fetchDetailError": "Không thể lấy chi tiết đơn hàng.",
-    "status": {
+    "edit": "Chỉnh sửa",
+    "remove": "Xóa",
+    "emailCannotChange": "Địa chỉ email không thể thay đổi.",
+    "coordinates": "Tọa độ",
+    "addressSuggestionHelp": "Bắt đầu nhập để xem gợi ý địa chỉ hoặc thêm địa chỉ thủ công.",
+    "notifications": {
+      "tab": "Thông báo",
+      "title": "Cài đặt thông báo",
+      "orderUpdates": "Cập nhật đơn hàng",
+      "orderUpdatesDes": "Nhận thông báo về trạng thái đơn hàng của bạn.",
+      "promotions": "Khuyến mãi & Ưu đãi",
+      "promotionsDesc": "Nhận thông báo về các chương trình khuyến mãi đặc biệt.",
+      "newProducts": "Sản phẩm mới",
+      "newProductsDes": "Cập nhật những sản phẩm mới nhất.",
+      "newsletter": "Đăng ký bản tin",
+      "newsletterDesc": "Đăng ký nhận bản tin hàng tuần để nhận tin tức và cập nhật."
+    },
+    "orders": {
+      "tab": "Đơn hàng",
+      "title": "Lịch sử đơn hàng của bạn",
+      "noOrders": "Bạn chưa đặt đơn hàng nào.",
+      "viewDetails": "Xem chi tiết",
+      "buyAgain": "Mua lại",
+      "buyAgainSuccess": "Đã thêm sản phẩm vào giỏ hàng! Đang chuyển hướng đến cửa hàng...",
+      "buyAgainError": "Không thể thêm sản phẩm vào giỏ hàng. Vui lòng thử lại.",
+      "cancel": "Hủy đơn hàng",
+      "cancelSuccess": "Hủy đơn hàng thành công!",
+      "cancelError": "Không thể hủy đơn hàng. Vui lòng thử lại.",
+      "downloadInvoice": "Hóa đơn",
+      "notFound": "Không tìm thấy đơn hàng.",
+      "fetchDetailError": "Không thể lấy chi tiết đơn hàng.",
+      "status": {
+        "pending": "Chờ xử lý",
+        "processing": "Đang xử lý",
+        "shipped": "Đã gửi",
+        "delivered": "Đã giao",
+        "completed": "Hoàn tất",
+        "cancelled": "Đã hủy"
+      }
+    },
+    "messages": {
+      "fetchError": "Không thể tải dữ liệu người dùng. Vui lòng thử lại trang.",
+      "saveSuccess": "Cập nhật hồ sơ thành công!",
+      "saveError": "Không thể cập nhật hồ sơ. Vui lòng kiểm tra lại thông tin và thử lại.",
+      "addressAdded": "Thêm địa chỉ thành công.",
+      "addressUpdated": "Cập nhật địa chỉ thành công.",
+      "addressDeleted": "Xóa địa chỉ thành công.",
+      "defaultAddressSet": "Đã cập nhật địa chỉ mặc định.",
+      "addressSuggestionError": "Không thể lấy gợi ý địa chỉ. Bạn vẫn có thể nhập địa chỉ thủ công."
+    },
+    "labels": {
       "pending": "Chờ xử lý",
       "processing": "Đang xử lý",
       "shipped": "Đã gửi",
       "delivered": "Đã giao",
       "completed": "Hoàn tất",
-      "cancelled": "Đã hủy"
+      "cancelled": "Đã hủy",
+      "on_hold": "Tạm giữ",
+      "refunded": "Hoàn tiền",
+      "failed": "Thất bại",
+      "orderId": "Mã đơn hàng",
+      "date": "Ngày",
+      "status": "Trạng thái",
+      "actions": "Thao tác"
+    },
+    "invoices": {
+      "tab": "Hóa đơn",
+      "title": "Hóa đơn của bạn",
+      "noInvoices": "Bạn chưa tạo hóa đơn nào.",
+      "viewDetails": "Xem chi tiết",
+      "download": "Tải xuống"
     }
   },
-  "messages": {
-    "fetchError": "Không thể tải dữ liệu người dùng. Vui lòng thử làm mới trang.",
-    "saveSuccess": "Cập nhật hồ sơ thành công!",
-    "saveError": "Không thể cập nhật hồ sơ. Vui lòng kiểm tra lại thông tin và thử lại.",
-    "addressAdded": "Thêm địa chỉ thành công.",
-    "addressUpdated": "Cập nhật địa chỉ thành công.",
-    "addressDeleted": "Xóa địa chỉ thành công.",
-    "defaultAddressSet": "Đã cập nhật địa chỉ mặc định.",
-    "addressSuggestionError": "Không thể lấy gợi ý địa chỉ. Bạn vẫn có thể nhập địa chỉ thủ công."
-  },
-  "labels": {
-    "pending": "Chờ xử lý",
-    "processing": "Đang xử lý",
-    "shipped": "Đã gửi",
-    "delivered": "Đã giao",
-    "completed": "Hoàn tất",
-    "cancelled": "Đã hủy",
-    "on_hold": "Tạm giữ",
-    "refunded": "Hoàn tiền",
-    "failed": "Thất bại",
-    "orderId": "Mã đơn hàng",
-    "date": "Ngày",
-    "status": "Trạng thái",
-    "actions": "Thao tác"
-  },
-  "invoices": {
-    "tab": "Hóa đơn",
-    "title": "Hóa đơn của bạn",
-    "noInvoices": "Bạn chưa tạo hóa đơn nào.",
-    "viewDetails": "Xem chi tiết",
-    "download": "Tải xuống"
+  "common": {
+    "labels": {
+      "date": "Ngày",
+      "status": "Trạng thái",
+      "address": "Địa chỉ",
+      "productName": "Tên sản phẩm",
+      "unit": "Đơn vị",
+      "quantity": "Số lượng"
+    },
+    "actions": {
+      "cancel": "Hủy"
+    }
   }
-},
-"common": { 
-  "labels": {
-    "date": "Ngày",
-    "status": "Trạng thái",
-    "address": "Địa chỉ",
-    "productName": "Tên sản phẩm",
-    "unit": "Đơn vị",
-    "quantity": "Số lượng"
-  },
-  "actions": {
-    "cancel": "Hủy"
-  }
-}
 } 

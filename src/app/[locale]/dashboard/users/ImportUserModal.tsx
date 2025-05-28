@@ -52,14 +52,14 @@ export default function ImportUserModal({ isOpen, onClose, onImportComplete }: I
         setShowPreview(true);
       },
       error: (error) => {
-        toast.error(`CSV parsing error: ${error.message}`);
+        toast.error(`${t('import.csvParsingError')}: ${error.message}`);
       }
     });
   };
 
   const handleImport = async () => {
     if (!file) {
-      toast.error('Please select a CSV file');
+      toast.error(t('import.selectFileError'));
       return;
     }
 
@@ -79,20 +79,20 @@ export default function ImportUserModal({ isOpen, onClose, onImportComplete }: I
 
           // Show summary
           if (result.success > 0) {
-            toast.success(`Successfully imported ${result.success} users`);
+            toast.success(t('import.successMessage', { count: result.success }));
             onImportComplete(result.success);
           }
           
           if (result.errors.length > 0) {
-            toast.warning(`${result.errors.length} users failed to import. Check the error details.`);
+            toast.warning(t('import.failureMessage', { count: result.errors.length }));
           }
         } catch (error: any) {
-          toast.error(`Import failed: ${error.message}`);
+          toast.error(`${t('import.importFailed')}: ${error.message}`);
           setIsImporting(false);
         }
       },
       error: (error) => {
-        toast.error(`CSV parsing error: ${error.message}`);
+        toast.error(`${t('import.csvParsingError')}: ${error.message}`);
         setIsImporting(false);
       }
     });
@@ -113,7 +113,7 @@ export default function ImportUserModal({ isOpen, onClose, onImportComplete }: I
       <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
         {/* Header */}
         <div className="flex justify-between items-center p-6 border-b border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-900">👥 Import Users from CSV</h2>
+          <h2 className="text-xl font-semibold text-gray-900">👥 {t('import.title')}</h2>
           <button
             onClick={handleClose}
             className="text-gray-400 hover:text-gray-600 transition-colors"
@@ -127,29 +127,29 @@ export default function ImportUserModal({ isOpen, onClose, onImportComplete }: I
         <div className="p-6 max-h-[calc(90vh-140px)] overflow-y-auto">
           {/* Instructions */}
           <div className="mb-6 p-4 bg-blue-50 rounded-lg">
-            <h3 className="font-semibold text-blue-900 mb-2">📋 Import Instructions</h3>
+            <h3 className="font-semibold text-blue-900 mb-2">📋 {t('import.instructions')}</h3>
             <ul className="text-sm text-blue-800 space-y-1">
-              <li>• CSV file must include headers: <strong>name</strong></li>
-              <li>• Optional fields: email, role, phone_number, address, notes, is_active</li>
-              <li>• <strong>All users will get login accounts with random passwords</strong></li>
-              <li>• Users without email will get dummy email addresses (user_xxxxx@dummy.email)</li>
-              <li>• Users with email will use their actual email for login</li>
-              <li>• Role defaults to 'customer' if not provided (admin, customer, driver)</li>
-              <li>• Status defaults to 'active' if not provided</li>
-              <li>• Email addresses must be unique and valid when provided</li>
+              <li>• {t('import.requiredFields')} <strong>{t('import.requiredFieldName')}</strong></li>
+              <li>• {t('import.optionalFields')}</li>
+              <li>• <strong>{t('import.loginAccounts')}</strong></li>
+              <li>• {t('import.dummyEmails')}</li>
+              <li>• {t('import.realEmails')}</li>
+              <li>• {t('import.roleDefault')}</li>
+              <li>• {t('import.statusDefault')}</li>
+              <li>• {t('import.emailUnique')}</li>
             </ul>
             <button
               onClick={downloadSampleCSV}
               className="mt-3 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
             >
-              📥 Download Sample CSV Template
+              📥 {t('import.downloadTemplate')}
             </button>
           </div>
 
           {/* File Upload */}
           <div className="mb-6">
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Select CSV File
+              {t('import.selectFile')}
             </label>
             <input
               type="file"
@@ -162,20 +162,20 @@ export default function ImportUserModal({ isOpen, onClose, onImportComplete }: I
           {/* Preview */}
           {showPreview && previewData.length > 0 && (
             <div className="mb-6">
-              <h3 className="font-semibold text-gray-900 mb-3">👀 Preview (First 5 rows)</h3>
+              <h3 className="font-semibold text-gray-900 mb-3">👀 {t('import.preview')}</h3>
               <div className="overflow-x-auto border border-gray-200 rounded-lg">
                 <table className="min-w-full text-sm">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th className="px-3 py-2 text-left font-medium text-gray-900">Name</th>
-                      <th className="px-3 py-2 text-left font-medium text-gray-900">Email</th>
-                      <th className="px-3 py-2 text-left font-medium text-gray-900">Email Type</th>
-                      <th className="px-3 py-2 text-left font-medium text-gray-900">Role</th>
-                      <th className="px-3 py-2 text-left font-medium text-gray-900">Phone</th>
-                      <th className="px-3 py-2 text-left font-medium text-gray-900">Address</th>
-                      <th className="px-3 py-2 text-left font-medium text-gray-900">City</th>
-                      <th className="px-3 py-2 text-left font-medium text-gray-900">Zip Code</th>
-                      <th className="px-3 py-2 text-left font-medium text-gray-900">Notes</th>
+                      <th className="px-3 py-2 text-left font-medium text-gray-900">{t('name')}</th>
+                      <th className="px-3 py-2 text-left font-medium text-gray-900">{t('email')}</th>
+                      <th className="px-3 py-2 text-left font-medium text-gray-900">{t('import.emailType')}</th>
+                      <th className="px-3 py-2 text-left font-medium text-gray-900">{t('role')}</th>
+                      <th className="px-3 py-2 text-left font-medium text-gray-900">{t('phone')}</th>
+                      <th className="px-3 py-2 text-left font-medium text-gray-900">{t('address')}</th>
+                      <th className="px-3 py-2 text-left font-medium text-gray-900">{t('city')}</th>
+                      <th className="px-3 py-2 text-left font-medium text-gray-900">{t('zipCode')}</th>
+                      <th className="px-3 py-2 text-left font-medium text-gray-900">{t('notes')}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200">
@@ -185,9 +185,9 @@ export default function ImportUserModal({ isOpen, onClose, onImportComplete }: I
                         <td className="px-3 py-2">{row.email || '-'}</td>
                         <td className="px-3 py-2">
                           {row.email && row.email.trim() ? (
-                            <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">Real Email</span>
+                            <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">{t('import.realEmail')}</span>
                           ) : (
-                            <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">Dummy Email</span>
+                            <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">{t('import.dummyEmail')}</span>
                           )}
                         </td>
                         <td className="px-3 py-2">{row.role || 'customer'}</td>
@@ -207,14 +207,14 @@ export default function ImportUserModal({ isOpen, onClose, onImportComplete }: I
           {/* Import Results */}
           {importResult && (
             <div className="mb-6">
-              <h3 className="font-semibold text-gray-900 mb-3">📊 Import Results</h3>
+              <h3 className="font-semibold text-gray-900 mb-3">📊 {t('import.importResults')}</h3>
               <div className="grid grid-cols-2 gap-4 mb-4">
                 <div className="p-4 bg-green-50 rounded-lg">
-                  <div className="text-green-800 font-semibold">✅ Successful</div>
+                  <div className="text-green-800 font-semibold">✅ {t('import.successful')}</div>
                   <div className="text-2xl font-bold text-green-900">{importResult.success}</div>
                 </div>
                 <div className="p-4 bg-red-50 rounded-lg">
-                  <div className="text-red-800 font-semibold">❌ Failed</div>
+                  <div className="text-red-800 font-semibold">❌ {t('import.failed')}</div>
                   <div className="text-2xl font-bold text-red-900">{importResult.errors.length}</div>
                 </div>
               </div>
@@ -222,15 +222,15 @@ export default function ImportUserModal({ isOpen, onClose, onImportComplete }: I
               {/* Error Details */}
               {importResult.errors.length > 0 && (
                 <div>
-                  <h4 className="font-medium text-red-900 mb-2">Error Details:</h4>
+                  <h4 className="font-medium text-red-900 mb-2">{t('import.errorDetails')}</h4>
                   <div className="max-h-40 overflow-y-auto border border-red-200 rounded-lg">
                     {importResult.errors.map((error, index) => (
                       <div key={index} className="p-3 border-b border-red-100 last:border-b-0">
                         <div className="text-sm text-red-800">
-                          <strong>Row {error.row}:</strong> {error.error}
+                          <strong>{t('import.row')} {error.row}:</strong> {error.error}
                         </div>
                         <div className="text-xs text-red-600 mt-1">
-                          Data: {JSON.stringify(error.data)}
+                          {t('import.data')}: {JSON.stringify(error.data)}
                         </div>
                       </div>
                     ))}
@@ -247,7 +247,7 @@ export default function ImportUserModal({ isOpen, onClose, onImportComplete }: I
             onClick={handleClose}
             className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
           >
-            Cancel
+            {t('cancel')}
           </button>
           <button
             onClick={handleImport}
@@ -264,10 +264,10 @@ export default function ImportUserModal({ isOpen, onClose, onImportComplete }: I
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
-                Importing...
+                {t('import.importing')}
               </>
             ) : (
-              '👥 Import Users'
+              <>👥 {t('import.importUsers')}</>
             )}
           </button>
         </div>

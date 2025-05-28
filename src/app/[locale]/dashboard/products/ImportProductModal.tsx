@@ -74,7 +74,7 @@ BAN001,Banana`;
         setShowPreview(true);
       },
       error: (error) => {
-        toast.error(`CSV parsing error: ${error.message}`);
+        toast.error(`${t('import.csvParsingError')}: ${error.message}`);
       }
     });
   };
@@ -82,11 +82,11 @@ BAN001,Banana`;
   const validateCSVRow = (row: CSVRow, index: number): string | null => {
     // Required fields validation
     if (!row.sku || !row.sku.trim()) {
-      return `Row ${index + 1}: SKU is required`;
+      return `${t('import.row')} ${index + 1}: SKU is required`;
     }
     
     if (!row.name || !row.name.trim()) {
-      return `Row ${index + 1}: Product name is required`;
+      return `${t('import.row')} ${index + 1}: Product name is required`;
     }
     
     // Unit is now optional - no validation needed
@@ -95,7 +95,7 @@ BAN001,Banana`;
     if (row.price !== undefined) {
       const price = typeof row.price === 'string' ? parseFloat(row.price) : row.price;
       if (isNaN(price) || price < 0) {
-        return `Row ${index + 1}: Invalid price value`;
+        return `${t('import.row')} ${index + 1}: Invalid price value`;
       }
     }
 
@@ -103,7 +103,7 @@ BAN001,Banana`;
     if (row.stock !== undefined) {
       const stock = typeof row.stock === 'string' ? parseInt(row.stock) : row.stock;
       if (isNaN(stock) || stock < 0) {
-        return `Row ${index + 1}: Invalid stock value`;
+        return `${t('import.row')} ${index + 1}: Invalid stock value`;
       }
     }
 
@@ -112,7 +112,7 @@ BAN001,Banana`;
 
   const handleImport = async () => {
     if (!file) {
-      toast.error('Please select a CSV file');
+      toast.error(t('import.selectFileError'));
       return;
     }
 
@@ -201,16 +201,16 @@ BAN001,Banana`;
 
         // Show summary
         if (importResult.success > 0) {
-          toast.success(`Successfully imported ${importResult.success} products`);
+          toast.success(t('import.successMessage', { count: importResult.success }));
           onImportComplete(importResult.success);
         }
         
         if (importResult.errors.length > 0) {
-          toast.warning(`${importResult.errors.length} products failed to import. Check the error details.`);
+          toast.warning(t('import.failureMessage', { count: importResult.errors.length }));
         }
       },
       error: (error) => {
-        toast.error(`CSV parsing error: ${error.message}`);
+        toast.error(`${t('import.csvParsingError')}: ${error.message}`);
         setIsImporting(false);
       }
     });
@@ -231,7 +231,7 @@ BAN001,Banana`;
       <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
         {/* Header */}
         <div className="flex justify-between items-center p-6 border-b border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-900">📤 Import Products from CSV</h2>
+          <h2 className="text-xl font-semibold text-gray-900">📤 {t('import.title')}</h2>
           <button
             onClick={handleClose}
             className="text-gray-400 hover:text-gray-600 transition-colors"
@@ -245,27 +245,27 @@ BAN001,Banana`;
         <div className="p-6 max-h-[calc(90vh-140px)] overflow-y-auto">
           {/* Instructions */}
           <div className="mb-6 p-4 bg-blue-50 rounded-lg">
-            <h3 className="font-semibold text-blue-900 mb-2">📋 Import Instructions</h3>
+            <h3 className="font-semibold text-blue-900 mb-2">📋 {t('import.instructions')}</h3>
             <ul className="text-sm text-blue-800 space-y-1">
-              <li>• CSV file must include headers: <strong>sku, name</strong></li>
-              <li>• Optional fields: unit, price, stock, description, is_active</li>
-              <li>• Unit defaults to 'piece' if not provided</li>
-              <li>• Price defaults to 0 if not provided</li>
-              <li>• Stock defaults to 0 if not provided</li>
-              <li>• is_active defaults to true if not provided</li>
+              <li>• {t('import.requiredFields')} <strong>{t('import.requiredFieldsSku')}</strong></li>
+              <li>• {t('import.optionalFields')}</li>
+              <li>• {t('import.unitDefault')}</li>
+              <li>• {t('import.priceDefault')}</li>
+              <li>• {t('import.stockDefault')}</li>
+              <li>• {t('import.activeDefault')}</li>
             </ul>
             <button
               onClick={downloadSampleCSV}
               className="px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-2xl hover:from-emerald-600 hover:to-teal-700 transition-all duration-200 shadow-lg hover:shadow-xl font-medium flex items-center mt-3"
             >
-              📥 Download Sample CSV Template
+              📥 {t('import.downloadTemplate')}
             </button>
           </div>
 
           {/* File Upload */}
           <div className="mb-6">
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Select CSV File
+              {t('import.selectFile')}
             </label>
             <input
               type="file"
@@ -278,14 +278,14 @@ BAN001,Banana`;
           {/* Preview */}
           {showPreview && previewData.length > 0 && (
             <div className="mb-6">
-              <h3 className="font-semibold text-gray-900 mb-3">👀 Preview (First 5 rows)</h3>
+              <h3 className="font-semibold text-gray-900 mb-3">👀 {t('import.preview')}</h3>
               <div className="overflow-x-auto border border-gray-200 rounded-lg">
                 <table className="min-w-full text-sm">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th className="px-3 py-2 text-left font-medium text-gray-900">SKU</th>
-                      <th className="px-3 py-2 text-left font-medium text-gray-900">Name</th>
-                      <th className="px-3 py-2 text-left font-medium text-gray-900">Unit</th>
+                      <th className="px-3 py-2 text-left font-medium text-gray-900">{t('sku')}</th>
+                      <th className="px-3 py-2 text-left font-medium text-gray-900">{t('productName')}</th>
+                      <th className="px-3 py-2 text-left font-medium text-gray-900">{t('unit')}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200">
@@ -305,14 +305,14 @@ BAN001,Banana`;
           {/* Import Results */}
           {importResult && (
             <div className="mb-6">
-              <h3 className="font-semibold text-gray-900 mb-3">📊 Import Results</h3>
+              <h3 className="font-semibold text-gray-900 mb-3">📊 {t('import.importResults')}</h3>
               <div className="grid grid-cols-2 gap-4 mb-4">
                 <div className="p-4 bg-green-50 rounded-lg">
-                  <div className="text-green-800 font-semibold">✅ Successful</div>
+                  <div className="text-green-800 font-semibold">✅ {t('import.successful')}</div>
                   <div className="text-2xl font-bold text-green-900">{importResult.success}</div>
                 </div>
                 <div className="p-4 bg-red-50 rounded-lg">
-                  <div className="text-red-800 font-semibold">❌ Failed</div>
+                  <div className="text-red-800 font-semibold">❌ {t('import.failed')}</div>
                   <div className="text-2xl font-bold text-red-900">{importResult.errors.length}</div>
                 </div>
               </div>
@@ -320,15 +320,15 @@ BAN001,Banana`;
               {/* Error Details */}
               {importResult.errors.length > 0 && (
                 <div>
-                  <h4 className="font-medium text-red-900 mb-2">Error Details:</h4>
+                  <h4 className="font-medium text-red-900 mb-2">{t('import.errorDetails')}</h4>
                   <div className="max-h-40 overflow-y-auto border border-red-200 rounded-lg">
                     {importResult.errors.map((error, index) => (
                       <div key={index} className="p-3 border-b border-red-100 last:border-b-0">
                         <div className="text-sm text-red-800">
-                          <strong>Row {error.row}:</strong> {error.error}
+                          <strong>{t('import.row')} {error.row}:</strong> {error.error}
                         </div>
                         <div className="text-xs text-red-600 mt-1">
-                          Data: {JSON.stringify(error.data)}
+                          {t('import.data')}: {JSON.stringify(error.data)}
                         </div>
                       </div>
                     ))}
@@ -345,7 +345,7 @@ BAN001,Banana`;
             onClick={handleClose}
             className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
           >
-            Cancel
+            {t('cancel')}
           </button>
           <button
             onClick={handleImport}
@@ -362,10 +362,10 @@ BAN001,Banana`;
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
-                Importing...
+                {t('import.importing')}
               </>
             ) : (
-              '📤 Import Products'
+              <>📤 {t('import.importProducts')}</>
             )}
           </button>
         </div>
