@@ -16,6 +16,7 @@ export default function HomePage({ params }: { params: { locale: string } }) {
     phone: '',
     message: ''
   });
+  const [isLoading, setIsLoading] = useState(true);
   const t = useTranslations('home');
 
   useEffect(() => {
@@ -32,6 +33,8 @@ export default function HomePage({ params }: { params: { locale: string } }) {
         setAppSettings(settings);
       } catch (error) {
         console.error('Error loading app settings:', error);
+      } finally {
+        setIsLoading(false);
       }
     }
     
@@ -147,6 +150,29 @@ export default function HomePage({ params }: { params: { locale: string } }) {
     // Handle form submission
   };
 
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-white">
+        <div className="flex flex-col items-center space-y-4">
+          <div className="w-16 h-16">
+            {appSettings?.logo_url && (
+              <img 
+                src={appSettings.logo_url} 
+                alt="Loading Logo" 
+                className="w-full h-full object-contain"
+              />
+            )}
+          </div>
+          <svg className="animate-spin h-6 w-6 text-emerald-600" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+          </svg>
+          <span className="text-gray-600 text-sm">Loading...</span>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-white">
       {/* Navigation */}
@@ -159,21 +185,17 @@ export default function HomePage({ params }: { params: { locale: string } }) {
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
             <Link href={`/${params.locale}`} className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center overflow-hidden">
-                {appSettings?.logo_url ? (
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center overflow-hidden">
+                {appSettings?.logo_url && (
                   <img 
                     src={appSettings.logo_url} 
                     alt="Logo" 
                     className="w-full h-full object-cover rounded-lg"
                   />
-                ) : (
-                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-                  </svg>
                 )}
               </div>
               <span className="text-lg font-semibold text-gray-900">
-                {appSettings?.company_name || t('hero.title')}
+                {appSettings?.company_name}
               </span>
             </Link>
 

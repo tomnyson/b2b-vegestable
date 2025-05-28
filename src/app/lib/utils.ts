@@ -1,3 +1,6 @@
+import { set } from 'date-fns';
+
+
 /**
  * Format a date string into a readable format
  * @param dateString - ISO date string
@@ -78,3 +81,68 @@ export function debounce<T extends (...args: any[]) => any>(
     timeout = setTimeout(later, wait);
   };
 } 
+
+// Filter function for delivery dates
+export function getOrderFilterRangeByDelivery(
+  type: 'today' | 'tomorrow',
+  cutoffTime: string = '18:00',
+  deliveryDays: number[] = [1, 2, 3, 4, 5, 6] // default Mon-Sat
+): { from: Date; to: Date } | null {
+  const now = new Date();
+
+  // Parse cutoffTime (VD: '18:00')
+  const [cutoffHour, cutoffMinute] = cutoffTime.split(':').map(Number);
+
+  const yesterday = new Date(now);
+  yesterday.setDate(yesterday.getDate() - 1);
+
+  const startYesterday = set(yesterday, { hours: 0, minutes: 0, seconds: 0, milliseconds: 0 });
+  const endYesterdayCutoff = set(yesterday, { hours: cutoffHour - 1, minutes: 59, seconds: 59 });
+
+  const startYesterdayCutoff = set(yesterday, { hours: cutoffHour, minutes: 0, seconds: 0 });
+  const endTodayCutoff = set(now, { hours: cutoffHour - 1, minutes: 59, seconds: 59 });
+
+  if (type === 'today') {
+    return {
+      from: startYesterday,
+      to: endYesterdayCutoff,
+    };
+  } else if (type === 'tomorrow') {
+    return {
+      from: startYesterdayCutoff,
+      to: endTodayCutoff,
+    };
+  }
+
+  return null;
+}
+
+export function getNextDeliveryDate(
+  orderDate: Date,
+  cutoffTime: string | undefined,
+  deliveryDays: number[] | undefined
+): Date {
+  const [cutoffHour, cutoffMinute] = (cutoffTime ?? '18:00').split(':').map(Number);
+
+  const cutoffDateTime = new Date(orderDate);
+  cutoffDateTime.setHours(cutoffHour, cutoffMinute, 0, 0);
+
+  let baseDeliveryDate = new Date(orderDate);
+
+  // If placed before cutoff → deliver next day; else → day after
+  if (orderDate <= cutoffDateTime) {
+    baseDeliveryDate.setDate(baseDeliveryDate.getDate() + 1);
+  } else {
+    baseDeliveryDate.setDate(baseDeliveryDate.getDate() + 2);
+  }
+
+  // Ensure deliveryDays is always an array of numbers for includes()
+  const availableDays = Array.isArray(deliveryDays) ? deliveryDays : [1, 2, 3, 4, 5, 6];
+
+  // Skip to next available delivery day
+  while (!availableDays.includes(baseDeliveryDate.getDay())) {
+    baseDeliveryDate.setDate(baseDeliveryDate.getDate() + 1);
+  }
+
+  return baseDeliveryDate;
+}

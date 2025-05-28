@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User } from '@supabase/supabase-js';
 import { supabase } from '../app/lib/supabase';
-import { UserProfile, getUser, getUserProfile, signOut, safeGetUser, safeGetSession } from '../app/lib/auth';
+import { UserProfile, getUser, getUserProfile, signOut, safeGetUser, safeGetSession, signIn } from '../app/lib/auth';
 import { useRouter } from 'next/navigation';
 
 interface AuthContextType {
@@ -82,13 +82,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (email: string, password: string) => {
     setIsLoading(true);
     try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+      const result = await signIn({ email, password });
       
-      if (error) throw error;
-      router.push('/dashboard');
+      // Role-based redirection
+      if (result.userProfile?.role === 'driver') {
+        router.push('/driver');
+      } else if (result.userProfile?.role === 'admin') {
+        router.push('/dashboard');
+      } else {
+        // Customers go to store
+        router.push('/store');
+      }
     } catch (error) {
       console.error('Error logging in:', error);
       throw error;
@@ -116,7 +120,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (error) throw error;
 
       // The profile will be created in a database trigger or function
-      router.push('/dashboard');
+      // New users are customers by default, so redirect to store
+      router.push('/store');
     } catch (error) {
       console.error('Error registering:', error);
       throw error;

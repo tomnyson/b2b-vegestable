@@ -1,19 +1,16 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
-import { Product, getPaginatedProducts, getProductById, getActiveProductById, getPopularProductIds } from '../../lib/product-api';
+import { Product, getPaginatedProducts, getActiveProductById, getPopularProductIds } from '../../lib/product-api';
 import { getUser } from '../../lib/auth';
 import { getCustomerDetailsFromAuth, CustomerDetails, getUserAddresses } from '../../lib/customer-api';
 import { createOrder } from '../../lib/order-api';
-import { getAppSettings, formatPriceSync, getCurrencyInfo } from '../../lib/settings-api';
 import { useCurrency } from '../../hooks/useCurrency';
 import { toast } from 'react-toastify';
 import ProductList from './ProductList';
 import ShoppingCart from './ShoppingCart';
-import AuthModal from './AuthModal';
 import Header from '../../components/Header';
-import CurrencySwitcher from '../../components/CurrencySwitcher';
 
 export default function StorePage() {
   const t = useTranslations('store');
@@ -26,10 +23,10 @@ export default function StorePage() {
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const [popularProductIds, setPopularProductIds] = useState<string[]>([]);
-  const itemsPerPage = 8;
 
   // Authentication state
   const [user, setUser] = useState<any>(null);
@@ -155,7 +152,12 @@ export default function StorePage() {
     if (!isSearching) {
       loadProducts();
     }
-  }, [currentPage, searchTerm, isSearching]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [currentPage, searchTerm, isSearching, itemsPerPage]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Reset to page 1 when itemsPerPage changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [itemsPerPage]);
 
   // Check for pending cart from Buy Again feature
   useEffect(() => {
@@ -444,7 +446,7 @@ export default function StorePage() {
       <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-teal-50">
         <div className="container mx-auto px-4 py-8">
           {/* Header Section */}
-          <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl border border-white/20 p-6 lg:p-8 mb-8">
+          {/* <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl border border-white/20 p-6 lg:p-8 mb-8">
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
               <div className="text-center lg:text-left">
                 <h1 className="text-3xl lg:text-4xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent mb-4">
@@ -455,11 +457,11 @@ export default function StorePage() {
                 </p>
               </div>
             </div>
-          </div>
+          </div> */}
           
           {/* Welcome Banner */}
           {user && (
-            <div className="bg-gradient-to-r from-emerald-500 to-teal-600 rounded-3xl shadow-2xl border border-white/20 p-6 lg:p-8 mb-8 text-white">
+            <div className="bg-gradient-to-r from-emerald-500 to-teal-600 rounded-xl shadow-2xl border border-white/20 p-6 lg:p-8 mb-8 text-white">
               <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
                 <div>
                   <div className="flex items-center space-x-3 mb-2">
@@ -474,13 +476,6 @@ export default function StorePage() {
                       : t('completeAddress')}
                   </p>
                 </div>
-                <div className="mt-4 lg:mt-0 flex items-center space-x-2">
-                  <svg className="w-5 h-5 text-emerald-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                  <span className="text-emerald-200 text-sm">{t('products.inStock')}</span>
-                </div>
               </div>
             </div>
           )}
@@ -488,7 +483,7 @@ export default function StorePage() {
           <div className="flex flex-col xl:flex-row gap-8">
             {/* Left Column - Product Listing */}
             <div className="xl:w-2/3">
-              <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl border border-white/20 overflow-hidden">
+              <div className="bg-white/80 backdrop-blur-lg rounded-xl shadow-2xl border border-white/20 overflow-hidden">
                 <ProductList 
                   products={products} 
                   loading={loading} 
@@ -502,13 +497,15 @@ export default function StorePage() {
                   popularProductIds={popularProductIds}
                   currency={currency}
                   isSearching={isSearching}
+                  itemsPerPage={itemsPerPage}
+                  onItemsPerPageChange={setItemsPerPage}
                 />
               </div>
             </div>
             
             {/* Right Column - Shopping Cart */}
             <div className="xl:w-1/3">
-              <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl border border-white/20 overflow-hidden sticky top-8">
+              <div className="bg-white/80 rounded-xl border border-white/20 overflow-hidden sticky top-8">
                 <ShoppingCart 
                   items={cartItems} 
                   total={cartTotal}
@@ -529,12 +526,6 @@ export default function StorePage() {
             </div>
           </div>
           
-          {/* Authentication Modal */}
-          <AuthModal
-            isOpen={isAuthModalOpen}
-            onClose={() => setIsAuthModalOpen(false)}
-            onSuccess={handleAuthSuccess}
-          />
         </div>
       </div>
     </>

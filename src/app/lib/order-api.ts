@@ -4,6 +4,7 @@ import { PostgrestError } from '@supabase/supabase-js';
 import { getAppSettings } from './settings-api';
 import { getUser } from './auth';
 import { getUserById } from './users-api';
+import { getNextDeliveryDate } from './utils';
 
 export interface OrderItem {
   id?: string;
@@ -19,6 +20,7 @@ export interface Order {
   user_id?: string;
   delivery_address?: string;
   order_date: string;
+  delivery_date?: string;
   total_amount: number;
   status: 'pending' | 'processing' | 'completed' | 'cancelled';
   payment_status: 'pending' | 'paid' | 'failed';
@@ -50,29 +52,43 @@ export interface OrderQueryParams {
   sortBy?: keyof Order;
   sortDirection?: 'asc' | 'desc';
   search?: string;
+  dateRange?: {
+    from: string;
+    to: string;
+  };
 }
+
 
 /**
  * Create a new order in the database
  */
 export async function createOrder(orderData: CreateOrderData): Promise<Order> {
   try {
-    // First, check stock availability for all items
-    const stockItems = orderData.items.map(item => ({
-      productId: item.product_id,
-      quantity: item.quantity
-    }));
-    
-    // Decrease stock for all items (this will throw an error if insufficient stock)
-    await batchDecreaseStock(stockItems);
-    
-    // If stock decrease successful, proceed with order creation
+    // const stockItems = orderData.items.map(item => ({
+    //   productId: item.product_id,
+    //   quantity: item.quantity
+    // }));
+
+    // await batchDecreaseStock(stockItems);
+
+    // 🟩 Add: Get delivery settings
+    const { data: settings } = await supabase
+      .from('settings')
+      .select('cutoff_time, delivery_days')
+      .single();
+
+    const cutoffTime = settings?.cutoff_time || '18:00';
+    const deliveryDays = settings?.delivery_days || [1, 2, 3, 4, 5, 6];
+
+    const deliveryDate = getNextDeliveryDate(new Date(), cutoffTime, deliveryDays);
+
     const { data: order, error: orderError } = await supabase
       .from('orders')
       .insert({
         user_id: orderData.user_id,
         delivery_address: orderData.delivery_address,
         order_date: new Date().toISOString(),
+        delivery_date: deliveryDate.toISOString().split('T')[0], // 🟩 Save delivery date
         total_amount: orderData.total_amount,
         status: orderData.status || 'pending',
         payment_status: orderData.payment_status || 'pending',
@@ -82,13 +98,10 @@ export async function createOrder(orderData: CreateOrderData): Promise<Order> {
       .single();
 
     if (orderError) {
-      console.error('Error creating order:', orderError);
-      // If order creation fails, restore the stock
       await restoreStockFromOrder(orderData.items);
       throw orderError;
     }
 
-    // Then, insert the order items
     const orderItems = orderData.items.map(item => ({
       order_id: order.id,
       product_id: item.product_id,
@@ -101,20 +114,12 @@ export async function createOrder(orderData: CreateOrderData): Promise<Order> {
       .insert(orderItems);
 
     if (itemsError) {
-      console.error('Error adding order items:', itemsError);
-      // If order items creation fails, restore the stock and delete the order
       await restoreStockFromOrder(orderData.items);
       await supabase.from('orders').delete().eq('id', order.id);
       throw itemsError;
     }
 
-    console.log(`Order ${order.id} created successfully with stock decreased for ${orderData.items.length} products`);
-
-    // Return the created order with items
-    return {
-      ...order,
-      items: orderData.items
-    };
+    return { ...order, items: orderData.items };
   } catch (err) {
     console.error('Create order failed:', err);
     throw err;
@@ -264,12 +269,19 @@ export async function getAllOrders(params: OrderQueryParams = {}) {
       query = query.eq('payment_status', params.payment_status);
     }
     
-    if (params.fromDate) {
-      query = query.gte('order_date', params.fromDate);
-    }
-    
-    if (params.toDate) {
-      query = query.lte('order_date', params.toDate);
+    // Handle date range filter
+    if (params.dateRange) {
+      query = query.gte('order_date', params.dateRange.from)
+                  .lte('order_date', params.dateRange.to);
+    } else {
+      // Use fromDate and toDate if dateRange is not provided
+      if (params.fromDate) {
+        query = query.gte('order_date', params.fromDate);
+      }
+      
+      if (params.toDate) {
+        query = query.lte('order_date', params.toDate);
+      }
     }
     
     // Apply search if provided

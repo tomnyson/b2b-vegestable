@@ -7,6 +7,7 @@ import { getUser, getUserProfile, signOut } from '../../../lib/auth';
 import { getAppSettings, AppSettings } from '../../lib/settings-api';
 import { useTranslations } from 'next-intl';
 import LanguageSwitcher from '@/app/components/LanguageSwitcher';
+import { Toaster } from 'react-hot-toast';
 
 export default function DashboardLayout({
   children,
@@ -189,6 +190,7 @@ export default function DashboardLayout({
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50">
+      <Toaster position="top-right" />
       {/* Mobile menu overlay */}
       {mobileMenuOpen && (
         <div
@@ -198,7 +200,7 @@ export default function DashboardLayout({
       )}
 
       {/* Sidebar */}
-      <div className={`fixed inset-y-0 left-0 z-50 ${sidebarOpen ? 'w-72' : 'w-20'
+      <div className={`fixed inset-y-0 left-0 z-50 ${sidebarOpen ? 'w-50' : 'w-20'
         } lg:${sidebarOpen ? 'w-72' : 'w-20'} ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         } transition-all duration-300 ease-in-out`}>
 
@@ -288,13 +290,13 @@ export default function DashboardLayout({
           </nav>
 
           {/* Language Switcher */}
-          <div className="px-6 py-4 border-t border-gray-100 relative">
+          {sidebarOpen && <div className="px-6 py-4 border-t border-gray-100 relative">
             <p className="text-xs font-medium text-gray-500 mb-3 uppercase tracking-wide">
               {t('labels.language')}
             </p>
               <LanguageSwitcher />
           </div>
-
+}
           {/* User Profile */}
           <div className="p-6 border-t border-gray-100 bg-gray-50/50">
             <div className="flex items-center">
@@ -377,7 +379,7 @@ export default function DashboardLayout({
       {/* Main Content */}
       <div className={`${sidebarOpen ? 'lg:pl-72' : 'lg:pl-20'} transition-all duration-300 pt-16 lg:pt-0`}>
         <main className="p-6 lg:p-8 min-h-screen">
-          <div className="max-w-7xl mx-auto">
+          <div className="max-w-8xl mx-auto">
             {children}
           </div>
         </main>

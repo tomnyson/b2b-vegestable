@@ -1,5 +1,5 @@
 import { supabase } from './supabase';
-import { User } from '@supabase/supabase-js';
+import { User, Session, WeakPassword } from '@supabase/supabase-js';
 
 export type UserRole = 'admin' | 'customer' | 'driver';
 
@@ -40,12 +40,26 @@ export type AuthSignUpCredentials = {
   name: string;
 };
 
+export type AuthSignInResult = {
+  user: User;
+  session: Session;
+  weakPassword?: WeakPassword;
+  userProfile?: {
+    id: string;
+    email: string;
+    name?: string;
+    role: UserRole;
+    status: string;
+    [key: string]: any; // Allow additional properties from database
+  };
+};
+
 /**
  * Authentication functions
  */
 
 // Sign in a user
-export async function signIn({ email, password }: AuthSignInCredentials) {
+export async function signIn({ email, password }: AuthSignInCredentials): Promise<AuthSignInResult> {
   const { data, error } = await supabase.auth.signInWithPassword({
     email,
     password,
@@ -53,7 +67,7 @@ export async function signIn({ email, password }: AuthSignInCredentials) {
   
   if (error) throw error;
   
-  // Check if user exists in the users table
+  // Check if user exists in the users table and get their profile
   if (data.user) {
     const { data: userData, error: fetchError } = await supabase
       .from('users')
@@ -83,6 +97,30 @@ export async function signIn({ email, password }: AuthSignInCredentials) {
       if (insertError) {
         console.error('Error creating user record:', insertError);
       }
+      
+      // Return data with default customer role
+      return {
+        ...data,
+        userProfile: {
+          id: data.user.id,
+          email: email,
+          name: data.user.user_metadata?.full_name || email.split('@')[0],
+          role: 'customer' as UserRole,
+          status: 'active'
+        }
+      };
+    } else {
+      // Update last login time
+      await supabase
+        .from('users')
+        .update({ last_login: new Date().toISOString() })
+        .eq('id', data.user.id);
+        
+      // Return data with user profile
+      return {
+        ...data,
+        userProfile: userData
+      };
     }
   }
   
@@ -94,7 +132,7 @@ export async function signInWithGoogle() {
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: {
-      redirectTo: `${window.location.origin}/dashboard`,
+      redirectTo: `${window.location.origin}/auth/callback`,
       queryParams: {
         access_type: 'offline',
         prompt: 'consent',

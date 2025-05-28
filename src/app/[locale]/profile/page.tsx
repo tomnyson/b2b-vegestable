@@ -741,7 +741,7 @@ export default function ProfilePage() {
                         id="email"
                         name="email"
                         value={formData.email}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-2xl bg-gray-50/50 text-gray-500 cursor-not-allowed transition-all duration-200"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-xl bg-gray-50/50 text-gray-500 cursor-not-allowed transition-all duration-200"
                         disabled
                       />
                       <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
@@ -763,7 +763,7 @@ export default function ProfilePage() {
                       name="name"
                       value={formData.name}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-2xl bg-white/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl bg-white/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200"
                       required
                     />
                   </div>
@@ -779,7 +779,7 @@ export default function ProfilePage() {
                     name="phone"
                     value={formData.phone}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-2xl bg-white/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl bg-white/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200"
                   />
                 </div>
 
@@ -792,7 +792,7 @@ export default function ProfilePage() {
                 </div>
 
                 {saveSuccess && (
-                  <div className="bg-emerald-50/80 backdrop-blur-lg rounded-2xl border border-emerald-200/20 p-4 flex items-center">
+                  <div className="bg-emerald-50/80 backdrop-blur-lg rounded-xl border border-emerald-200/20 p-4 flex items-center">
                     <svg className="w-5 h-5 text-emerald-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
@@ -800,7 +800,7 @@ export default function ProfilePage() {
                   </div>
                 )}
                 {saveError && (
-                  <div className="bg-red-50/80 backdrop-blur-lg rounded-2xl border border-red-200/20 p-4 flex items-center">
+                  <div className="bg-red-50/80 backdrop-blur-lg rounded-xl border border-red-200/20 p-4 flex items-center">
                     <svg className="w-5 h-5 text-red-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
@@ -812,7 +812,7 @@ export default function ProfilePage() {
                   <button
                     type="submit"
                     disabled={isSaving}
-                    className={`w-full flex justify-center items-center py-4 px-6 border border-transparent rounded-2xl text-base font-semibold transition-all duration-200 ${isSaving
+                    className={`w-full flex justify-center items-center py-4 px-6 border border-transparent rounded-xl text-base font-semibold transition-all duration-200 ${isSaving
                         ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
                         : 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white hover:from-emerald-600 hover:to-teal-700 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5'
                       }`}
@@ -841,7 +841,7 @@ export default function ProfilePage() {
           <div className="space-y-6">
             {/* Buy Again Status Messages */}
             {buyAgainSuccess && (
-              <div className="bg-green-50/80 backdrop-blur-lg rounded-2xl border border-green-200/20 p-4 flex items-center">
+              <div className="bg-green-50/80 backdrop-blur-lg rounded-xl border border-green-200/20 p-4 flex items-center">
                 <svg className="w-5 h-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
@@ -849,7 +849,7 @@ export default function ProfilePage() {
               </div>
             )}
             {buyAgainError && (
-              <div className="bg-red-50/80 backdrop-blur-lg rounded-2xl border border-red-200/20 p-4 flex items-center">
+              <div className="bg-red-50/80 backdrop-blur-lg rounded-xl border border-red-200/20 p-4 flex items-center">
                 <svg className="w-5 h-5 text-red-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>

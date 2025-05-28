@@ -65,7 +65,7 @@ const CurrencySwitcher: React.FC<CurrencySwitcherProps> = ({
 
       {/* Currency Dropdown */}
       {isOpen && (
-        <div className="absolute top-full right-0 mt-2 w-56 bg-white/95 backdrop-blur-lg border border-gray-200 rounded-2xl shadow-2xl z-50 overflow-hidden">
+        <div className="absolute top-full right-0 mt-2 w-56 bg-white/95 backdrop-blur-lg border border-gray-200 rounded-xl shadow-2xl z-50 overflow-hidden">
           <div className="py-2">
             <div className="px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider border-b border-gray-100">
               {t('selectCurrency')}

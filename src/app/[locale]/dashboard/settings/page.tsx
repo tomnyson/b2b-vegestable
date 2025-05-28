@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import { getUser, getUserProfile } from '../../../lib/auth';
-import { AppSettings, getAppSettings, updateAppSettings, uploadLogo, SUPPORTED_LANGUAGES, SUPPORTED_CURRENCIES, getDefaultMenuSettings } from '../../../lib/settings-api';
+import { AppSettings, getAppSettings, updateAppSettings, uploadLogo, SUPPORTED_LANGUAGES, SUPPORTED_CURRENCIES, getDefaultMenuSettings, getDefaultDeliverySettings } from '../../../lib/settings-api';
 
 export default function AdminSettingsPage() {
   const router = useRouter();
@@ -15,10 +15,10 @@ export default function AdminSettingsPage() {
   const [settings, setSettings] = useState<AppSettings | null>(null);
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
-  
+
   // File input ref for logo upload
   const fileInputRef = useRef<HTMLInputElement>(null);
-  
+
   // Form state
   const [logoUrl, setLogoUrl] = useState('');
   const [vatPercentage, setVatPercentage] = useState('');
@@ -27,7 +27,7 @@ export default function AdminSettingsPage() {
   const [companyName, setCompanyName] = useState('');
   const [supportEmail, setSupportEmail] = useState('');
   const [supportPhone, setSupportPhone] = useState('');
-  
+
   // Menu configuration state
   const [enableOverview, setEnableOverview] = useState(true);
   const [enableProducts, setEnableProducts] = useState(true);
@@ -37,33 +37,37 @@ export default function AdminSettingsPage() {
   const [enableDrivers, setEnableDrivers] = useState(true);
   const [enableSettings, setEnableSettings] = useState(true);
   const [enableStore, setEnableStore] = useState(true);
-  
+
+  // Delivery configuration state
+  const [orderCutoffTime, setOrderCutoffTime] = useState('18:00');
+  const [deliveryDays, setDeliveryDays] = useState<number[]>([1, 2, 3, 4, 5, 6]); // Monday to Saturday
+
   // Logo preview
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
-  
+
   // Check authorization and load settings
   useEffect(() => {
     async function loadData() {
       try {
         setIsLoading(true);
-        
+
         // Check if user is admin
         const user = await getUser();
         if (!user) {
           router.push('/login');
           return;
         }
-        
+
         const userProfile = await getUserProfile(user.id);
         if (userProfile?.role !== 'admin') {
           router.push('/dashboard');
           return;
         }
-        
+
         // Load app settings
         const appSettings = await getAppSettings();
         setSettings(appSettings);
-        
+
         // Initialize form fields
         if (appSettings) {
           setLogoUrl(appSettings.logo_url || '');
@@ -74,7 +78,7 @@ export default function AdminSettingsPage() {
           setSupportEmail(appSettings.support_email || '');
           setSupportPhone(appSettings.support_phone || '');
           setLogoPreview(appSettings.logo_url || null);
-          
+
           // Initialize menu settings with defaults if not set
           const defaults = getDefaultMenuSettings();
           setEnableOverview(appSettings.enable_overview ?? defaults.enable_overview);
@@ -85,6 +89,11 @@ export default function AdminSettingsPage() {
           setEnableDrivers(appSettings.enable_drivers ?? defaults.enable_drivers);
           setEnableSettings(appSettings.enable_settings ?? defaults.enable_settings);
           setEnableStore(appSettings.enable_store ?? defaults.enable_store);
+
+          // Initialize delivery settings with defaults if not set
+          const deliveryDefaults = getDefaultDeliverySettings();
+          setOrderCutoffTime(appSettings.order_cutoff_time || deliveryDefaults.order_cutoff_time);
+          setDeliveryDays(appSettings.delivery_days || deliveryDefaults.delivery_days);
         }
       } catch (error) {
         console.error('Error loading settings:', error);
@@ -93,15 +102,15 @@ export default function AdminSettingsPage() {
         setIsLoading(false);
       }
     }
-    
+
     loadData();
   }, [router, t]);
-  
+
   // Handle logo file selection
   const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    
+
     // Show preview
     const reader = new FileReader();
     reader.onload = () => {
@@ -109,28 +118,28 @@ export default function AdminSettingsPage() {
     };
     reader.readAsDataURL(file);
   };
-  
+
   // Trigger file input click
   const handleLogoClick = () => {
     fileInputRef.current?.click();
   };
-  
+
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     try {
       setIsSaving(true);
       setErrorMessage('');
       setSuccessMessage('');
-      
+
       // Upload logo if new file selected
       if (fileInputRef.current?.files?.length) {
         const file = fileInputRef.current.files[0];
         const newLogoUrl = await uploadLogo(file);
         setLogoUrl(newLogoUrl);
       }
-      
+
       // Update settings
       const updatedSettings = await updateAppSettings({
         logo_url: logoPreview || logoUrl,
@@ -148,12 +157,15 @@ export default function AdminSettingsPage() {
         enable_users: enableUsers,
         enable_drivers: enableDrivers,
         enable_settings: enableSettings,
-        enable_store: enableStore
+        enable_store: enableStore,
+        // Delivery configuration
+        order_cutoff_time: orderCutoffTime,
+        delivery_days: deliveryDays
       });
-      
+
       setSettings(updatedSettings);
       setSuccessMessage(t('saveSuccess'));
-      
+
       // Clear success message after 3 seconds
       setTimeout(() => {
         setSuccessMessage('');
@@ -165,7 +177,7 @@ export default function AdminSettingsPage() {
       setIsSaving(false);
     }
   };
-  
+
   if (isLoading) {
     return (
       <div className="p-6">
@@ -176,44 +188,44 @@ export default function AdminSettingsPage() {
       </div>
     );
   }
-  
+
   return (
     <div className="p-6">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900">{t('title')}</h1>
         <p className="text-gray-600 mt-1">{t('subtitle')}</p>
       </div>
-      
+
       {successMessage && (
         <div className="mb-4 p-3 bg-green-50 text-green-800 rounded-md">
           {successMessage}
         </div>
       )}
-      
+
       {errorMessage && (
         <div className="mb-4 p-3 bg-red-50 text-red-800 rounded-md">
           {errorMessage}
         </div>
       )}
-      
+
       <form onSubmit={handleSubmit} className="space-y-8">
         {/* Logo Settings */}
         <div className="bg-white rounded-lg shadow-md p-6">
           <h2 className="text-lg font-medium text-gray-900 mb-4">{t('branding')}</h2>
-          
+
           <div className="mb-6">
             <label className="block text-gray-700 text-sm font-medium mb-2">
               {t('companyLogo')}
             </label>
-            
+
             <div className="flex items-start space-x-4">
-              <div 
+              <div
                 onClick={handleLogoClick}
                 className="w-32 h-32 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center cursor-pointer hover:border-gray-400 transition-colors"
               >
                 {logoPreview ? (
-                  <img 
-                    src={logoPreview} 
+                  <img
+                    src={logoPreview}
                     alt={t('logoPreview')}
                     className="max-w-full max-h-full object-contain"
                   />
@@ -233,7 +245,7 @@ export default function AdminSettingsPage() {
                   className="hidden"
                 />
               </div>
-              
+
               <div className="flex-1">
                 <p className="text-sm text-gray-600 mb-2">
                   {t('logoDescription')}
@@ -241,7 +253,7 @@ export default function AdminSettingsPage() {
                 <p className="text-xs text-gray-500">
                   {t('logoFormats')}
                 </p>
-                
+
                 {logoPreview && (
                   <button
                     type="button"
@@ -259,7 +271,7 @@ export default function AdminSettingsPage() {
               </div>
             </div>
           </div>
-          
+
           <div>
             <label htmlFor="companyName" className="block text-gray-700 text-sm font-medium mb-2">
               {t('companyName')}
@@ -274,11 +286,11 @@ export default function AdminSettingsPage() {
             />
           </div>
         </div>
-        
+
         {/* Tax Settings */}
         <div className="bg-white rounded-lg shadow-md p-6">
           <h2 className="text-lg font-medium text-gray-900 mb-4">{t('taxSettings')}</h2>
-          
+
           <div>
             <label htmlFor="vatPercentage" className="block text-gray-700 text-sm font-medium mb-2">
               {t('vatPercentage')}
@@ -302,11 +314,11 @@ export default function AdminSettingsPage() {
             </p>
           </div>
         </div>
-        
+
         {/* Localization Settings */}
         <div className="bg-white rounded-lg shadow-md p-6">
           <h2 className="text-lg font-medium text-gray-900 mb-4">{t('localization')}</h2>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label htmlFor="language" className="block text-gray-700 text-sm font-medium mb-2">
@@ -325,7 +337,7 @@ export default function AdminSettingsPage() {
                 ))}
               </select>
             </div>
-            
+
             <div>
               <label htmlFor="currency" className="block text-gray-700 text-sm font-medium mb-2">
                 {t('defaultCurrency')}
@@ -345,11 +357,11 @@ export default function AdminSettingsPage() {
             </div>
           </div>
         </div>
-        
+
         {/* Contact Settings */}
         <div className="bg-white rounded-lg shadow-md p-6">
           <h2 className="text-lg font-medium text-gray-900 mb-4">{t('supportContact')}</h2>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label htmlFor="supportEmail" className="block text-gray-700 text-sm font-medium mb-2">
@@ -364,7 +376,7 @@ export default function AdminSettingsPage() {
                 placeholder={t('supportEmailPlaceholder')}
               />
             </div>
-            
+
             <div>
               <label htmlFor="supportPhone" className="block text-gray-700 text-sm font-medium mb-2">
                 {t('supportPhone')}
@@ -380,12 +392,12 @@ export default function AdminSettingsPage() {
             </div>
           </div>
         </div>
-        
+
         {/* Menu Configuration */}
         <div className="bg-white rounded-lg shadow-md p-6">
           <h2 className="text-lg font-medium text-gray-900 mb-4">{t('menuConfiguration')}</h2>
           <p className="text-sm text-gray-600 mb-6">{t('menuConfigurationDescription')}</p>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Overview Page */}
             <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
@@ -524,7 +536,79 @@ export default function AdminSettingsPage() {
             </div>
           </div>
         </div>
-        
+
+        {/* Delivery Configuration */}
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <h2 className="text-lg font-medium text-gray-900 mb-4">Delivery Settings</h2>
+          <p className="text-sm text-gray-600 mb-6">Configure the order cut-off time and weekly delivery days</p>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Order Cut-off Time */}
+            <div>
+              <label htmlFor="orderCutoffTime" className="block text-gray-700 text-sm font-medium mb-2">
+                Order Cut-off Time
+              </label>
+              <input
+                type="time"
+                id="orderCutoffTime"
+                value={orderCutoffTime}
+                onChange={(e) => setOrderCutoffTime(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"
+              />
+              <p className="mt-1 text-sm text-gray-500">
+                Orders placed after this time will be delivered on the next working day
+              </p>
+            </div>
+
+            {/* Delivery Days */}
+            <div>
+              <label className="block text-gray-700 text-sm font-medium mb-2">
+                Delivery Days of the Week
+              </label>
+              <div className="space-y-2">
+                {[
+                  { value: 1, label: 'Monday' },
+                  { value: 2, label: 'Tuesday' },
+                  { value: 3, label: 'Wednesday' },
+                  { value: 4, label: 'Thursday' },
+                  { value: 5, label: 'Friday' },
+                  { value: 6, label: 'Saturday' },
+                  { value: 0, label: 'Sunday' }
+                ].map((day) => (
+                  <label key={day.value} className="flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={deliveryDays.includes(day.value)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setDeliveryDays([...deliveryDays, day.value].sort());
+                        } else {
+                          setDeliveryDays(deliveryDays.filter(d => d !== day.value));
+                        }
+                      }}
+                      className="h-4 w-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
+                    />
+                    <span className="ml-2 text-sm text-gray-700">{day.label}</span>
+                  </label>
+                ))}
+              </div>
+              <p className="mt-2 text-sm text-gray-500">
+                Select the days of the week on which deliveries are available
+              </p>
+            </div>
+          </div>
+
+          {/* Delivery Logic Example */}
+          <div className="mt-6 p-4 bg-gray-50 rounded-md">
+            <h3 className="text-sm font-medium text-gray-900 mb-2">Example delivery logic:</h3>
+            <ul className="text-sm text-gray-600 space-y-1">
+              <li>• Orders placed before {orderCutoffTime} → delivered on the next working day</li>
+              <li>• Orders placed after {orderCutoffTime} → delivered on the day after the next working day</li>
+              <li>• If that day is not a delivery day, the system will automatically shift to the next available delivery day</li>
+            </ul>
+          </div>
+        </div>
+
         {/* Submit Button */}
         <div className="flex justify-end">
           <button

@@ -19,6 +19,9 @@ interface ProductListProps {
   popularProductIds?: string[]; // Optional array of popular product IDs
   currency?: string; // Currency code
   isSearching?: boolean; // Optional prop to show search loading state
+  itemsPerPage: number;
+  onItemsPerPageChange: (value: number) => void;
+
 }
 
 // Custom debounce function with cancel method
@@ -27,16 +30,16 @@ function debounce<T extends (...args: any[]) => any>(
   wait: number
 ): ((...args: Parameters<T>) => void) & { cancel: () => void } {
   let timeout: NodeJS.Timeout;
-  
+
   const debouncedFunction = (...args: Parameters<T>) => {
     clearTimeout(timeout);
     timeout = setTimeout(() => func(...args), wait);
   };
-  
+
   debouncedFunction.cancel = () => {
     clearTimeout(timeout);
   };
-  
+
   return debouncedFunction;
 }
 
@@ -52,7 +55,9 @@ const ProductList: React.FC<ProductListProps> = ({
   onAddToCart,
   popularProductIds = [], // Default to empty array
   currency,
-  isSearching
+  isSearching,
+  itemsPerPage,
+  onItemsPerPageChange
 }) => {
   const t = useTranslations('store');
   const locale = useLocale();
@@ -132,7 +137,7 @@ const ProductList: React.FC<ProductListProps> = ({
   if (error) {
     return (
       <div className="p-4 sm:p-6 lg:p-8">
-        <div className="bg-red-50/80 backdrop-blur-lg rounded-2xl border border-red-200/20 p-4 sm:p-6 flex items-start sm:items-center">
+        <div className="bg-red-50/80 backdrop-blur-lg rounded-xl border border-red-200/20 p-4 sm:p-6 flex items-start sm:items-center">
           <svg className="w-5 h-5 sm:w-6 sm:h-6 text-red-400 mr-3 flex-shrink-0 mt-0.5 sm:mt-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
@@ -142,11 +147,7 @@ const ProductList: React.FC<ProductListProps> = ({
     );
   }
 
-  // Function to determine if a product is frequently ordered
-  const isFrequentlyOrdered = (product: Product) => {
-    // Check if the product ID is in the list of popular product IDs
-    return popularProductIds.includes(product.id);
-  };
+
 
   return (
     <div className="p-4 sm:p-6 lg:p-8">
@@ -165,14 +166,6 @@ const ProductList: React.FC<ProductListProps> = ({
               </svg>
               <span>{t('orderHistory')}</span>
             </a>
-            
-            {/* Products Count */}
-            <div className="flex items-center space-x-2 text-xs sm:text-sm text-gray-600 flex-shrink-0">
-              <svg className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4-8-4m16 0v10l-8 4-8-4V7" />
-              </svg>
-              <span className="whitespace-nowrap font-medium">{products.length} {t('products.productsAvailable')}</span>
-            </div>
           </div>
         </div>
 
@@ -193,7 +186,7 @@ const ProductList: React.FC<ProductListProps> = ({
                 setInputValue(newValue);
                 handleSearchChange(newValue);
               }}
-              className="block w-full pl-12 pr-4 py-3 sm:py-4 border border-gray-200 rounded-2xl text-sm sm:text-base leading-5 bg-white/80 backdrop-blur-lg placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200 shadow-lg hover:shadow-xl"
+              className="block w-full pl-12 pr-4 py-3 sm:py-4 border border-gray-200 rounded-xl text-sm sm:text-base leading-5 bg-white/80 backdrop-blur-lg placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200 shadow-lg hover:shadow-xl"
             />
             {isSearching && (
               <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
@@ -204,16 +197,35 @@ const ProductList: React.FC<ProductListProps> = ({
         </div>
       </div>
 
+      {/* Items per page dropdown */}
+      <div className="flex justify-end mb-4">
+        <label htmlFor="itemsPerPage" className="mr-2 text-sm text-gray-700 font-medium">
+          {t('pagination.itemsPerPage')}:
+        </label>
+        <select
+          id="itemsPerPage"
+          value={itemsPerPage}
+          onChange={(e) => onItemsPerPageChange(Number(e.target.value))}
+          className="px-3 py-2 border border-gray-300 rounded-lg bg-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+        >
+          {[10, 20, 50, 100].map((size) => (
+            <option key={size} value={size}>
+              {size}
+            </option>
+          ))}
+        </select>
+      </div>
+
       {/* Products Display */}
       {products.length > 0 ? (
         <>
           {/* Mobile and Tablet Card View */}
           <div className="block xl:hidden space-y-4 sm:space-y-6">
             {products.map((product) => (
-              <div key={product.id} className="bg-white/80 backdrop-blur-lg rounded-2xl border border-white/20 p-6 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+              <div key={product.id} className="bg-white/80 backdrop-blur-lg rounded-xl border border-white/20 p-6 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
                 <div className="flex flex-col sm:flex-row sm:items-start space-y-4 sm:space-y-0 sm:space-x-4">
-                                      {/* Product Image */}
-                  <div className="h-24 w-24 sm:h-20 sm:w-20 relative rounded-2xl overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 flex-shrink-0 mx-auto sm:mx-0 shadow-lg">
+                  {/* Product Image */}
+                  <div className="h-24 w-24 sm:h-20 sm:w-20 relative rounded-xl overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 flex-shrink-0 mx-auto sm:mx-0 shadow-lg">
                     {product.image_url ? (
                       <Image
                         src={product.image_url}
@@ -235,13 +247,7 @@ const ProductList: React.FC<ProductListProps> = ({
                   <div className="flex-1 min-w-0 space-y-3">
                     <div className="text-center sm:text-left">
                       <h3 className="text-base sm:text-lg font-semibold text-gray-900 break-words">{product.name_en}</h3>
-                      {isFrequentlyOrdered(product) && (
-                        <span className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold bg-gradient-to-r from-emerald-100 to-teal-100 text-emerald-800 mt-2 shadow-sm">
-                          ⭐ {t('products.bestSeller')}
-                        </span>
-                      )}
                     </div>
-
                     {/* Price and Unit */}
                     <div className="text-center sm:text-left">
                       {/* <div className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">{formatPriceSync(product.price, currency)}</div> */}
@@ -303,7 +309,7 @@ const ProductList: React.FC<ProductListProps> = ({
 
           {/* Desktop Table View */}
           <div className="hidden xl:block">
-            <div className="bg-white/80 backdrop-blur-lg rounded-2xl overflow-hidden border border-white/20 shadow-xl">
+            <div className="bg-white/80 backdrop-blur-lg rounded-xl overflow-hidden border border-white/20 shadow-xl">
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-100">
                   <thead className="bg-gradient-to-r from-emerald-50 to-teal-50">
@@ -314,7 +320,7 @@ const ProductList: React.FC<ProductListProps> = ({
                       <th scope="col" className="px-6 py-5 text-left text-xs font-bold text-gray-800 uppercase tracking-wider min-w-[140px]">
                         {t('labels.unit')}
                       </th>
-          
+
                       <th scope="col" className="px-6 py-5 text-center text-xs font-bold text-gray-800 uppercase tracking-wider min-w-[120px]">
                         {t('labels.quantity')}
                       </th>
@@ -326,17 +332,17 @@ const ProductList: React.FC<ProductListProps> = ({
                   <tbody className="bg-white/40 divide-y divide-gray-100">
                     {products.map((product) => (
                       <tr key={product.id} className="hover:bg-emerald-50/70 transition-all duration-300 hover:shadow-lg">
-                        <td className="px-6 py-5">
+                        <td className="px-6 py-2">
                           <div className="flex items-center space-x-3">
-                            <div className="h-16 w-16 relative rounded-2xl overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 flex-shrink-0 shadow-lg">
+                            <div className="h-16 w-16 relative rounded-xl overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 flex-shrink-0 shadow-lg">
                               {product.image_url ? (
-                                                                  <Image
-                                    src={product.image_url}
-                                    alt={product.name_en}
-                                    fill
-                                    sizes="64px"
-                                    style={{ objectFit: 'cover' }}
-                                  />
+                                <Image
+                                  src={product.image_url}
+                                  alt={product.name_en}
+                                  fill
+                                  sizes="64px"
+                                  style={{ objectFit: 'cover' }}
+                                />
                               ) : (
                                 <div className="w-full h-full flex items-center justify-center">
                                   <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -349,20 +355,15 @@ const ProductList: React.FC<ProductListProps> = ({
                               <div className="text-base font-bold text-gray-900 break-words leading-tight">
                                 {product.name_en}
                               </div>
-                              {isFrequentlyOrdered(product) && (
-                                <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-gradient-to-r from-emerald-100 to-teal-100 text-emerald-800 mt-2 shadow-sm">
-                                  ⭐ {t('products.bestSeller')}
-                                </span>
-                              )}
                             </div>
                           </div>
                         </td>
-                        <td className="px-6 py-5">
+                        <td className="px-6 py-2">
                           {/* <div className="text-lg font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent break-words">{formatPriceSync(product.price, currency)}</div> */}
-                          <div className="text-sm text-gray-600 font-medium break-words">{t('products.per')} {product.unit || 'kg'}</div>
+                          <div className="text-sm text-gray-600 font-medium break-words">{product.unit}</div>
                         </td>
-                    
-                        <td className="px-4 py-4">
+
+                        <td className="px-4 py-2">
                           <div className="flex items-center justify-center">
                             <div className="flex items-center bg-gray-100 rounded-lg">
                               <button
@@ -389,12 +390,12 @@ const ProductList: React.FC<ProductListProps> = ({
                             </div>
                           </div>
                         </td>
-                        <td className="px-4 py-4 text-center">
+                        <td className="px-4 py-2 text-center">
                           <button
                             onClick={() => handleAddToCart(product)}
                             className={`inline-flex items-center px-4 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 space-x-2 whitespace-nowrap
                                 bg-gradient-to-r from-emerald-500 to-teal-600 text-white hover:from-emerald-600 hover:to-teal-700 shadow-lg hover:shadow-xl`
-                              }
+                            }
                           >
                             <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m0 0L17 18" />
@@ -429,64 +430,84 @@ const ProductList: React.FC<ProductListProps> = ({
             {t('pagination.showing')} <span className="font-semibold">{currentPage}</span> {t('pagination.of')}{' '}
             <span className="font-semibold">{totalPages}</span>
           </div>
-          <div className="flex items-center justify-center space-x-1 sm:space-x-2">
-            <button
-              onClick={() => onPageChange(Math.max(1, currentPage - 1))}
-              disabled={currentPage <= 1}
-              className={`px-3 sm:px-4 py-2 rounded-lg border font-medium text-xs sm:text-sm transition-all duration-200 flex items-center space-x-1 ${currentPage <= 1
-                  ? 'border-gray-200 text-gray-400 cursor-not-allowed bg-gray-50'
-                  : 'border-emerald-300 text-emerald-700 hover:bg-emerald-50 hover:border-emerald-400'
-                }`}
-            >
-              <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-              <span className="hidden sm:inline">{t('pagination.previous')}</span>
-            </button>
 
-            <div className="flex items-center space-x-1">
-              {[...Array(Math.min(totalPages, 5))].map((_, idx) => {
-                let pageNum;
-                if (totalPages <= 5) {
-                  pageNum = idx + 1;
-                } else {
-                  if (currentPage <= 3) {
-                    pageNum = idx + 1;
-                  } else if (currentPage >= totalPages - 2) {
-                    pageNum = totalPages - 4 + idx;
-                  } else {
-                    pageNum = currentPage - 2 + idx;
-                  }
-                }
-
-                return (
-                  <button
-                    key={pageNum}
-                    onClick={() => onPageChange(pageNum)}
-                    className={`px-2.5 sm:px-3 py-2 rounded-lg font-medium text-xs sm:text-sm transition-all duration-200 ${currentPage === pageNum
-                        ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg'
-                        : 'bg-white text-gray-700 hover:bg-emerald-50 border border-gray-200'
-                      }`}
-                  >
+          <div className="flex flex-col sm:flex-row items-center justify-center space-y-3 sm:space-y-0 sm:space-x-4">
+            {/* Page Number Selector */}
+            <div className="flex items-center space-x-2">
+              <span className="text-xs sm:text-sm text-gray-600">{t('pagination.goToPage')}:</span>
+              <select
+                value={currentPage}
+                onChange={(e) => onPageChange(Number(e.target.value))}
+                className="px-3 py-2 border border-gray-300 rounded-lg bg-white text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200"
+              >
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
+                  <option key={pageNum} value={pageNum}>
                     {pageNum}
-                  </button>
-                );
-              })}
+                  </option>
+                ))}
+              </select>
             </div>
 
-            <button
-              onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
-              disabled={currentPage >= totalPages}
-              className={`px-3 sm:px-4 py-2 rounded-lg border font-medium text-xs sm:text-sm transition-all duration-200 flex items-center space-x-1 ${currentPage >= totalPages
+            {/* Navigation Buttons */}
+            <div className="flex items-center justify-center space-x-1 sm:space-x-2">
+              <button
+                onClick={() => onPageChange(Math.max(1, currentPage - 1))}
+                disabled={currentPage <= 1}
+                className={`px-3 sm:px-4 py-2 rounded-lg border font-medium text-xs sm:text-sm transition-all duration-200 flex items-center space-x-1 ${currentPage <= 1
                   ? 'border-gray-200 text-gray-400 cursor-not-allowed bg-gray-50'
                   : 'border-emerald-300 text-emerald-700 hover:bg-emerald-50 hover:border-emerald-400'
-                }`}
-            >
-              <span className="hidden sm:inline">{t('pagination.next')}</span>
-              <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </button>
+                  }`}
+              >
+                <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+                <span className="hidden sm:inline">{t('pagination.previous')}</span>
+              </button>
+
+              <div className="flex items-center space-x-1">
+                {[...Array(Math.min(totalPages, 5))].map((_, idx) => {
+                  let pageNum;
+                  if (totalPages <= 5) {
+                    pageNum = idx + 1;
+                  } else {
+                    if (currentPage <= 3) {
+                      pageNum = idx + 1;
+                    } else if (currentPage >= totalPages - 2) {
+                      pageNum = totalPages - 4 + idx;
+                    } else {
+                      pageNum = currentPage - 2 + idx;
+                    }
+                  }
+
+                  return (
+                    <button
+                      key={pageNum}
+                      onClick={() => onPageChange(pageNum)}
+                      className={`px-2.5 sm:px-3 py-2 rounded-lg font-medium text-xs sm:text-sm transition-all duration-200 ${currentPage === pageNum
+                        ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg'
+                        : 'bg-white text-gray-700 hover:bg-emerald-50 border border-gray-200'
+                        }`}
+                    >
+                      {pageNum}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <button
+                onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
+                disabled={currentPage >= totalPages}
+                className={`px-3 sm:px-4 py-2 rounded-lg border font-medium text-xs sm:text-sm transition-all duration-200 flex items-center space-x-1 ${currentPage >= totalPages
+                  ? 'border-gray-200 text-gray-400 cursor-not-allowed bg-gray-50'
+                  : 'border-emerald-300 text-emerald-700 hover:bg-emerald-50 hover:border-emerald-400'
+                  }`}
+              >
+                <span className="hidden sm:inline">{t('pagination.next')}</span>
+                <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </div>
           </div>
         </div>
       )}

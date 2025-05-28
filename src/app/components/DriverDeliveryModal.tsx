@@ -111,7 +111,7 @@ export default function DriverDeliveryModal({
         
         <div className="p-4 sm:p-6 space-y-6">
           {/* Customer Information */}
-          <div className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-2xl p-4 border border-emerald-100">
+          <div className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-xl p-4 border border-emerald-100">
             <h3 className="text-gray-700 font-semibold mb-3 flex items-center">
               <svg className="w-5 h-5 mr-2 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -161,7 +161,7 @@ export default function DriverDeliveryModal({
           </div>
           
           {/* Delivery Date */}
-          <div className="bg-gray-50 rounded-2xl p-4">
+          <div className="bg-gray-50 rounded-xl p-4">
             <h3 className="text-gray-700 font-semibold mb-2 flex items-center">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -174,7 +174,7 @@ export default function DriverDeliveryModal({
           </div>
           
           {/* Status Section */}
-          <div className="bg-gray-50 rounded-2xl p-4">
+          <div className="bg-gray-50 rounded-xl p-4">
             <div className="flex justify-between items-center mb-3">
               <h3 className="text-gray-700 font-semibold flex items-center">
                 <svg className="w-5 h-5 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -235,7 +235,7 @@ export default function DriverDeliveryModal({
           </div>
           
           {/* Address Section */}
-          <div className="bg-gray-50 rounded-2xl p-4">
+          <div className="bg-gray-50 rounded-xl p-4">
             <h3 className="text-gray-700 font-semibold mb-3 flex items-center">
               <svg className="w-5 h-5 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
@@ -271,7 +271,7 @@ export default function DriverDeliveryModal({
           </div>
           
           {/* Order items summary */}
-          <div className="bg-gray-50 rounded-2xl p-4">
+          <div className="bg-gray-50 rounded-xl p-4">
             <h3 className="text-gray-700 font-semibold mb-3 flex items-center">
               <svg className="w-5 h-5 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
@@ -321,7 +321,7 @@ export default function DriverDeliveryModal({
           <div className="flex justify-end space-x-3 pt-4 border-t border-gray-100">
             <button 
               onClick={onClose} 
-              className="px-6 py-3 bg-gray-100 text-gray-700 rounded-2xl hover:bg-gray-200 transition-colors font-medium"
+              className="px-6 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors font-medium"
             >
               {tActions('cancel')}
             </button>

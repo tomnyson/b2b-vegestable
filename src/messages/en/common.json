@@ -16,7 +16,8 @@
     "currency": "Currency",
     "cart": "Cart",
     "invoices": "Invoices",
-    "dashboard": "Dashboard"
+    "dashboard": "Dashboard",
+    "customer": "Customer"
   },
   "actions": {
     "logout": "Logout",
@@ -132,10 +133,14 @@
     "delete": "Delete",
     "showing": "Showing",
     "of": "of",
+    "to": "to",
     "products": "products",
     "page": "Page",
     "previous": "Previous",
     "next": "Next",
+    "first": "First",
+    "last": "Last",
+    "itemsPerPage": "Items per page",
     "totalProducts": "Total Products",
     "activeProducts": "Active Products",
     "tabDetails": "Details",
@@ -260,7 +265,10 @@
       "cancelled": "Cancelled",
       "shipped": "Shipped",
       "delivered": "Delivered"
-    }
+    },
+    "todayDeliveries": "Today's Deliveries",
+    "tomorrowDeliveries": "Tomorrow's Deliveries",
+    "clearDeliveryFilter": "Clear Delivery Filter"
   },
   "summary": {
     "title": "Order Summary",
@@ -278,7 +286,11 @@
     "sku": "SKU",
     "totalQuantity": "Total Quantity",
     "notAvailable": "N/A",
-    "printSummary": "Print Summary"
+    "printSummary": "Print Summary",
+    "todayDeliveries": "Today's Deliveries",
+    "tomorrowDeliveries": "Tomorrow's Deliveries",
+    "clearDeliveryFilter": "Clear Delivery Filter",
+    "clearFilters": "Clear All Filters"
   },
   "users": {
     "title": "User Management",
@@ -401,7 +413,9 @@
     "generateRandom": "Generate Random",
     "cancel": "Cancel",
     "update": "Update",
-    "add": "Add"
+    "add": "Add",
+    "totalDrivers": "Total Drivers",
+    "activeDrivers": "Active Drivers"
   },
   "settings": {
     "title": "Application Settings",
@@ -449,7 +463,24 @@
     "usersDescription": "User account management",
     "driversDescription": "Driver management and delivery assignments",
     "settingsDescription": "Application settings and configuration",
-    "storeDescription": "Customer-facing store interface"
+    "storeDescription": "Customer-facing store interface",
+    "deliveryConfiguration": "Delivery Configuration",
+    "deliveryConfigurationDescription": "Configure order cut-off times and delivery days",
+    "orderCutoffTime": "Order Cut-off Time",
+    "orderCutoffTimeDescription": "Orders placed before this time will be delivered the next working day",
+    "deliveryDays": "Delivery Days",
+    "deliveryDaysDescription": "Select which days of the week deliveries are available",
+    "monday": "Monday",
+    "tuesday": "Tuesday",
+    "wednesday": "Wednesday",
+    "thursday": "Thursday",
+    "friday": "Friday",
+    "saturday": "Saturday",
+    "sunday": "Sunday",
+    "deliveryLogic": "Delivery Logic",
+    "deliveryLogicBefore": "Orders placed before {time} → delivered next working day",
+    "deliveryLogicAfter": "Orders placed after {time} → delivered day after next working day",
+    "deliveryLogicNonDeliveryDay": "If delivery falls on a non-delivery day, it shifts to the next available delivery day"
   },
   "store": {
     "title": "Fresh Vegetables Store",
@@ -482,7 +513,9 @@
       "showing": "Showing page",
       "of": "of",
       "previous": "Previous",
-      "next": "Next"
+      "next": "Next",
+      "goToPage": "Go to page",
+      "itemsPerPage": "Items per page"
     },
     "labels": {
       "productName": "Product Name",

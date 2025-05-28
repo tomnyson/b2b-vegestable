@@ -13,6 +13,7 @@ export default function DriverDeliveriesPage() {
   const t = useTranslations('driver');
   const tCommon = useTranslations('labels');
   const tActions = useTranslations('actions');
+  const tOrders = useTranslations('orders');
   
   // User data states
   const [user, setUser] = useState<any>(null);
@@ -23,6 +24,10 @@ export default function DriverDeliveriesPage() {
   // Search and filter states
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
   
   // Detail modal state
   const [selectedDelivery, setSelectedDelivery] = useState<Order | null>(null);
@@ -85,6 +90,18 @@ export default function DriverDeliveriesPage() {
     
     return matchesSearch && matchesStatus;
   });
+
+  // Calculate pagination
+  const totalItems = filteredDeliveries.length;
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedDeliveries = filteredDeliveries.slice(startIndex, endIndex);
+
+  // Reset to first page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, statusFilter, itemsPerPage]);
   
   // Handle opening delivery detail modal
   const handleOpenDeliveryDetail = (delivery: Order) => {
@@ -127,6 +144,15 @@ export default function DriverDeliveriesPage() {
     } finally {
       setIsUpdatingStatus(false);
     }
+  };
+
+  // Pagination handlers
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  const handleItemsPerPageChange = (newItemsPerPage: number) => {
+    setItemsPerPage(newItemsPerPage);
   };
   
   // Get status badge styling
@@ -182,14 +208,13 @@ export default function DriverDeliveriesPage() {
       <Header />
       <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 py-8">
         <div className="container mx-auto px-4 space-y-6">
-          
           {/* Header */}
           <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl border border-white/20 p-6 lg:p-8">
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
               <div>
-                <h1 className="text-3xl lg:text-4xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
+                <h3 className="text-3xl lg:text-2xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
                   {t('title')}
-                </h1>
+                </h3>
                 <p className="mt-2 text-gray-600 text-lg">
                   {t('subtitle')}
                 </p>
@@ -210,7 +235,7 @@ export default function DriverDeliveriesPage() {
 
           {/* Statistics Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-xl border border-white/20 p-6">
+            <div className="bg-white/80 backdrop-blur-lg rounded-xl shadow-xl border border-white/20 p-6">
               <div className="flex items-center">
                 <div className="p-3 rounded-full bg-gradient-to-r from-emerald-500 to-teal-600">
                   <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -224,7 +249,7 @@ export default function DriverDeliveriesPage() {
               </div>
             </div>
 
-            <div className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-xl border border-white/20 p-6">
+            <div className="bg-white/80 backdrop-blur-lg rounded-xl shadow-xl border border-white/20 p-6">
               <div className="flex items-center">
                 <div className="p-3 rounded-full bg-gradient-to-r from-yellow-500 to-orange-600">
                   <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -238,7 +263,7 @@ export default function DriverDeliveriesPage() {
               </div>
             </div>
 
-            <div className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-xl border border-white/20 p-6">
+            <div className="bg-white/80 backdrop-blur-lg rounded-xl shadow-xl border border-white/20 p-6">
               <div className="flex items-center">
                 <div className="p-3 rounded-full bg-gradient-to-r from-blue-500 to-indigo-600">
                   <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -252,7 +277,7 @@ export default function DriverDeliveriesPage() {
               </div>
             </div>
 
-            <div className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-xl border border-white/20 p-6">
+            <div className="bg-white/80 backdrop-blur-lg rounded-xl shadow-xl border border-white/20 p-6">
               <div className="flex items-center">
                 <div className="p-3 rounded-full bg-gradient-to-r from-green-500 to-emerald-600">
                   <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -284,7 +309,7 @@ export default function DriverDeliveriesPage() {
                   <input
                     id="search-filter"
                     type="text"
-                    className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-2xl leading-5 bg-white/50 backdrop-blur-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200"
+                    className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl leading-5 bg-white/50 backdrop-blur-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200"
                     placeholder={t('searchPlaceholder')}
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
@@ -301,7 +326,7 @@ export default function DriverDeliveriesPage() {
                   id="status-filter"
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
-                  className="w-full min-w-[160px] px-4 py-3 border border-gray-300 rounded-2xl bg-white/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200"
+                  className="w-full min-w-[160px] px-4 py-3 border border-gray-300 rounded-xl bg-white/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200"
                 >
                   <option value="all">{t('allStatuses')}</option>
                   <option value="pending">{t('pending')}</option>
@@ -315,7 +340,7 @@ export default function DriverDeliveriesPage() {
 
           {/* Success/Error Messages */}
           {updateSuccess && (
-            <div className="bg-emerald-50/80 backdrop-blur-lg rounded-2xl shadow-xl border border-emerald-200/20 p-4">
+            <div className="bg-emerald-50/80 backdrop-blur-lg rounded-xl shadow-xl border border-emerald-200/20 p-4">
               <div className="flex items-center">
                 <svg className="w-5 h-5 text-emerald-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -326,7 +351,7 @@ export default function DriverDeliveriesPage() {
           )}
           
           {updateError && (
-            <div className="bg-red-50/80 backdrop-blur-lg rounded-2xl shadow-xl border border-red-200/20 p-4">
+            <div className="bg-red-50/80 backdrop-blur-lg rounded-xl shadow-xl border border-red-200/20 p-4">
               <div className="flex items-center">
                 <svg className="w-5 h-5 text-red-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -337,7 +362,7 @@ export default function DriverDeliveriesPage() {
           )}
 
           {/* Deliveries Content */}
-          {filteredDeliveries.length === 0 ? (
+          {totalItems === 0 ? (
             <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl border border-white/20 p-12">
               <div className="text-center">
                 <svg 
@@ -357,7 +382,7 @@ export default function DriverDeliveriesPage() {
                       setSearchTerm('');
                       setStatusFilter('all');
                     }}
-                    className="px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-2xl hover:from-emerald-600 hover:to-teal-700 transition-all duration-200 shadow-lg font-medium"
+                    className="px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl hover:from-emerald-600 hover:to-teal-700 transition-all duration-200 shadow-lg font-medium"
                   >
                     {t('clearFilters')}
                   </button>
@@ -374,7 +399,7 @@ export default function DriverDeliveriesPage() {
                   <h3 className="text-lg font-semibold text-gray-900">{t('deliveries')}</h3>
                 </div>
                 <div className="divide-y divide-gray-100">
-                  {filteredDeliveries.map((delivery) => (
+                  {paginatedDeliveries.map((delivery) => (
                     <div key={delivery.id} className="p-6 hover:bg-emerald-50/50 transition-colors duration-200">
                       <div className="space-y-4">
                         <div className="flex items-center justify-between">
@@ -408,11 +433,15 @@ export default function DriverDeliveriesPage() {
                           )}
                         </div>
                         
-                        <div className="flex flex-wrap gap-2">
+                        <div className="flex flex-wrap gap-3">
                           <button
                             onClick={() => handleOpenDeliveryDetail(delivery)}
-                            className="px-4 py-2 bg-emerald-100 text-emerald-700 rounded-xl hover:bg-emerald-200 transition-colors font-medium text-sm"
+                            className="inline-flex items-center px-5 py-3 bg-emerald-100 text-emerald-700 rounded-xl hover:bg-emerald-200 transition-colors font-medium text-base"
                           >
+                            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
                             {tActions('view')}
                           </button>
                           
@@ -420,8 +449,11 @@ export default function DriverDeliveriesPage() {
                             <button
                               onClick={() => delivery.id && handleUpdateStatus(delivery.id, 'processing')}
                               disabled={isUpdatingStatus || !delivery.id}
-                              className="px-4 py-2 bg-blue-100 text-blue-700 rounded-xl hover:bg-blue-200 transition-colors font-medium text-sm disabled:opacity-50"
+                              className="inline-flex items-center px-5 py-3 bg-blue-100 text-blue-700 rounded-xl hover:bg-blue-200 transition-colors font-medium text-base disabled:opacity-50 disabled:cursor-not-allowed"
                             >
+                              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+                              </svg>
                               {t('startDelivery')}
                             </button>
                           )}
@@ -430,8 +462,11 @@ export default function DriverDeliveriesPage() {
                             <button
                               onClick={() => delivery.id && handleUpdateStatus(delivery.id, 'completed')}
                               disabled={isUpdatingStatus || !delivery.id}
-                              className="px-4 py-2 bg-green-100 text-green-700 rounded-xl hover:bg-green-200 transition-colors font-medium text-sm disabled:opacity-50"
+                              className="inline-flex items-center px-5 py-3 bg-green-100 text-green-700 rounded-xl hover:bg-green-200 transition-colors font-medium text-base disabled:opacity-50 disabled:cursor-not-allowed"
                             >
+                              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                              </svg>
                               {t('markDelivered')}
                             </button>
                           )}
@@ -465,7 +500,7 @@ export default function DriverDeliveriesPage() {
                     </tr>
                   </thead>
                   <tbody className="bg-white/50 divide-y divide-gray-100">
-                    {filteredDeliveries.map((delivery) => (
+                    {paginatedDeliveries.map((delivery) => (
                       <tr key={delivery.id} className="hover:bg-emerald-50/50 transition-colors duration-200">
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center">
@@ -510,28 +545,28 @@ export default function DriverDeliveriesPage() {
                           {delivery.items?.length || 0} {t('itemsCount')}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                          <div className="flex items-center space-x-2">
+                          <div className="flex items-center space-x-3">
                             <button
                               onClick={() => handleOpenDeliveryDetail(delivery)}
-                              className="text-emerald-600 hover:text-emerald-900 p-2 hover:bg-emerald-50 rounded-lg transition-colors"
-                              title={tActions('view')}
+                              className="inline-flex items-center px-5 py-3 bg-emerald-100 text-emerald-700 rounded-xl hover:bg-emerald-200 transition-colors font-medium text-base"
                             >
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                               </svg>
+                              {tActions('view')}
                             </button>
                             
                             {delivery.status === 'pending' && (
                               <button
                                 onClick={() => delivery.id && handleUpdateStatus(delivery.id, 'processing')}
                                 disabled={isUpdatingStatus || !delivery.id}
-                                className="text-blue-600 hover:text-blue-900 p-2 hover:bg-blue-50 rounded-lg transition-colors disabled:opacity-50"
-                                title={t('startDelivery')}
+                                className="inline-flex items-center px-5 py-3 bg-blue-100 text-blue-700 rounded-xl hover:bg-blue-200 transition-colors font-medium text-base disabled:opacity-50 disabled:cursor-not-allowed"
                               >
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" />
                                 </svg>
+                                {t('startDelivery')}
                               </button>
                             )}
                             
@@ -539,12 +574,12 @@ export default function DriverDeliveriesPage() {
                               <button
                                 onClick={() => delivery.id && handleUpdateStatus(delivery.id, 'completed')}
                                 disabled={isUpdatingStatus || !delivery.id}
-                                className="text-green-600 hover:text-green-900 p-2 hover:bg-green-50 rounded-lg transition-colors disabled:opacity-50"
-                                title={t('markDelivered')}
+                                className="inline-flex items-center px-5 py-3 bg-green-100 text-green-700 rounded-xl hover:bg-green-200 transition-colors font-medium text-base disabled:opacity-50 disabled:cursor-not-allowed"
                               >
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                                 </svg>
+                                {t('markDelivered')}
                               </button>
                             )}
                           </div>
@@ -553,6 +588,98 @@ export default function DriverDeliveriesPage() {
                     ))}
                   </tbody>
                 </table>
+              </div>
+            </div>
+          )}
+
+          {/* Pagination Controls */}
+          {totalItems > 0 && (
+            <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl border border-white/20 p-6">
+              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
+                {/* Items per page selector */}
+                <div className="flex items-center space-x-2">
+                  <span className="text-sm text-gray-700">{tOrders('itemsPerPage')}</span>
+                  <select
+                    value={itemsPerPage}
+                    onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
+                    className="px-3 py-2 border border-gray-300 rounded-lg bg-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  >
+                    <option value={5}>5</option>
+                    <option value={10}>10</option>
+                    <option value={20}>20</option>
+                    <option value={50}>50</option>
+                  </select>
+                </div>
+
+                {/* Page info */}
+                <div className="text-sm text-gray-700 text-center lg:text-left">
+                  {tOrders('showing')} {startIndex + 1} {tOrders('to')} {Math.min(endIndex, totalItems)} {tOrders('of')} {totalItems} {t('deliveries')}
+                </div>
+
+                {/* Pagination buttons */}
+                <div className="flex items-center justify-center lg:justify-end space-x-2">
+                  <button
+                    onClick={() => handlePageChange(1)}
+                    disabled={currentPage === 1}
+                    className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {tOrders('first')}
+                  </button>
+                  
+                  <button
+                    onClick={() => handlePageChange(currentPage - 1)}
+                    disabled={currentPage === 1}
+                    className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {tOrders('previous')}
+                  </button>
+
+                  {/* Page numbers */}
+                  <div className="flex items-center space-x-1">
+                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                      let pageNumber;
+                      if (totalPages <= 5) {
+                        pageNumber = i + 1;
+                      } else if (currentPage <= 3) {
+                        pageNumber = i + 1;
+                      } else if (currentPage >= totalPages - 2) {
+                        pageNumber = totalPages - 4 + i;
+                      } else {
+                        pageNumber = currentPage - 2 + i;
+                      }
+
+                      return (
+                        <button
+                          key={pageNumber}
+                          onClick={() => handlePageChange(pageNumber)}
+                          className={`px-3 py-2 text-sm font-medium rounded-lg ${
+                            currentPage === pageNumber
+                              ? 'bg-emerald-600 text-white'
+                              : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50'
+                          }`}
+                        >
+                          {pageNumber}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  <button
+                    onClick={() => handlePageChange(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                    className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {tOrders('next')}
+                  </button>
+                  
+                  <button
+                    onClick={() => handlePageChange(totalPages)}
+                    disabled={currentPage === totalPages}
+                    className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {tOrders('last')}
+                  </button>
+                </div>
               </div>
             </div>
           )}

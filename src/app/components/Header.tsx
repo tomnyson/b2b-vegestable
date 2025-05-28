@@ -99,29 +99,38 @@ export default function Header() {
           
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-6">
-            <Link 
-              href="/store" 
-              className={`text-sm font-medium ${
-                pathname === '/store' 
-                  ? 'text-green-600' 
-                  : 'text-gray-700 hover:text-green-500'
-              }`}
-            >
-              {t('store')}
-            </Link>
+            {userRole !== 'driver' && (
+              <Link 
+                href="/store" 
+                className={`text-sm font-medium flex items-center space-x-2 ${
+                  pathname === '/store' 
+                    ? 'text-green-600' 
+                    : 'text-gray-700 hover:text-green-500'
+                }`}
+              >
+                <span>{t('store')}</span>
+                {userRole === 'customer' && (
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
+                    {t('customer')}
+                  </span>
+                )}
+              </Link>
+            )}
             
             {user ? (
               <>
-                <Link 
-                  href="/profile" 
-                  className={`text-sm font-medium ${
-                    pathname === '/profile' 
-                      ? 'text-green-600' 
-                      : 'text-gray-700 hover:text-green-500'
-                  }`}
-                >
-                  {t('profile')}
-                </Link>
+                {userRole !== 'driver' && (
+                  <Link 
+                    href="/profile" 
+                    className={`text-sm font-medium ${
+                      pathname === '/profile' 
+                        ? 'text-green-600' 
+                        : 'text-gray-700 hover:text-green-500'
+                    }`}
+                  >
+                    {t('profile')}
+                  </Link>
+                )}
                 
                 {/* Show Driver link only for users with driver role */}
                 {userRole === 'driver' && (
@@ -178,31 +187,35 @@ export default function Header() {
         {/* Mobile Navigation Menu */}
         {mobileMenuOpen && (
           <div className="md:hidden mt-4 pb-2 border-t pt-4 space-y-4">
-            <Link 
-              href="/store" 
-              className={`block text-sm font-medium ${
-                pathname === '/store' 
-                  ? 'text-green-600' 
-                  : 'text-gray-700 hover:text-green-500'
-              }`}
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              {t('store')}
-            </Link>
+            {userRole !== 'driver' && (
+              <Link 
+                href="/store" 
+                className={`block text-sm font-medium ${
+                  pathname === '/store' 
+                    ? 'text-green-600' 
+                    : 'text-gray-700 hover:text-green-500'
+                }`}
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                {t('store')}
+              </Link>
+            )}
             
             {user ? (
               <>
-                <Link 
-                  href="/profile" 
-                  className={`block text-sm font-medium ${
-                    pathname === '/profile' 
-                      ? 'text-green-600' 
-                      : 'text-gray-700 hover:text-green-500'
-                  }`}
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  {t('profile')}
-                </Link>
+                {userRole !== 'driver' && (
+                  <Link 
+                    href="/profile" 
+                    className={`block text-sm font-medium ${
+                      pathname === '/profile' 
+                        ? 'text-green-600' 
+                        : 'text-gray-700 hover:text-green-500'
+                    }`}
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    {t('profile')}
+                  </Link>
+                )}
                 
                 {/* Show Driver link only for users with driver role */}
                 {userRole === 'driver' && (

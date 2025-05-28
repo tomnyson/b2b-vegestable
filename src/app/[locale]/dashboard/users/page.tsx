@@ -310,10 +310,10 @@ export default function UsersPage() {
   // Loading state
   if (loading && users.length === 0) {
     return (
-      <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl border border-white/20 p-8 lg:p-12">
+      <div className="bg-white/80 backdrop-blur-lg rounded-lg shadow-2xl border border-white/20 p-6 lg:p-8">
         <div className="flex flex-col items-center justify-center space-y-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500"></div>
-          <p className="text-lg font-medium text-gray-700">{t('loading')}</p>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-500"></div>
+          <p className="text-base font-medium text-gray-700">{t('loading')}</p>
         </div>
       </div>
     );
@@ -322,12 +322,12 @@ export default function UsersPage() {
   // Error state
   if (error) {
     return (
-      <div className="bg-red-50/80 backdrop-blur-lg rounded-3xl shadow-2xl border border-red-200/20 p-6 lg:p-8">
+      <div className="bg-red-50/80 backdrop-blur-lg rounded-lg shadow-2xl border border-red-200/20 p-4 lg:p-6">
         <div className="flex items-center">
-          <svg className="w-6 h-6 text-red-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-4 h-4 text-red-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
-          <p className="text-red-700 font-medium">{error}</p>
+          <p className="text-red-700 font-medium text-sm">{error}</p>
         </div>
       </div>
     );
@@ -336,23 +336,23 @@ export default function UsersPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl border border-white/20 p-6 lg:p-8">
+      <div className="bg-white/80 backdrop-blur-lg rounded-lg shadow-2xl border border-white/20 p-4 lg:p-6">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <h1 className="text-3xl lg:text-4xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
+            <h1 className="text-xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
               {t('title')}
             </h1>
-            <p className="mt-2 text-gray-600 text-lg">
+            <p className="mt-1 text-gray-600 text-base">
               Manage user accounts and access permissions
             </p>
           </div>
-          <div className="mt-4 lg:mt-0 flex flex-col sm:flex-row gap-3">
+          <div className="mt-4 lg:mt-0 flex flex-col sm:flex-row gap-2">
             <button
               onClick={() => setIsImportModalOpen(true)}
               disabled={loading}
-                className="px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-2xl hover:from-emerald-600 hover:to-teal-700 transition-all duration-200 shadow-lg hover:shadow-xl font-medium flex items-center space-x-2 disabled:opacity-50"
+                className="px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-lg hover:from-emerald-600 hover:to-teal-700 transition-all duration-200 shadow-lg hover:shadow-xl font-medium flex items-center space-x-2 disabled:opacity-50 text-sm"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
               </svg>
               <span>Import CSV</span>
@@ -375,9 +375,9 @@ export default function UsersPage() {
                 setIsModalOpen(true);
               }}
               disabled={loading}
-              className="px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-2xl hover:from-emerald-600 hover:to-teal-700 transition-all duration-200 shadow-lg hover:shadow-xl font-medium flex items-center space-x-2 disabled:opacity-50"
+              className="px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-lg hover:from-emerald-600 hover:to-teal-700 transition-all duration-200 shadow-lg hover:shadow-xl font-medium flex items-center space-x-2 disabled:opacity-50 text-sm"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
               <span>{t('addUser')}</span>
@@ -387,23 +387,23 @@ export default function UsersPage() {
       </div>
 
       {/* Search and Statistics */}
-      <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl border border-white/20 p-6 lg:p-8">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+      <div className="bg-white/80 backdrop-blur-lg rounded-lg shadow-2xl border border-white/20 p-4 lg:p-6">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
           {/* Search */}
           <div className="lg:col-span-2">
-            <label htmlFor="search" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="search" className="block text-xs font-medium text-gray-700 mb-1">
               {t('searchUsers')}
             </label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <svg className="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                <svg className="h-4 w-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
                 </svg>
               </div>
               <input
                 id="search"
                 type="text"
-                className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-2xl leading-5 bg-white/50 backdrop-blur-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200"
+                className="block w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg leading-5 bg-white/50 backdrop-blur-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200 text-sm"
                 placeholder={t('searchPlaceholder')}
                 value={searchTerm}
                 onChange={handleSearchChange}
@@ -411,41 +411,41 @@ export default function UsersPage() {
               />
               {isSearching && (
                 <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
-                  <div className="animate-spin h-4 w-4 border-2 border-emerald-500 rounded-full border-t-transparent"></div>
+                  <div className="animate-spin h-3 w-3 border-2 border-emerald-500 rounded-full border-t-transparent"></div>
                 </div>
               )}
             </div>
           </div>
 
           {/* Statistics Cards */}
-          <div className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-2xl p-4">
-            <div className="text-2xl font-bold text-emerald-700">{totalCount}</div>
-            <div className="text-sm text-gray-600">{t('totalUsers')}</div>
+          <div className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-lg p-3">
+            <div className="text-xl font-bold text-emerald-700">{totalCount}</div>
+            <div className="text-xs text-gray-600">{t('totalUsers')}</div>
           </div>
 
-          <div className="bg-gradient-to-br from-teal-50 to-cyan-50 rounded-2xl p-4">
-            <div className="text-2xl font-bold text-teal-700">{users.filter(u => u.status === 'active').length}</div>
-            <div className="text-sm text-gray-600">{t('activeUsers')}</div>
+          <div className="bg-gradient-to-br from-teal-50 to-cyan-50 rounded-lg p-3">
+            <div className="text-xl font-bold text-teal-700">{users.filter(u => u.status === 'active').length}</div>
+            <div className="text-xs text-gray-600">{t('activeUsers')}</div>
           </div>
         </div>
       </div>
 
       {/* Users Table */}
-      <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl border border-white/20 overflow-hidden">
+      <div className="bg-white/80 backdrop-blur-lg rounded-lg shadow-2xl border border-white/20 overflow-hidden">
         {/* Mobile Card View */}
         <div className="block lg:hidden">
-          <div className="px-6 py-4 border-b border-gray-100">
-            <h3 className="text-lg font-semibold text-gray-900">{t('users')}</h3>
+          <div className="px-4 py-2 border-b border-gray-100">
+            <h3 className="text-base font-semibold text-gray-900">{t('users')}</h3>
           </div>
           <div className="divide-y divide-gray-100">
             {users.length > 0 ? (
               users.map((user) => (
-                <div key={user.id} className="p-6 hover:bg-emerald-50/50 transition-colors duration-200">
-                  <div className="space-y-4">
+                <div key={user.id} className="p-4 hover:bg-emerald-50/50 transition-colors duration-200">
+                  <div className="space-y-3">
                     <div className="flex items-center justify-between">
                       <div>
-                        <h4 className="text-lg font-semibold text-gray-900">{user.name}</h4>
-                        <p className="text-sm text-gray-600">{user.email}</p>
+                        <h4 className="text-base font-semibold text-gray-900">{user.name}</h4>
+                        <p className="text-xs text-gray-600">{user.email}</p>
                       </div>
                       <span
                         className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${user.status === 'active'
@@ -457,7 +457,7 @@ export default function UsersPage() {
                       </span>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4 text-sm text-gray-600">
+                    <div className="grid grid-cols-2 gap-3 text-xs text-gray-600">
                       <div>
                         <span className="font-medium">{t('phone')}:</span> {user.phone || '-'}
                       </div>
@@ -475,21 +475,21 @@ export default function UsersPage() {
                     <div className="flex flex-wrap gap-2">
                       <button
                         onClick={() => handleEdit(user)}
-                        className="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors font-medium text-sm disabled:opacity-50"
+                        className="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors font-medium text-xs disabled:opacity-50"
                         disabled={loading}
                       >
                         {t('edit')}
                       </button>
                       <button
                         onClick={() => handleToggleStatus(user.id, user.status)}
-                        className="px-4 py-2 bg-yellow-100 text-yellow-700 rounded-lg hover:bg-yellow-200 transition-colors font-medium text-sm disabled:opacity-50"
+                        className="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-lg hover:bg-yellow-200 transition-colors font-medium text-xs disabled:opacity-50"
                         disabled={loading}
                       >
                         {user.status === 'active' ? t('deactivate') : t('activate')}
                       </button>
                       <button
                         onClick={() => handleDelete(user.id)}
-                        className="px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors font-medium text-sm disabled:opacity-50"
+                        className="px-3 py-1 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors font-medium text-xs disabled:opacity-50"
                         disabled={loading}
                       >
                         {t('delete')}
@@ -709,7 +709,7 @@ export default function UsersPage() {
           className="fixed inset-0 flex items-center justify-center z-50 p-6 sm:p-8 lg:p-12"
           onClick={(e) => e.target === e.currentTarget && setIsModalOpen(false)}
         >
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[92vh] overflow-hidden flex flex-col border border-gray-100 backdrop-blur-sm">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[92vh] overflow-hidden flex flex-col border border-gray-100 backdrop-blur-sm">
             {/* Header */}
             <div className="modal-header flex justify-between items-center border-b border-gray-200 p-6 bg-gradient-to-r from-emerald-50 to-teal-50">
               <h2 className="text-2xl font-bold text-gray-800">

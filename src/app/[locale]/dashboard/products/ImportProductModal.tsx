@@ -256,7 +256,7 @@ BAN001,Banana`;
             </ul>
             <button
               onClick={downloadSampleCSV}
-              className="px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-2xl hover:from-emerald-600 hover:to-teal-700 transition-all duration-200 shadow-lg hover:shadow-xl font-medium flex items-center mt-3"
+              className="px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl hover:from-emerald-600 hover:to-teal-700 transition-all duration-200 shadow-lg hover:shadow-xl font-medium flex items-center mt-3"
             >
               📥 {t('import.downloadTemplate')}
             </button>

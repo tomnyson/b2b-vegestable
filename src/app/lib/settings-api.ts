@@ -19,6 +19,9 @@ export interface AppSettings {
   enable_drivers?: boolean;
   enable_settings?: boolean;
   enable_store?: boolean;
+  // Delivery configuration
+  order_cutoff_time?: string; // Format: "HH:MM" (24-hour format)
+  delivery_days?: number[]; // Array of day numbers (0=Sunday, 1=Monday, ..., 6=Saturday)
   created_at?: string;
   updated_at?: string;
 }
@@ -251,4 +254,106 @@ export function formatPriceSync(price: number, currencyCode: string = 'USD'): st
     // Two decimal places for other currencies, symbol before amount
     return `${currencyInfo.symbol}${price.toFixed(2)}`;
   }
+}
+
+/**
+ * Get default delivery configuration
+ */
+export function getDefaultDeliverySettings() {
+  return {
+    order_cutoff_time: '18:00',
+    delivery_days: [1, 2, 3, 4, 5, 6] // Monday to Saturday
+  };
+}
+
+/**
+ * Calculate delivery date based on order placement time and delivery settings
+ */
+export async function calculateDeliveryDate(orderDate: Date = new Date()): Promise<Date> {
+  try {
+    const settings = await getAppSettings();
+    const defaults = getDefaultDeliverySettings();
+    
+    const cutoffTime = settings?.order_cutoff_time || defaults.order_cutoff_time;
+    const deliveryDays = settings?.delivery_days || defaults.delivery_days;
+    
+    return calculateDeliveryDateSync(orderDate, cutoffTime, deliveryDays);
+  } catch (error) {
+    console.error('Error calculating delivery date:', error);
+    // Fallback to default logic
+    const defaults = getDefaultDeliverySettings();
+    return calculateDeliveryDateSync(orderDate, defaults.order_cutoff_time, defaults.delivery_days);
+  }
+}
+
+/**
+ * Calculate delivery date synchronously with provided settings
+ */
+export function calculateDeliveryDateSync(
+  orderDate: Date,
+  cutoffTime: string,
+  deliveryDays: number[]
+): Date {
+  // Parse cutoff time
+  const [cutoffHour, cutoffMinute] = cutoffTime.split(':').map(Number);
+  
+  // Create cutoff time for the order date
+  const cutoffDateTime = new Date(orderDate);
+  cutoffDateTime.setHours(cutoffHour, cutoffMinute, 0, 0);
+  
+  // Determine the next delivery date
+  let deliveryDate = new Date(orderDate);
+  
+  // If order is placed after cutoff time, move to next day
+  if (orderDate > cutoffDateTime) {
+    deliveryDate.setDate(deliveryDate.getDate() + 1);
+  }
+  
+  // Find the next delivery day
+  let daysToAdd = 0;
+  const maxDaysToCheck = 14; // Prevent infinite loop
+  
+  while (daysToAdd < maxDaysToCheck) {
+    const currentDay = deliveryDate.getDay();
+    
+    if (deliveryDays.includes(currentDay)) {
+      // Found a delivery day
+      break;
+    }
+    
+    // Move to next day
+    deliveryDate.setDate(deliveryDate.getDate() + 1);
+    daysToAdd++;
+  }
+  
+  return deliveryDate;
+}
+
+/**
+ * Check if a given day is a delivery day
+ */
+export async function isDeliveryDay(date: Date): Promise<boolean> {
+  try {
+    const settings = await getAppSettings();
+    const defaults = getDefaultDeliverySettings();
+    const deliveryDays = settings?.delivery_days || defaults.delivery_days;
+    
+    return deliveryDays.includes(date.getDay());
+  } catch (error) {
+    console.error('Error checking delivery day:', error);
+    return true; // Default to available
+  }
+}
+
+/**
+ * Get delivery days as formatted strings
+ */
+export function getDeliveryDaysText(deliveryDays: number[], locale: string = 'en'): string[] {
+  const dayNames = {
+    en: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+    vi: ['Chủ nhật', 'Thứ hai', 'Thứ ba', 'Thứ tư', 'Thứ năm', 'Thứ sáu', 'Thứ bảy']
+  };
+  
+  const names = dayNames[locale as keyof typeof dayNames] || dayNames.en;
+  return deliveryDays.map(day => names[day]);
 } 

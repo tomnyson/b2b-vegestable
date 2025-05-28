@@ -1,11 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams, useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import React from 'react';
-import { signIn, signInWithGoogle } from '../../lib/auth';
+import { signIn, signInWithGoogle, getUser, getUserProfile } from '../../lib/auth';
 import { getAppSettings, AppSettings } from '../../lib/settings-api';
 
 export default function Login() {
@@ -17,8 +17,11 @@ export default function Login() {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [appSettings, setAppSettings] = useState<AppSettings | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
   const searchParams = useSearchParams();
+  const params = useParams();
+  const locale = Array.isArray(params?.locale) ? params?.locale[0] : params?.locale || 'en';
   const t = useTranslations('login');
 
   useEffect(() => {
@@ -29,6 +32,43 @@ export default function Login() {
     }
   }, [searchParams, t]);
 
+  // Check if user is already logged in and redirect based on role
+  useEffect(() => {
+    async function checkExistingAuth() {
+      try {
+        const user = await getUser();
+        if (user) {
+          // Get user profile to determine role
+          const userProfile = await getUserProfile(user.id);
+          const role = userProfile?.role;
+          
+          // Check if there's a redirect URL from query params
+          const redirectTo = searchParams?.get('redirect');
+          
+          if (redirectTo) {
+            // If there's a redirect URL, use it
+            router.push(redirectTo);
+          } else {
+            // Otherwise do role-based redirection with locale
+            if (role === 'driver') {
+              router.push(`/${locale}/driver`);
+            } else if (role === 'admin') {
+              router.push(`/${locale}/dashboard`);
+            } else {
+              // Customers go to store
+              router.push(`/${locale}/store`);
+            }
+          }
+        }
+      } catch (error) {
+        // User not logged in or error occurred, stay on login page
+        console.log('User not authenticated:', error);
+      }
+    }
+    
+    checkExistingAuth();
+  }, [router, locale, searchParams]);
+
   // Load app settings
   useEffect(() => {
     async function loadAppSettings() {
@@ -38,6 +78,7 @@ export default function Login() {
       } catch (err) {
         console.error('Error loading app settings:', err);
       }
+      setIsLoading(false);
     }
     
     loadAppSettings();
@@ -51,11 +92,25 @@ export default function Login() {
     
     try {
       // Using the signIn function from auth.ts
-      await signIn({ email, password });
+      const result = await signIn({ email, password });
       
-      // Successful login
-      console.log('Login successful');
-      router.push('/dashboard');
+      // Get redirect URL from query params
+      const redirectTo = searchParams?.get('redirect');
+      
+      if (redirectTo) {
+        // If there's a redirect URL, use it
+        router.push(redirectTo);
+      } else {
+        // Otherwise do role-based redirection with locale
+        if (result.userProfile?.role === 'driver') {
+          router.push(`/${locale}/driver`);
+        } else if (result.userProfile?.role === 'admin') {
+          router.push(`/${locale}/dashboard`);
+        } else {
+          // Customers go to store
+          router.push(`/${locale}/store`);
+        }
+      }
     } catch (err) {
       console.error('Login error:', err);
       setError(err instanceof Error ? err.message : t('loginError'));
@@ -70,15 +125,30 @@ export default function Login() {
     setGoogleLoading(true);
     
     try {
+      // Get redirect URL from query params and encode it for the callback
+      const redirectTo = searchParams?.get('redirect');
+      const callbackUrl = redirectTo 
+        ? `/auth/callback?redirect=${encodeURIComponent(redirectTo)}`
+        : '/auth/callback';
+        
       await signInWithGoogle();
-      // Note: The user will be redirected to Google's OAuth page,
-      // and then back to the redirectTo URL specified in signInWithGoogle
+      // The user will be redirected to Google's OAuth page,
+      // and then back to the callback URL which will handle the redirect
     } catch (err) {
       console.error('Google login error:', err);
       setError(err instanceof Error ? err.message : t('googleLoginError'));
       setGoogleLoading(false);
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-green-500 border-r-transparent"></div>
+        <p className="ml-2">Loading...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-100 flex flex-col">
@@ -87,21 +157,17 @@ export default function Login() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <Link href="/" className="flex items-center space-x-3 group">
-              <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 transform group-hover:scale-105">
-                {appSettings?.logo_url ? (
+              <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 transform group-hover:scale-105">
+                {appSettings?.logo_url && (
                   <img
                     src={appSettings.logo_url}
                     alt="Logo"
                     className="w-full h-full object-cover rounded-xl"
                   />
-                ) : (
-                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-                  </svg>
-                )}
+                ) }
               </div>
               <span className="text-xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
-                {appSettings?.company_name || 'B2B Vegetable'}
+                {appSettings?.company_name}
               </span>
             </Link>
             <Link 
@@ -137,7 +203,7 @@ export default function Login() {
             <div className="px-6 sm:px-8 py-8 sm:py-10">
               {/* Success Message */}
               {successMessage && (
-                <div className="mb-6 bg-emerald-50 border border-emerald-200 rounded-2xl p-4 animate-fade-in">
+                <div className="mb-6 bg-emerald-50 border border-emerald-200 rounded-xl p-4 animate-fade-in">
                   <div className="flex items-start">
                     <div className="flex-shrink-0">
                       <svg className="h-5 w-5 text-emerald-500 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
@@ -153,7 +219,7 @@ export default function Login() {
 
               {/* Error Message */}
               {error && (
-                <div className="mb-6 bg-red-50 border border-red-200 rounded-2xl p-4 animate-shake">
+                <div className="mb-6 bg-red-50 border border-red-200 rounded-xl p-4 animate-shake">
                   <div className="flex items-start">
                     <div className="flex-shrink-0">
                       <svg className="h-5 w-5 text-red-500 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
@@ -185,7 +251,7 @@ export default function Login() {
                       id="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="block w-full pl-12 pr-4 py-4 border border-gray-200 rounded-2xl bg-gray-50/50 placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent focus:bg-white transition-all duration-200 text-base"
+                      className="block w-full pl-12 pr-4 py-4 border border-gray-200 rounded-xl bg-gray-50/50 placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent focus:bg-white transition-all duration-200 text-base"
                       placeholder={t('emailPlaceholder')}
                       required
                       autoComplete="email"
@@ -209,7 +275,7 @@ export default function Login() {
                       id="password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="block w-full pl-12 pr-14 py-4 border border-gray-200 rounded-2xl bg-gray-50/50 placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent focus:bg-white transition-all duration-200 text-base"
+                      className="block w-full pl-12 pr-14 py-4 border border-gray-200 rounded-xl bg-gray-50/50 placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent focus:bg-white transition-all duration-200 text-base"
                       placeholder={t('passwordPlaceholder')}
                       required
                       autoComplete="current-password"
@@ -258,7 +324,7 @@ export default function Login() {
                 <button 
                   type="submit" 
                   disabled={loading}
-                  className="w-full flex justify-center items-center py-4 px-6 border border-transparent rounded-2xl shadow-lg text-base font-semibold text-white bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.02] active:scale-[0.98] disabled:hover:scale-100"
+                  className="w-full flex justify-center items-center py-4 px-6 border border-transparent rounded-xl shadow-lg text-base font-semibold text-white bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.02] active:scale-[0.98] disabled:hover:scale-100"
                 >
                   {loading ? (
                     <>
@@ -297,7 +363,7 @@ export default function Login() {
                   type="button"
                   onClick={handleGoogleSignIn}
                   disabled={googleLoading}
-                  className="w-full flex justify-center items-center py-4 px-6 border border-gray-200 rounded-2xl shadow-sm text-base font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.02] active:scale-[0.98] disabled:hover:scale-100"
+                  className="w-full flex justify-center items-center py-4 px-6 border border-gray-200 rounded-xl shadow-sm text-base font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.02] active:scale-[0.98] disabled:hover:scale-100"
                 >
                   {googleLoading ? (
                     <>
@@ -342,7 +408,7 @@ export default function Login() {
             </p>
             <Link 
               href="/register" 
-              className="inline-flex items-center justify-center py-3 px-8 border-2 border-emerald-500 rounded-2xl shadow-sm text-sm font-semibold text-emerald-600 bg-white hover:bg-emerald-50 hover:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-all duration-200 transform hover:scale-105 active:scale-95"
+              className="inline-flex items-center justify-center py-3 px-8 border-2 border-emerald-500 rounded-xl shadow-sm text-sm font-semibold text-emerald-600 bg-white hover:bg-emerald-50 hover:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-all duration-200 transform hover:scale-105 active:scale-95"
             >
               <span>{t('createAccount')}</span>
               <svg className="ml-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

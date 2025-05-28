@@ -274,10 +274,10 @@ export default function DriversPage() {
   // Loading state
   if (loading && drivers.length === 0) {
     return (
-      <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl border border-white/20 p-8 lg:p-12">
+      <div className="bg-white/80 backdrop-blur-lg rounded-lg shadow-2xl border border-white/20 p-6 lg:p-8">
         <div className="flex flex-col items-center justify-center space-y-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500"></div>
-          <p className="text-lg font-medium text-gray-700">{t('loading')}</p>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-500"></div>
+          <p className="text-base font-medium text-gray-700">{t('loading')}</p>
         </div>
       </div>
     );
@@ -286,12 +286,12 @@ export default function DriversPage() {
   // Error state
   if (error) {
     return (
-      <div className="bg-red-50/80 backdrop-blur-lg rounded-3xl shadow-2xl border border-red-200/20 p-6 lg:p-8">
+      <div className="bg-red-50/80 backdrop-blur-lg rounded-lg shadow-2xl border border-red-200/20 p-4 lg:p-6">
         <div className="flex items-center">
-          <svg className="w-6 h-6 text-red-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-4 h-4 text-red-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
-          <p className="text-red-700 font-medium">{error}</p>
+          <p className="text-red-700 font-medium text-sm">{error}</p>
         </div>
       </div>
     );
@@ -300,13 +300,13 @@ export default function DriversPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl border border-white/20 p-6 lg:p-8">
+      <div className="bg-white/80 backdrop-blur-lg rounded-lg shadow-2xl border border-white/20 p-4 lg:p-6">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <h1 className="text-3xl lg:text-4xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
+            <h1 className="text-xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
               {t('title')}
             </h1>
-            <p className="mt-2 text-gray-600 text-lg">
+            <p className="mt-1 text-gray-600 text-base">
               Manage delivery drivers and route assignments
             </p>
           </div>
@@ -318,9 +318,9 @@ export default function DriversPage() {
                 setIsModalOpen(true);
               }}
               disabled={loading}
-              className="px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-2xl hover:from-emerald-600 hover:to-teal-700 transition-all duration-200 shadow-lg hover:shadow-xl font-medium flex items-center space-x-2 disabled:opacity-50"
+              className="px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-lg hover:from-emerald-600 hover:to-teal-700 transition-all duration-200 shadow-lg hover:shadow-xl font-medium flex items-center space-x-2 disabled:opacity-50 text-sm"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
               <span>{t('addDriver')}</span>
@@ -330,23 +330,23 @@ export default function DriversPage() {
       </div>
 
       {/* Search and Statistics */}
-      <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl border border-white/20 p-6 lg:p-8">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+      <div className="bg-white/80 backdrop-blur-lg rounded-lg shadow-2xl border border-white/20 p-4 lg:p-6">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
           {/* Search */}
           <div className="lg:col-span-2">
-            <label htmlFor="search" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="search" className="block text-xs font-medium text-gray-700 mb-1">
               {t('searchDrivers')}
             </label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <svg className="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                <svg className="h-4 w-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
                 </svg>
               </div>
               <input
                 id="search"
                 type="text"
-                className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-2xl leading-5 bg-white/50 backdrop-blur-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200"
+                className="block w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg leading-5 bg-white/50 backdrop-blur-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200 text-sm"
                 placeholder={t('searchPlaceholder')}
                 value={searchTerm}
                 onChange={handleSearchChange}
@@ -356,34 +356,34 @@ export default function DriversPage() {
           </div>
 
           {/* Statistics Cards */}
-          <div className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-2xl p-4">
-            <div className="text-2xl font-bold text-emerald-700">{totalCount}</div>
-            <div className="text-sm text-gray-600">{t('totalDrivers')}</div>
+          <div className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-lg p-3">
+            <div className="text-xl font-bold text-emerald-700">{totalCount}</div>
+            <div className="text-xs text-gray-600">{t('totalDrivers')}</div>
           </div>
           
-          <div className="bg-gradient-to-br from-teal-50 to-cyan-50 rounded-2xl p-4">
-            <div className="text-2xl font-bold text-teal-700">{drivers.filter(d => d.status === 'active').length}</div>
-            <div className="text-sm text-gray-600">{t('activeDrivers')}</div>
+          <div className="bg-gradient-to-br from-teal-50 to-cyan-50 rounded-lg p-3">
+            <div className="text-xl font-bold text-teal-700">{drivers.filter(d => d.status === 'active').length}</div>
+            <div className="text-xs text-gray-600">{t('activeDrivers')}</div>
           </div>
         </div>
       </div>
 
       {/* Drivers Table */}
-      <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl border border-white/20 overflow-hidden">
+      <div className="bg-white/80 backdrop-blur-lg rounded-lg shadow-2xl border border-white/20 overflow-hidden">
         {/* Mobile Card View */}
         <div className="block lg:hidden">
-          <div className="px-6 py-4 border-b border-gray-100">
-            <h3 className="text-lg font-semibold text-gray-900">{t('drivers')}</h3>
+          <div className="px-4 py-2 border-b border-gray-100">
+            <h3 className="text-base font-semibold text-gray-900">{t('drivers')}</h3>
           </div>
           <div className="divide-y divide-gray-100">
             {drivers.length > 0 ? (
               drivers.map((driver) => (
-                <div key={driver.id} className="p-6 hover:bg-emerald-50/50 transition-colors duration-200">
-                  <div className="space-y-4">
+                <div key={driver.id} className="p-4 hover:bg-emerald-50/50 transition-colors duration-200">
+                  <div className="space-y-3">
                     <div className="flex items-center justify-between">
                       <div>
-                        <h4 className="text-lg font-semibold text-gray-900">{driver.name}</h4>
-                        <p className="text-sm text-gray-600">{driver.email}</p>
+                        <h4 className="text-base font-semibold text-gray-900">{driver.name}</h4>
+                        <p className="text-xs text-gray-600">{driver.email}</p>
                       </div>
                       <span
                         className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
@@ -396,33 +396,33 @@ export default function DriversPage() {
                       </span>
                     </div>
                     
-                    <div className="grid grid-cols-2 gap-4 text-sm text-gray-600">
+                    <div className="grid grid-cols-2 gap-3 text-xs text-gray-600">
                       <div>
                         <span className="font-medium">{t('phone')}:</span> {driver.phone || '-'}
                       </div>
                       <div>
-                        <span className="font-medium">{t('route')}:</span> {driver.assigned_route || t('noRoute')}
+                        <span className="font-medium">{t('route')}:</span> {driver.assigned_route}
                       </div>
                     </div>
                     
                     <div className="flex flex-wrap gap-2">
                       <button
                         onClick={() => handleEdit(driver)}
-                        className="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors font-medium text-sm disabled:opacity-50"
+                        className="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors font-medium text-xs disabled:opacity-50"
                         disabled={loading}
                       >
                         {t('edit')}
                       </button>
                       <button
                         onClick={() => handleToggleStatus(driver.id, driver.status)}
-                        className="px-4 py-2 bg-yellow-100 text-yellow-700 rounded-lg hover:bg-yellow-200 transition-colors font-medium text-sm disabled:opacity-50"
+                        className="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-lg hover:bg-yellow-200 transition-colors font-medium text-xs disabled:opacity-50"
                         disabled={loading}
                       >
                         {driver.status === 'active' ? t('deactivate') : t('activate')}
                       </button>
                       <button
                         onClick={() => handleDelete(driver.id)}
-                        className="px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors font-medium text-sm disabled:opacity-50"
+                        className="px-3 py-1 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors font-medium text-xs disabled:opacity-50"
                         disabled={loading}
                       >
                         {t('delete')}
@@ -432,11 +432,11 @@ export default function DriversPage() {
                 </div>
               ))
             ) : (
-              <div className="p-12 text-center">
-                <svg className="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="p-8 text-center">
+                <svg className="w-12 h-12 text-gray-400 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
-                <p className="text-gray-500 font-medium">{t('noDriversFound')}</p>
+                <p className="text-gray-500 font-medium text-sm">{t('noDriversFound')}</p>
               </div>
             )}
           </div>
@@ -448,7 +448,7 @@ export default function DriversPage() {
             <thead className="bg-gradient-to-r from-emerald-50 to-teal-50">
               <tr>
                 <th 
-                  className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-emerald-100 transition-colors duration-200"
+                  className="px-4 py-2 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-emerald-100 transition-colors duration-200"
                   onClick={() => handleSort('name')}
                 >
                   <div className="flex items-center">
@@ -457,7 +457,7 @@ export default function DriversPage() {
                   </div>
                 </th>
                 <th 
-                  className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-emerald-100 transition-colors duration-200"
+                  className="px-4 py-2 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-emerald-100 transition-colors duration-200"
                   onClick={() => handleSort('email')}
                 >
                   <div className="flex items-center">
@@ -466,7 +466,7 @@ export default function DriversPage() {
                   </div>
                 </th>
                 <th 
-                  className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-emerald-100 transition-colors duration-200"
+                  className="px-4 py-2 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-emerald-100 transition-colors duration-200"
                   onClick={() => handleSort('phone')}
                 >
                   <div className="flex items-center">
@@ -474,11 +474,11 @@ export default function DriversPage() {
                     {renderSortIcon('phone')}
                   </div>
                 </th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                <th className="px-4 py-2 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                   {t('assignedRoute')}
                 </th>
                 <th 
-                  className="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-emerald-100 transition-colors duration-200"
+                  className="px-4 py-2 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-emerald-100 transition-colors duration-200"
                   onClick={() => handleSort('status')}
                 >
                   <div className="flex items-center justify-center">
@@ -486,7 +486,7 @@ export default function DriversPage() {
                     {renderSortIcon('status')}
                   </div>
                 </th>
-                <th className="px-6 py-4 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                <th className="px-4 py-2 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">
                   {t('actions')}
                 </th>
               </tr>
@@ -495,21 +495,21 @@ export default function DriversPage() {
               {drivers.length > 0 ? (
                 drivers.map((driver) => (
                   <tr key={driver.id} className="hover:bg-emerald-50/50 transition-colors duration-200">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
+                    <td className="px-4 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
                       {driver.name}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-600">
                       {driver.email}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-600">
                       {driver.phone || '-'}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                      <span className="px-3 py-1 bg-gray-100 text-gray-800 rounded-full text-xs font-medium">
-                        {driver.assigned_route || t('noRoute')}
+                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-600">
+                      <span className="px-3 py-1 text-gray-800 rounded-full text-xs font-medium">
+                        {driver.assigned_route}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-center">
+                    <td className="px-4 py-4 whitespace-nowrap text-center">
                       <span
                         className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
                           driver.status === 'active'
@@ -520,7 +520,7 @@ export default function DriversPage() {
                         {driver.status === 'active' ? t('active') : t('inactive')}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <td className="px-4 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <div className="flex items-center justify-end space-x-2">
                         <button
                           onClick={() => handleEdit(driver)}
@@ -647,7 +647,7 @@ export default function DriversPage() {
                   type="text"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-2xl bg-white/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl bg-white/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200"
                   required
                   disabled={loading}
                 />
@@ -659,7 +659,7 @@ export default function DriversPage() {
                   type="email"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-2xl bg-white/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl bg-white/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200"
                   required
                   disabled={loading}
                 />
@@ -671,7 +671,7 @@ export default function DriversPage() {
                   type="tel"
                   value={formData.phone}
                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-2xl bg-white/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl bg-white/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200"
                   disabled={loading}
                 />
               </div>
@@ -682,7 +682,7 @@ export default function DriversPage() {
                   type="text"
                   value={formData.assigned_route}
                   onChange={(e) => setFormData({ ...formData, assigned_route: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-2xl bg-white/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl bg-white/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200"
                   placeholder={t('routePlaceholder')}
                   disabled={loading}
                 />
@@ -694,7 +694,7 @@ export default function DriversPage() {
                   type="text"
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-2xl bg-white/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl bg-white/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200"
                   disabled={loading}
                   placeholder={editingDriver ? t('passwordPlaceholder') : ""}
                   required={!editingDriver}
@@ -718,14 +718,14 @@ export default function DriversPage() {
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="w-full lg:w-auto px-6 py-3 text-sm font-medium text-gray-700 bg-gray-100 rounded-2xl hover:bg-gray-200 disabled:opacity-50 transition-all duration-200"
+                  className="w-full lg:w-auto px-6 py-3 text-sm font-medium text-gray-700 bg-gray-100 rounded-xl hover:bg-gray-200 disabled:opacity-50 transition-all duration-200"
                   disabled={loading}
                 >
                   {t('cancel')}
                 </button>
                 <button
                   type="submit"
-                  className="w-full lg:w-auto px-6 py-3 text-sm font-medium text-white bg-gradient-to-r from-emerald-500 to-teal-600 rounded-2xl hover:from-emerald-600 hover:to-teal-700 disabled:opacity-50 disabled:from-gray-400 disabled:to-gray-500 shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center space-x-2"
+                  className="w-full lg:w-auto px-6 py-3 text-sm font-medium text-white bg-gradient-to-r from-emerald-500 to-teal-600 rounded-xl hover:from-emerald-600 hover:to-teal-700 disabled:opacity-50 disabled:from-gray-400 disabled:to-gray-500 shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center space-x-2"
                   disabled={loading}
                 >
                   {loading ? (
