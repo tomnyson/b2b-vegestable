@@ -459,6 +459,8 @@
     "orderSubmitted": "Bestellung erfolgreich übermittelt! Bestell-ID:",
     "orderError": "Bestellung konnte nicht übermittelt werden",
     "itemsAdded": "Artikel aus vorheriger Bestellung zum Warenkorb hinzugefügt!",
+    "itemsNoLongerAvailable": "Artikel nicht mehr verfügbar",
+    "allItemsNoLongerAvailable": "Alle gespeicherten Artikel sind nicht mehr verfügbar",
     "orderHistory": "Bestellhistorie",
     "loadingProducts": "Produkte werden geladen...",
     "productsError": "Produkte konnten nicht geladen werden",

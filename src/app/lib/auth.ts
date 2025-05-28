@@ -220,6 +220,44 @@ export async function getUser() {
 }
 
 /**
+ * Safe auth checking utility that doesn't throw on missing sessions
+ */
+export async function safeGetUser(): Promise<User | null> {
+  try {
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+    
+    if (sessionError || !session) {
+      return null;
+    }
+
+    const { data, error } = await supabase.auth.getUser();
+    if (error) {
+      return null;
+    }
+    
+    return data.user;
+  } catch (error) {
+    // Silently handle auth errors
+    return null;
+  }
+}
+
+/**
+ * Safe session checking utility
+ */
+export async function safeGetSession() {
+  try {
+    const { data, error } = await supabase.auth.getSession();
+    if (error) {
+      return null;
+    }
+    return data.session;
+  } catch (error) {
+    return null;
+  }
+}
+
+/**
  * User profile functions
  */
 

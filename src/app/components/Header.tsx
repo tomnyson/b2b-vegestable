@@ -4,7 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { getUser, signOut, getUserProfile } from '../../lib/auth';
+import { getUser, signOut, getUserProfile, getSession, safeGetUser, safeGetSession } from '../../lib/auth';
 import { getAppSettings, AppSettings } from '../lib/settings-api';
 import { useState, useEffect } from 'react';
 import LanguageSwitcher from './LanguageSwitcher';
@@ -22,7 +22,7 @@ export default function Header() {
     async function checkAuth() {
       try {
         const [userData, settings] = await Promise.all([
-          getUser(),
+          safeGetUser(),
           getAppSettings()
         ]);
         

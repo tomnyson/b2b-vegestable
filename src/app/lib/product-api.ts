@@ -57,6 +57,25 @@ export async function getProductById(id: string) {
 }
 
 /**
+ * Fetch a single active product by ID (for store/customer use)
+ */
+export async function getActiveProductById(id: string) {
+  const { data, error } = await supabase
+    .from('products')
+    .select('*')
+    .eq('id', id)
+    .eq('is_active', true)
+    .single();
+
+  if (error) {
+    console.error(`Error fetching active product ${id}:`, error);
+    throw error;
+  }
+  
+  return data as Product;
+}
+
+/**
  * Create a new product
  * @param productData The product data
  * @param imageFile Optional image file to upload
@@ -232,38 +251,40 @@ export async function getPaginatedProducts(
   pageSize: number, 
   sortField: keyof Product = 'name_en', 
   sortDirection: 'asc' | 'desc' = 'asc',
-  filter?: string
-  // categoryFilter?: string // Removed - category column doesn't exist in database
+  filter?: string,
+  active?: boolean // ➕ thêm filter theo trạng thái
 ) {
   let query = supabase
     .from('products')
     .select('*', { count: 'exact' });
-  
-  // Apply category filter if provided
-  // if (categoryFilter) {
-  //   query = query.eq('category', categoryFilter);
-  // }
-  
-  // Apply search filter if provided
-  if (filter) {
-    query = query.or(`name_en.ilike.%${filter}%,name_vi.ilike.%${filter}%,name_tr.ilike.%${filter}%,sku.ilike.%${filter}%`);
+
+  // ➕ Filter theo trạng thái nếu có truyền
+  if (typeof active === 'boolean') {
+    query = query.eq('is_active', active);
   }
-  
-  // Apply sorting
+
+  // 🔍 Áp dụng bộ lọc tìm kiếm nếu có
+  if (filter) {
+    query = query.or(
+      `name_en.ilike.%${filter}%,name_vi.ilike.%${filter}%,name_tr.ilike.%${filter}%,sku.ilike.%${filter}%`
+    );
+  }
+
+  // 🔃 Sắp xếp
   query = query.order(sortField, { ascending: sortDirection === 'asc' });
-  
-  // Apply pagination
+
+  // 📦 Phân trang
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
   query = query.range(from, to);
-  
+
   const { data, error, count } = await query;
 
   if (error) {
     console.error('Error fetching paginated products:', error);
     throw error;
   }
-  
+
   return { 
     products: data as Product[], 
     totalCount: count || 0,
@@ -272,7 +293,6 @@ export async function getPaginatedProducts(
     totalPages: Math.ceil((count || 0) / pageSize)
   };
 }
-
 /**
  * Update product stock quantity after an order is placed
  * @param productId Product ID

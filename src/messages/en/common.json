@@ -163,7 +163,7 @@
     "productNameVietnamese": "Product Name (Vietnamese)",
     "productNameVietnamesePlaceholder": "Nhập tên sản phẩm bằng tiếng Việt",
     "productNameTurkish": "Product Name (Turkish)",
-    "productNameTurkishPlaceholder": "Türkçe ürün adını girin"
+          "productNameTurkishPlaceholder": "Türkçe ürün adını girin"
   },
   "orders": {
     "title": "Order Management",
@@ -402,6 +402,8 @@
     "orderSubmitted": "Order submitted successfully! Order ID:",
     "orderError": "Failed to submit order",
     "itemsAdded": "Items added to cart from previous order!",
+    "itemsNoLongerAvailable": "items no longer available",
+    "allItemsNoLongerAvailable": "All saved items are no longer available",
     "orderHistory": "Order History",
     "products": {
       "title": "Our Products",

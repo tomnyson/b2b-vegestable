@@ -21,16 +21,23 @@ interface ProductListProps {
   isSearching?: boolean; // Optional prop to show search loading state
 }
 
-// Custom debounce function
+// Custom debounce function with cancel method
 function debounce<T extends (...args: any[]) => any>(
   func: T,
   wait: number
-): (...args: Parameters<T>) => void {
+): ((...args: Parameters<T>) => void) & { cancel: () => void } {
   let timeout: NodeJS.Timeout;
-  return (...args: Parameters<T>) => {
+  
+  const debouncedFunction = (...args: Parameters<T>) => {
     clearTimeout(timeout);
     timeout = setTimeout(() => func(...args), wait);
   };
+  
+  debouncedFunction.cancel = () => {
+    clearTimeout(timeout);
+  };
+  
+  return debouncedFunction;
 }
 
 const ProductList: React.FC<ProductListProps> = ({
@@ -55,20 +62,39 @@ const ProductList: React.FC<ProductListProps> = ({
   // State for search input value
   const [inputValue, setInputValue] = useState(searchTerm);
 
+  // Ref to track the latest input value for debounced search
+  const latestInputRef = useRef(searchTerm);
+
   useEffect(() => {
-    setInputValue(searchTerm);
+    // Only update input value if it's different from what user is currently typing
+    if (searchTerm !== latestInputRef.current) {
+      setInputValue(searchTerm);
+      latestInputRef.current = searchTerm;
+    }
   }, [searchTerm]);
 
-  // Debounced search with 300ms delay, memoized with useMemo to avoid recreation on each render
+  // Debounced search with 1000ms delay, memoized with useMemo to avoid recreation on each render
   const debouncedSearch = useMemo(
     () => debounce((term: string) => {
-      onSearch(term);
+      // Only search if this is still the latest input value
+      if (term === latestInputRef.current) {
+        onSearch(term);
+      }
     }, 1000),
     [onSearch]
   );
 
+  // Cleanup debounced function on unmount
+  useEffect(() => {
+    return () => {
+      // Cancel any pending debounced calls when component unmounts
+      debouncedSearch.cancel();
+    };
+  }, [debouncedSearch]);
+
   // Handle search input change
   const handleSearchChange = (value: string) => {
+    latestInputRef.current = value;
     debouncedSearch(value);
   };
 
@@ -163,8 +189,9 @@ const ProductList: React.FC<ProductListProps> = ({
               placeholder={t('products.searchPlaceholder')}
               value={inputValue}
               onChange={(e) => {
-                setInputValue(e.target.value);
-                handleSearchChange(e.target.value);
+                const newValue = e.target.value;
+                setInputValue(newValue);
+                handleSearchChange(newValue);
               }}
               className="block w-full pl-12 pr-4 py-3 sm:py-4 border border-gray-200 rounded-2xl text-sm sm:text-base leading-5 bg-white/80 backdrop-blur-lg placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200 shadow-lg hover:shadow-xl"
             />

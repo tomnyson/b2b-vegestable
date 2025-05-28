@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
-import { Product, getPaginatedProducts, getProductById, getPopularProductIds } from '../../lib/product-api';
+import { Product, getPaginatedProducts, getProductById, getActiveProductById, getPopularProductIds } from '../../lib/product-api';
 import { getUser } from '../../lib/auth';
 import { getCustomerDetailsFromAuth, CustomerDetails, getUserAddresses } from '../../lib/customer-api';
 import { createOrder } from '../../lib/order-api';
@@ -65,7 +65,8 @@ export default function StorePage() {
         itemsPerPage,
         'name_en',
         'asc',
-        searchTerm || undefined
+        searchTerm || undefined,
+        true
       );
       
       setProducts(result.products);
@@ -169,10 +170,11 @@ export default function StorePage() {
           // We need to load the actual product data for each item
           const loadPendingCart = async () => {
             const loadedItems: {product: Product, quantity: number}[] = [];
+            let skippedCount = 0;
             
             for (const item of cartData) {
               try {
-                const product = await getProductById(item.product_id);
+                const product = await getActiveProductById(item.product_id);
                 if (product) {
                   loadedItems.push({
                     product,
@@ -181,6 +183,9 @@ export default function StorePage() {
                 }
               } catch (err) {
                 console.error(`Failed to load product ${item.product_id}:`, err);
+                // Product might be inactive or deleted, skip it
+                console.log(`Skipping inactive or deleted product: ${item.product_id}`);
+                skippedCount++;
               }
             }
             
@@ -207,8 +212,15 @@ export default function StorePage() {
                 return mergedCart;
               });
               
-              // Show success message
-              alert(t('itemsAdded'));
+              // Show success message with info about skipped items
+              if (skippedCount > 0) {
+                toast.success(`${t('itemsAdded')} (${skippedCount} ${t('itemsNoLongerAvailable')})`);
+              } else {
+                toast.success(t('itemsAdded'));
+              }
+            } else if (skippedCount > 0) {
+              // All items were skipped
+              toast.warning(t('allItemsNoLongerAvailable'));
             }
           };
           
@@ -224,18 +236,18 @@ export default function StorePage() {
   }, [isCheckingAuth, user]);
 
   // Load popular products
-  useEffect(() => {
-    async function fetchPopularProducts() {
-      try {
-        const popularIds = await getPopularProductIds(10);
-        setPopularProductIds(popularIds);
-      } catch (err) {
-        console.error('Error fetching popular products:', err);
-      }
-    }
+  // useEffect(() => {
+  //   async function fetchPopularProducts() {
+  //     try {
+  //       const popularIds = await getPopularProductIds(10);
+  //       setPopularProductIds(popularIds);
+  //     } catch (err) {
+  //       console.error('Error fetching popular products:', err);
+  //     }
+  //   }
     
-    fetchPopularProducts();
-  }, []);
+  //   fetchPopularProducts();
+  // }, []);
 
   // Add product to cart
   const addToCart = (product: Product, quantity: number = 1) => {

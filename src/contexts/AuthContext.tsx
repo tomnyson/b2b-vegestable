@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User } from '@supabase/supabase-js';
 import { supabase } from '../app/lib/supabase';
-import { UserProfile, getUser, getUserProfile, signOut } from '../app/lib/auth';
+import { UserProfile, getUser, getUserProfile, signOut, safeGetUser, safeGetSession } from '../app/lib/auth';
 import { useRouter } from 'next/navigation';
 
 interface AuthContextType {
@@ -28,17 +28,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     async function loadUserSession() {
       setIsLoading(true);
       try {
-        // Get current user from Supabase auth
-        const currentUser = await getUser();
+        // Get current user safely
+        const currentUser = await safeGetUser();
         setUser(currentUser);
 
         // If user exists, fetch their profile
         if (currentUser) {
           const userProfile = await getUserProfile(currentUser.id);
           setProfile(userProfile);
+        } else {
+          setProfile(null);
         }
       } catch (error) {
         console.error('Error loading user session:', error);
+        setUser(null);
+        setProfile(null);
       } finally {
         setIsLoading(false);
       }
@@ -53,8 +57,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(session?.user || null);
         
         if (session?.user) {
-          const userProfile = await getUserProfile(session.user.id);
-          setProfile(userProfile);
+          try {
+            const userProfile = await getUserProfile(session.user.id);
+            setProfile(userProfile);
+          } catch (error) {
+            console.error('Error fetching user profile:', error);
+            setProfile(null);
+          }
         } else {
           setProfile(null);
         }

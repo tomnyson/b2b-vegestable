@@ -481,6 +481,8 @@
     "orderSubmitted": "Đặt hàng thành công! Đơn hàng",
     "orderError": "Không thể gửi đơn hàng",
     "itemsAdded": "Sản phẩm từ đơn hàng trước đã được thêm vào giỏ hàng",
+    "itemsNoLongerAvailable": "sản phẩm không còn có sẵn",
+    "allItemsNoLongerAvailable": "Tất cả sản phẩm đã lưu không còn có sẵn",
     "loadingProducts": "Đang tải sản phẩm...",
     "productsError": "Không thể tải sản phẩm",
     "products": {

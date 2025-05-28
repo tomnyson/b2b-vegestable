@@ -40,8 +40,8 @@ export default async function LocaleLayout({
   }
 
   return (
-    <html lang={locale} className={`${inter.className} scroll-smooth`}>
-      <body className="min-h-screen bg-gray-100 overflow-x-hidden">
+    <html lang={locale} className="scroll-smooth">
+      <body className={`${inter.className} min-h-screen bg-gray-100 overflow-x-hidden`}>
         <NextIntlClientProvider locale={locale} messages={messages}>
           <ClientRootLayout>
             {children}
