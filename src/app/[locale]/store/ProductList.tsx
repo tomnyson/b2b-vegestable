@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useCallback, useEffect, useRef } from 'react';
+import React, { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import { Product } from '../../lib/product-api';
 import { formatPriceSync } from '../../lib/settings-api';
@@ -52,11 +52,18 @@ const ProductList: React.FC<ProductListProps> = ({
   // State for quantity inputs
   const [quantities, setQuantities] = useState<Record<string, number>>({});
 
-  // Debounced search with 50ms delay
-  const debouncedSearch = useCallback(
-    debounce((term: string) => {
+  // State for search input value
+  const [inputValue, setInputValue] = useState(searchTerm);
+
+  useEffect(() => {
+    setInputValue(searchTerm);
+  }, [searchTerm]);
+
+  // Debounced search with 300ms delay, memoized with useMemo to avoid recreation on each render
+  const debouncedSearch = useMemo(
+    () => debounce((term: string) => {
       onSearch(term);
-    }, 50),
+    }, 300),
     [onSearch]
   );
 
@@ -154,8 +161,9 @@ const ProductList: React.FC<ProductListProps> = ({
             <input
               type="text"
               placeholder={t('products.searchPlaceholder')}
-              value={searchTerm}
+              value={inputValue}
               onChange={(e) => {
+                setInputValue(e.target.value);
                 handleSearchChange(e.target.value);
               }}
               className="block w-full pl-12 pr-4 py-3 sm:py-4 border border-gray-200 rounded-2xl text-sm sm:text-base leading-5 bg-white/80 backdrop-blur-lg placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200 shadow-lg hover:shadow-xl"
