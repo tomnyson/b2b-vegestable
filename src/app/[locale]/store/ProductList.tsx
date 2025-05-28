@@ -63,7 +63,7 @@ const ProductList: React.FC<ProductListProps> = ({
   const debouncedSearch = useMemo(
     () => debounce((term: string) => {
       onSearch(term);
-    }, 300),
+    }, 1000),
     [onSearch]
   );
 
