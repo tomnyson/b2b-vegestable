@@ -20,6 +20,8 @@ interface AddressSuggestion {
   address: string;
   longitude?: number;
   latitude?: number;
+  city?: string;
+  postcode?: string;
 }
 
 // TabType definition
@@ -35,10 +37,6 @@ interface NotificationSettings {
 
 // Types
 
-
-
-
-
 interface Address {
   id: string;
   address: string;
@@ -46,8 +44,6 @@ interface Address {
   longitude?: number;
   latitude?: number;
 }
-
-
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -66,7 +62,10 @@ export default function ProfilePage() {
     name: '',
     email: '',
     phone: '',
-    // address: '', // This seems to be superseded by the addresses array
+    business_name: '',
+    city: '',
+    zip_code: '',
+    address: ''
   });
 
   // Multiple addresses state
@@ -140,17 +139,22 @@ export default function ProfilePage() {
           router.push(`/${locale}/login`);
           return;
         }
-
         setUser(userData);
 
         const details = await getCustomerDetailsFromAuth(userData);
         if (details) {
           setCustomerDetails(details);
+          console.log('details', details);
           setFormData({
             name: details.name || '',
             email: details.email || '', // email comes from auth usually, but details can supplement
             phone: details.phone || '',
+            address: details.address || '',
+            business_name: '',
+            city: '',
+            zip_code: '',
           });
+          setNewAddress(details.address || '');
 
           // Initialize addresses from customer details if available
           const userAddresses = await getUserAddresses(userData.id);
@@ -208,8 +212,6 @@ export default function ProfilePage() {
   const handleAddressInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const query = e.target.value;
     setNewAddress(query);
-    // setAddressQuery(query); // Removed as newAddress serves this purpose
-
     if (suggestionTimeoutRef.current) {
       clearTimeout(suggestionTimeoutRef.current);
     }
@@ -246,7 +248,9 @@ export default function ProfilePage() {
               name: props.name,
               address: parts.join(', '),
               longitude: coordinates[0],
-              latitude: coordinates[1]
+              latitude: coordinates[1],
+              city: props.city,
+              postcode: props.postcode
             };
           });
 
@@ -267,6 +271,17 @@ export default function ProfilePage() {
       longitude: suggestion.longitude,
       latitude: suggestion.latitude
     });
+    
+    // Auto-fill city and zip code if available
+    if (suggestion.city || suggestion.postcode) {
+      setFormData(prev => ({
+        ...prev,
+        city: suggestion.city || prev.city,
+        zip_code: suggestion.postcode || prev.zip_code
+      }));
+      toast.success('Address details auto-filled!');
+    }
+    
     setShowSuggestions(false);
     setSuggestions([]);
   };
@@ -421,6 +436,9 @@ export default function ProfilePage() {
       const profileUpdateData: Partial<UserProfile> = { // Use Partial for flexibility
         name: formData.name,
         phone: formData.phone,
+        business_name: formData.business_name,
+        city: formData.city,
+        zip_code: formData.zip_code,
         address: defaultAddress?.address || '', // Main address string for compatibility if needed
         // longitude: defaultAddress?.longitude, // If main longitude/latitude are still needed
         // latitude: defaultAddress?.latitude,  // on the root UserProfile object
@@ -783,6 +801,53 @@ export default function ProfilePage() {
                   />
                 </div>
 
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  <div>
+                    <label htmlFor="business_name" className="block text-sm font-medium text-gray-700 mb-2">
+                      Business Name
+                    </label>
+                    <input
+                      type="text"
+                      id="business_name"
+                      name="business_name"
+                      value={formData.business_name}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl bg-white/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200"
+                      placeholder="Enter business name (optional)"
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-2">
+                      City
+                    </label>
+                    <input
+                      type="text"
+                      id="city"
+                      name="city"
+                      value={formData.city}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl bg-white/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200"
+                      placeholder="City (optional)"
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="zip_code" className="block text-sm font-medium text-gray-700 mb-2">
+                      Zip Code
+                    </label>
+                    <input
+                      type="text"
+                      id="zip_code"
+                      name="zip_code"
+                      value={formData.zip_code}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl bg-white/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200"
+                      placeholder="Zip code (optional)"
+                    />
+                  </div>
+                </div>
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-3">
                     {t('deliveryAddresses')}
@@ -1039,7 +1104,7 @@ export default function ProfilePage() {
         <div className="max-w-6xl mx-auto">
           {user && (
             <div className="bg-white/60 backdrop-blur-md rounded-3xl shadow-xl p-6 mb-8 border border-white/30">
-              <h1 className="text-3xl font-bold text-gray-800">
+              <h1 className="text-2xl font-bold text-gray-800">
                 {t('welcome')}, {customerDetails?.name || user?.email || t('guest')}!
               </h1>
               <p className="text-gray-600 mt-1">{t('manageInfo')}</p>

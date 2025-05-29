@@ -23,6 +23,7 @@ import {
   getDashboardSummary,
   getTodaysOrders
 } from '../../lib/dashboard-api';
+import Loading from '@/app/components/Loading';
 
 
 // Register ChartJS components
@@ -263,12 +264,7 @@ export default function DashboardPage() {
       </div>
       
       {loading ? (
-        <div className="bg-white/80 backdrop-blur-lg rounded-lg shadow-2xl border border-white/20 p-6 lg:p-8">
-          <div className="flex flex-col items-center justify-center space-y-4">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-500"></div>
-            <p className="text-base font-medium text-gray-700">{t('loading')}</p>
-          </div>
-        </div>
+        <Loading />
       ) : error ? (
         <div className="bg-red-50/80 backdrop-blur-lg rounded-lg shadow-2xl border border-red-200/20 p-4 lg:p-6">
           <div className="flex items-center">

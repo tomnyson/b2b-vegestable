@@ -9,6 +9,9 @@ import { getOrderFilterRangeByDelivery, getNextDeliveryDate, formatDate } from '
 import { getDrivers } from '../../../lib/driver-api';
 import OrderDetailModal from './OrderDetailModal';
 import toast from 'react-hot-toast';
+import Loading from '@/app/components/Loading';
+import Pagination from '@/app/components/Pagination';
+
 
 
 
@@ -24,10 +27,16 @@ export default function OrdersPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalOrders, setTotalOrders] = useState(0);
   const [statusFilter, setStatusFilter] = useState('');
-  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [itemsPerPage, setItemsPerPage] = useState(12);
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const [deliveryFilter, setDeliveryFilter] = useState<'today' | 'tomorrow' | null>(null);
+  const [totalCount, setTotalCount] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+
+  const handleItemsPerPageChange = (newItemsPerPage: number) => {
+    setItemsPerPage(newItemsPerPage);
+  };
 
   // Get next delivery date based on settings
 
@@ -94,9 +103,9 @@ export default function OrdersPage() {
             to: dateRange.to.toISOString()
           } : undefined
         });
-
         setOrders(result.orders);
-        setTotalOrders(result.count);
+        setTotalPages(Math.ceil(result.count / itemsPerPage));
+        setTotalCount(result.count);
 
         // Get available drivers
         const driversData = await getDrivers();
@@ -171,7 +180,6 @@ export default function OrdersPage() {
   };
 
   // Calculate total pages
-  const totalPages = Math.ceil(totalOrders / itemsPerPage);
 
   // Handle clearing all filters
   const handleClearFilters = () => {
@@ -231,6 +239,7 @@ export default function OrdersPage() {
         });
         setOrders(result.orders);
         setTotalOrders(result.count);
+        setTotalCount(result.count);
       } catch (err) {
         console.error('Error filtering orders:', err);
         toast.error(t('loadingError'));
@@ -241,12 +250,7 @@ export default function OrdersPage() {
   // Loading state
   if (loading && orders.length === 0) {
     return (
-      <div className="bg-white/80 backdrop-blur-lg rounded-lg shadow-2xl border border-white/20 p-6 lg:p-8">
-        <div className="flex flex-col items-center justify-center space-y-4">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-500"></div>
-          <p className="text-base font-medium text-gray-700">{t('loading')}</p>
-        </div>
-      </div>
+      <Loading />
     );
   }
 
@@ -532,28 +536,28 @@ export default function OrdersPage() {
                 <table className="min-w-full divide-y divide-gray-100">
                   <thead className="bg-gradient-to-r from-emerald-50 to-teal-50">
                     <tr>
-                      <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                      <th scope="col" className="px-6 py-2 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                         STT
                       </th>
-                      <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                      <th scope="col" className="px-6 py-2 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                         {t('date')}
                       </th>
-                      <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                      <th scope="col" className="px-6 py-2 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                         {t('deliveryDate')}
                       </th>
-                      <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                      <th scope="col" className="px-6 py-2 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                         {t('customer')}
                       </th>
-                      {/* <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                      {/* <th scope="col" className="px-6 py-2 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                       {t('total')}
                     </th> */}
-                      <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                      <th scope="col" className="px-6 py-2 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                         {tCommon('labels.status')}
                       </th>
-                      <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                      <th scope="col" className="px-6 py-2 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                         {t('driver')}
                       </th>
-                      <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                      <th scope="col" className="px-6 py-2 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                         {t('actions')}
                       </th>
                     </tr>
@@ -561,13 +565,13 @@ export default function OrdersPage() {
                   <tbody className="bg-white/50 divide-y divide-gray-100">
                     {orders.map((order, index) => (
                       <tr key={order.id} className="hover:bg-emerald-50/50 transition-colors duration-200">
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
+                        <td className="px-6 py-2 whitespace-nowrap text-sm font-semibold text-gray-900">
                           #{((currentPage - 1) * itemsPerPage) + index + 1}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                        <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-600">
                           {formatDate(order.order_date)}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                        <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-600">
                           {order.delivery_date != null
                             ? formatDate(order.delivery_date)
                             : formatDate(getNextDeliveryDate(
@@ -576,14 +580,14 @@ export default function OrdersPage() {
                                 settings?.delivery_days
                               ).toISOString())}
                         </td>
-                        <td className="px-6 py-4 text-sm text-gray-600 max-w-xs">
+                        <td className="px-6 py-2 text-sm text-gray-600 max-w-xs">
                           <div className="font-medium text-gray-900">{order.customer?.email || (order.user_id ? order.user_id : t('guestOrder'))}</div>
                           <div className="text-xs text-gray-500 truncate">{order.delivery_address}</div>
                         </td>
-                        {/* <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-semibold">
+                        {/* <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-900 font-semibold">
                         ${order.total_amount.toFixed(2)}
                       </td> */}
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-6 py-2 whitespace-nowrap">
                           <select
                             className={`min-w-[120px] px-3 py-1.5 text-xs font-medium rounded-xl border-0 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all duration-200 ${order.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
                                 order.status === 'processing' ? 'bg-blue-100 text-blue-800' :
@@ -599,7 +603,7 @@ export default function OrdersPage() {
                             <option value="cancelled">{t('status.cancelled')}</option>
                           </select>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm">
+                        <td className="px-6 py-2 whitespace-nowrap text-sm">
                           <select
                             className="block w-full min-w-[160px] px-3 py-2 text-sm border border-gray-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed"
                             value={order.assigned_driver_id || ''}
@@ -614,7 +618,7 @@ export default function OrdersPage() {
                             ))}
                           </select>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <td className="px-6 py-2 whitespace-nowrap text-sm font-medium">
                           <button
                             className="text-emerald-600 hover:text-emerald-900 p-2 hover:bg-emerald-50 rounded-lg transition-colors"
                             onClick={() => handleViewDetails(order.id!)}
@@ -632,57 +636,19 @@ export default function OrdersPage() {
                 </table>
               </div>
             </div>
-
-            {/* Pagination */}
-            {totalPages > 1 && (
-              <div className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-2xl border border-white/20 p-6">
-                <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
-                  <div className="text-sm text-gray-700">
-                    {t('showing')} <span className="font-semibold">{((currentPage - 1) * itemsPerPage) + 1}</span> {t('to')}{' '}
-                    <span className="font-semibold">{Math.min(currentPage * itemsPerPage, totalOrders)}</span> {t('of')}{' '}
-                    <span className="font-semibold">{totalOrders}</span> {t('orders')}
-                  </div>
-
-                  <div className="flex items-center space-x-2">
-                    <button
-                      onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                      disabled={currentPage <= 1}
-                      className={`px-4 py-2 rounded-xl border font-medium transition-all duration-200 ${currentPage <= 1
-                          ? 'border-gray-200 text-gray-400 cursor-not-allowed bg-gray-50'
-                          : 'border-emerald-300 text-emerald-700 hover:bg-emerald-50 hover:border-emerald-400'
-                        }`}
-                    >
-                      <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                      </svg>
-                      {t('previous')}
-                    </button>
-
-                    <div className="flex items-center space-x-1">
-                      <span className="px-4 py-2 text-sm font-medium text-gray-700">
-                        {t('page')} {currentPage} {t('of')} {totalPages}
-                      </span>
-                    </div>
-
-                    <button
-                      onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-                      disabled={currentPage >= totalPages}
-                      className={`px-4 py-2 rounded-xl border font-medium transition-all duration-200 ${currentPage >= totalPages
-                          ? 'border-gray-200 text-gray-400 cursor-not-allowed bg-gray-50'
-                          : 'border-emerald-300 text-emerald-700 hover:bg-emerald-50 hover:border-emerald-400'
-                        }`}
-                    >
-                      {t('next')}
-                      <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              totalCount={totalCount}
+              itemsPerPage={itemsPerPage}
+              onPageChange={setCurrentPage}
+              onItemsPerPageChange={handleItemsPerPageChange}
+              t={tCommon}
+              itemName="orders"
+            />
           </>
         )}
+        
 
         {/* Order Detail Modal */}
         {detailModalOpen && selectedOrder && (
@@ -698,12 +664,7 @@ export default function OrdersPage() {
 
         {/* Loading overlay for order details */}
         {loadingOrderDetails && (
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-            <div className="bg-white/90 backdrop-blur-lg rounded-2xl shadow-2xl p-8 flex flex-col items-center border border-white/20">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500 mb-4"></div>
-              <p className="text-lg font-medium text-gray-700">{t('loadingOrderDetails')}</p>
-            </div>
-          </div>
+          <Loading />
         )}
       </div>
     </RouteProtection>

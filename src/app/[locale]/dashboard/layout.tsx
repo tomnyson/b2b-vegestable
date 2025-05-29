@@ -8,6 +8,7 @@ import { getAppSettings, AppSettings } from '../../lib/settings-api';
 import { useTranslations } from 'next-intl';
 import LanguageSwitcher from '@/app/components/LanguageSwitcher';
 import { Toaster } from 'react-hot-toast';
+import Loading from '@/app/components/Loading';
 
 export default function DashboardLayout({
   children,
@@ -162,12 +163,7 @@ export default function DashboardLayout({
   // Show loading state
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50">
-        <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl border border-white/20 p-8 flex items-center space-x-4">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-500"></div>
-          <p className="text-lg font-medium text-gray-700">{t('labels.loading')}</p>
-        </div>
-      </div>
+      <Loading />
     );
   }
 

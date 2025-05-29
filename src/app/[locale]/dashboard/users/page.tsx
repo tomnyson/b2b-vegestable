@@ -1,19 +1,36 @@
 'use client';
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 import { User, getPaginatedUsers, createUser, updateUser, deleteUser, toggleUserStatus, updateUserPassword } from '../../../lib/users-api';
 import ImportUserModal from './ImportUserModal';
 import { toast } from 'react-toastify';
+import Switch from '../../../components/Switch';
+import Loading from '@/app/components/Loading';
+import Pagination from '@/app/components/Pagination';
 
 type SortField = 'name' | 'email' | 'phone' | 'address' | 'role' | 'status';
 type SortDirection = 'asc' | 'desc';
 
+// Address suggestion interface
+interface AddressSuggestion {
+  name: string;
+  address: string;
+  longitude?: number;
+  latitude?: number;
+  city?: string;
+  postcode?: string;
+  street?: string;
+  housenumber?: string;
+}
+
 export default function UsersPage() {
   const t = useTranslations('users');
+  const tCommon = useTranslations('common');
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
@@ -23,6 +40,7 @@ export default function UsersPage() {
     email: '',
     phone: '',
     address: '',
+    business_name: '',
     city: '',
     zip_code: '',
     notes: '',
@@ -43,7 +61,13 @@ export default function UsersPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
-  const itemsPerPage = 10;
+
+  // Address suggestion state
+  const [addressSuggestions, setAddressSuggestions] = useState<AddressSuggestion[]>([]);
+  const [showAddressSuggestions, setShowAddressSuggestions] = useState(false);
+  const [isSearchingAddress, setIsSearchingAddress] = useState(false);
+  const addressTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const addressSuggestionsRef = useRef<HTMLDivElement>(null);
 
   // Debounce search query
   useEffect(() => {
@@ -169,20 +193,7 @@ export default function UsersPage() {
       setTotalPages(result.totalPages);
       setTotalCount(result.totalCount);
 
-      setIsModalOpen(false);
-      setEditingUser(null);
-      setFormData({
-        name: '',
-        email: '',
-        phone: '',
-        address: '',
-        city: '',
-        zip_code: '',
-        notes: '',
-        password: '',
-        role: 'customer',
-        status: 'active'
-      });
+      closeModal();
     } catch (err) {
       console.error('Error saving user:', err);
       alert(t('saveError'));
@@ -198,6 +209,7 @@ export default function UsersPage() {
       email: user.email,
       phone: user.phone || '',
       address: user.address || '',
+      business_name: user.business_name || '',
       city: user.city || '',
       zip_code: user.zip_code || '',
       notes: user.notes || '',
@@ -206,6 +218,34 @@ export default function UsersPage() {
       status: user.status,
     });
     setIsModalOpen(true);
+    // Reset address suggestions
+    setAddressSuggestions([]);
+    setShowAddressSuggestions(false);
+  };
+
+  // Helper function to close modal and reset state
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setEditingUser(null);
+    setFormData({
+      name: '',
+      email: '',
+      phone: '',
+      address: '',
+      business_name: '',
+      city: '',
+      zip_code: '',
+      notes: '',
+      password: '',
+      role: 'customer',
+      status: 'active'
+    });
+    // Clear address suggestions
+    setAddressSuggestions([]);
+    setShowAddressSuggestions(false);
+    if (addressTimeoutRef.current) {
+      clearTimeout(addressTimeoutRef.current);
+    }
   };
 
   const handleDelete = async (id: string) => {
@@ -235,28 +275,117 @@ export default function UsersPage() {
     }
   };
 
-  const handleToggleStatus = async (id: string, currentStatus: User['status']) => {
+  // Handle status toggle
+  const handleToggleStatus = async (id: string, newStatus: User['status']) => {
     try {
       setLoading(true);
-      await toggleUserStatus(id, currentStatus);
+      await toggleUserStatus(id, newStatus);
 
-      // Refresh user list
-      const result = await getPaginatedUsers(
-        currentPage,
-        itemsPerPage,
-        sortField,
-        sortDirection,
-        searchTerm || undefined
+      // Update the local state
+      setUsers(prevUsers =>
+        prevUsers.map(user =>
+          user.id === id ? { ...user, status: newStatus } : user
+        )
       );
 
-      setUsers(result.users);
     } catch (err) {
       console.error('Error toggling user status:', err);
-      alert(t('statusError'));
+      toast.error(t('statusError'));
     } finally {
       setLoading(false);
     }
   };
+
+  // Address suggestion functions
+  const handleAddressInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const query = e.target.value;
+    setFormData({ ...formData, address: query });
+
+    if (addressTimeoutRef.current) {
+      clearTimeout(addressTimeoutRef.current);
+    }
+
+    if (query.length > 2) {
+      addressTimeoutRef.current = setTimeout(() => {
+        fetchAddressSuggestions(query);
+      }, 500);
+    } else {
+      setAddressSuggestions([]);
+      setShowAddressSuggestions(false);
+    }
+  };
+
+  const fetchAddressSuggestions = async (query: string) => {
+    if (query.length < 3) return;
+
+    try {
+      setIsSearchingAddress(true);
+      const response = await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=5`);
+      const data = await response.json();
+
+      if (data && data.features) {
+        const suggestions: AddressSuggestion[] = data.features
+          .filter((feature: any) => feature.properties.name)
+          .map((feature: any) => {
+            const props = feature.properties;
+            const parts = [
+              props.name, props.street, props.housenumber, props.postcode, props.city, props.state, props.country
+            ].filter(Boolean);
+
+            const coordinates = feature.geometry?.coordinates || [];
+            return {
+              name: props.name,
+              address: parts.join(', '),
+              longitude: coordinates[0],
+              latitude: coordinates[1],
+              city: props.city,
+              postcode: props.postcode,
+              street: props.street,
+              housenumber: props.housenumber
+            };
+          });
+
+        setAddressSuggestions(suggestions);
+        setShowAddressSuggestions(suggestions.length > 0);
+      }
+    } catch (error) {
+      console.error('Error fetching address suggestions:', error);
+      toast.error('Error fetching address suggestions');
+    } finally {
+      setIsSearchingAddress(false);
+    }
+  };
+
+  const handleSelectAddressSuggestion = (suggestion: AddressSuggestion) => {
+    // Split the address into components
+    const streetAddress = [suggestion.street, suggestion.housenumber].filter(Boolean).join(' ');
+    const city = suggestion.city || '';
+    const zipCode = suggestion.postcode || '';
+    
+    setFormData({
+      ...formData,
+      address: streetAddress || suggestion.address,
+      city: city,
+      zip_code: zipCode
+    });
+    
+    setShowAddressSuggestions(false);
+    setAddressSuggestions([]);
+    toast.success('Address automatically filled!');
+  };
+
+  // Handle click outside to close suggestions
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (addressSuggestionsRef.current && !addressSuggestionsRef.current.contains(event.target as Node)) {
+        setShowAddressSuggestions(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   // Handle search input with debounce
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -286,6 +415,11 @@ export default function UsersPage() {
     }
   };
 
+  const handleItemsPerPageChange = (newItemsPerPage: number) => {
+    setItemsPerPage(newItemsPerPage);
+    setCurrentPage(1); // Reset to first page when changing items per page
+  };
+
   // Render sort indicator
   const renderSortIcon = (field: SortField) => {
     if (sortField !== field) {
@@ -310,12 +444,7 @@ export default function UsersPage() {
   // Loading state
   if (loading && users.length === 0) {
     return (
-      <div className="bg-white/80 backdrop-blur-lg rounded-lg shadow-2xl border border-white/20 p-6 lg:p-8">
-        <div className="flex flex-col items-center justify-center space-y-4">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-500"></div>
-          <p className="text-base font-medium text-gray-700">{t('loading')}</p>
-        </div>
-      </div>
+      <Loading />
     );
   }
 
@@ -365,6 +494,7 @@ export default function UsersPage() {
                   email: '',
                   phone: '',
                   address: '',
+                  business_name: '',
                   city: '',
                   zip_code: '',
                   notes: '',
@@ -373,6 +503,9 @@ export default function UsersPage() {
                   status: 'active'
                 });
                 setIsModalOpen(true);
+                // Reset address suggestions
+                setAddressSuggestions([]);
+                setShowAddressSuggestions(false);
               }}
               disabled={loading}
               className="px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-lg hover:from-emerald-600 hover:to-teal-700 transition-all duration-200 shadow-lg hover:shadow-xl font-medium flex items-center space-x-2 disabled:opacity-50 text-sm"
@@ -441,20 +574,17 @@ export default function UsersPage() {
             {users.length > 0 ? (
               users.map((user) => (
                 <div key={user.id} className="p-4 hover:bg-emerald-50/50 transition-colors duration-200">
-                  <div className="space-y-3">
+                  <div className="space-y-2">
                     <div className="flex items-center justify-between">
                       <div>
                         <h4 className="text-base font-semibold text-gray-900">{user.name}</h4>
                         <p className="text-xs text-gray-600">{user.email}</p>
                       </div>
-                      <span
-                        className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${user.status === 'active'
-                            ? 'bg-emerald-100 text-emerald-800'
-                            : 'bg-red-100 text-red-800'
-                          }`}
-                      >
-                        {user.status === 'active' ? t('active') : t('inactive')}
-                      </span>
+                      <Switch
+                        checked={user.status === 'active'}
+                        onChange={(checked) => handleToggleStatus(user.id, checked ? 'active' : 'inactive')}
+                        disabled={loading}
+                      />
                     </div>
 
                     <div className="grid grid-cols-2 gap-3 text-xs text-gray-600">
@@ -479,13 +609,6 @@ export default function UsersPage() {
                         disabled={loading}
                       >
                         {t('edit')}
-                      </button>
-                      <button
-                        onClick={() => handleToggleStatus(user.id, user.status)}
-                        className="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-lg hover:bg-yellow-200 transition-colors font-medium text-xs disabled:opacity-50"
-                        disabled={loading}
-                      >
-                        {user.status === 'active' ? t('deactivate') : t('activate')}
                       </button>
                       <button
                         onClick={() => handleDelete(user.id)}
@@ -515,7 +638,7 @@ export default function UsersPage() {
             <thead className="bg-gradient-to-r from-emerald-50 to-teal-50">
               <tr>
                 <th
-                  className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-emerald-100 transition-colors duration-200"
+                  className="px-6 py-2 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-emerald-100 transition-colors duration-200"
                   onClick={() => handleSort('name')}
                 >
                   <div className="flex items-center">
@@ -524,7 +647,7 @@ export default function UsersPage() {
                   </div>
                 </th>
                 <th
-                  className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-emerald-100 transition-colors duration-200"
+                  className="px-6 py-2 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-emerald-100 transition-colors duration-200"
                   onClick={() => handleSort('email')}
                 >
                   <div className="flex items-center">
@@ -533,7 +656,7 @@ export default function UsersPage() {
                   </div>
                 </th>
                 <th
-                  className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-emerald-100 transition-colors duration-200"
+                  className="px-6 py-2 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-emerald-100 transition-colors duration-200"
                   onClick={() => handleSort('phone')}
                 >
                   <div className="flex items-center">
@@ -542,7 +665,7 @@ export default function UsersPage() {
                   </div>
                 </th>
                 <th
-                  className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-emerald-100 transition-colors duration-200"
+                  className="px-6 py-2 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-emerald-100 transition-colors duration-200"
                   onClick={() => handleSort('address')}
                 >
                   <div className="flex items-center">
@@ -551,7 +674,7 @@ export default function UsersPage() {
                   </div>
                 </th>
                 <th
-                  className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-emerald-100 transition-colors duration-200"
+                  className="px-6 py-2 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-emerald-100 transition-colors duration-200"
                   onClick={() => handleSort('role')}
                 >
                   <div className="flex items-center">
@@ -560,7 +683,7 @@ export default function UsersPage() {
                   </div>
                 </th>
                 <th
-                  className="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-emerald-100 transition-colors duration-200"
+                  className="px-6 py-2 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-emerald-100 transition-colors duration-200"
                   onClick={() => handleSort('status')}
                 >
                   <div className="flex items-center justify-center">
@@ -577,35 +700,32 @@ export default function UsersPage() {
               {users.length > 0 ? (
                 users.map((user) => (
                   <tr key={user.id} className="hover:bg-emerald-50/50 transition-colors duration-200">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
+                    <td className="px-6 py-2 whitespace-nowrap text-sm font-semibold text-gray-900">
                       {user.name}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                    <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-600">
                       {user.email}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                    <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-600">
                       {user.phone || '-'}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                    <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-600">
                     {user.address ? (user.address.length >50 ? `${user.address.substring(0, 50)}...` : user.address) : '-'}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                    <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-600">
                       <span className="px-3 py-1 bg-gray-100 text-gray-800 rounded-full text-xs font-medium">
                         {user.role === 'customer' ? t('customer') :
                           user.role === 'driver' ? t('driver') : t('admin')}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-center">
-                      <span
-                        className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${user.status === 'active'
-                            ? 'bg-emerald-100 text-emerald-800'
-                            : 'bg-red-100 text-red-800'
-                          }`}
-                      >
-                        {user.status === 'active' ? t('active') : t('inactive')}
-                      </span>
+                    <td className="px-6 py-2 whitespace-nowrap text-center">
+                      <Switch
+                        checked={user.status === 'active'}
+                        onChange={(checked) => handleToggleStatus(user.id, checked ? 'active' : 'inactive')}
+                        disabled={loading}
+                      />
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <td className="px-6 py-2 whitespace-nowrap text-right text-sm font-medium">
                       <div className="flex items-center justify-end space-x-2">
                         <button
                           onClick={() => handleEdit(user)}
@@ -615,16 +735,6 @@ export default function UsersPage() {
                         >
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                          </svg>
-                        </button>
-                        <button
-                          onClick={() => handleToggleStatus(user.id, user.status)}
-                          className="text-yellow-600 hover:text-yellow-900 p-2 hover:bg-yellow-50 rounded-lg transition-colors disabled:opacity-50"
-                          disabled={loading}
-                          title={user.status === 'active' ? t('deactivate') : t('activate')}
-                        >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 9l4-4 4 4m0 6l-4 4-4-4" />
                           </svg>
                         </button>
                         <button
@@ -659,55 +769,22 @@ export default function UsersPage() {
       </div>
 
       {/* Pagination */}
-      <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl border border-white/20 p-6">
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
-          <div className="text-sm text-gray-700">
-            {t('showing')} <span className="font-semibold">{users.length}</span> {t('of')}{' '}
-            <span className="font-semibold">{totalCount}</span> {t('users')}
-          </div>
-          <div className="flex items-center space-x-2">
-            <button
-              onClick={prevPage}
-              disabled={currentPage <= 1 || loading}
-              className={`px-4 py-2 rounded-xl border font-medium transition-all duration-200 ${currentPage <= 1 || loading
-                  ? 'border-gray-200 text-gray-400 cursor-not-allowed bg-gray-50'
-                  : 'border-emerald-300 text-emerald-700 hover:bg-emerald-50 hover:border-emerald-400'
-                }`}
-            >
-              <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-              {t('previous')}
-            </button>
-
-            <div className="flex items-center space-x-1">
-              <span className="px-4 py-2 text-sm font-medium text-gray-700">
-                {t('page')} {currentPage} {t('of')} {totalPages || 1}
-              </span>
-            </div>
-
-            <button
-              onClick={nextPage}
-              disabled={currentPage >= totalPages || loading}
-              className={`px-4 py-2 rounded-xl border font-medium transition-all duration-200 ${currentPage >= totalPages || loading
-                  ? 'border-gray-200 text-gray-400 cursor-not-allowed bg-gray-50'
-                  : 'border-emerald-300 text-emerald-700 hover:bg-emerald-50 hover:border-emerald-400'
-                }`}
-            >
-              {t('next')}
-              <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </button>
-          </div>
-        </div>
-      </div>
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        totalCount={totalCount}
+        itemsPerPage={itemsPerPage}
+        onPageChange={setCurrentPage}
+        onItemsPerPageChange={handleItemsPerPageChange}
+        t={tCommon}
+        itemName="users"
+      />
 
       {/* Modal */}
       {isModalOpen && (
         <div
           className="fixed inset-0 flex items-center justify-center z-50 p-6 sm:p-8 lg:p-12"
-          onClick={(e) => e.target === e.currentTarget && setIsModalOpen(false)}
+          onClick={(e) => e.target === e.currentTarget && closeModal()}
         >
           <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[92vh] overflow-hidden flex flex-col border border-gray-100 backdrop-blur-sm">
             {/* Header */}
@@ -716,7 +793,7 @@ export default function UsersPage() {
                 👤 {editingUser ? t('editUser') : t('addNewUser')}
               </h2>
               <button
-                onClick={() => setIsModalOpen(false)}
+                onClick={closeModal}
                 className="text-gray-500 hover:text-gray-700 p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200"
                 disabled={loading}
               >
@@ -732,7 +809,7 @@ export default function UsersPage() {
                 {/* Personal Information Section */}
                 <div className="bg-blue-50 rounded-xl p-5">
                   <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-                    👤 Personal Information
+                    👤 {t('personalInformation')}
                   </h3>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -775,6 +852,18 @@ export default function UsersPage() {
                     </div>
 
                     <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">{t('businessName')}</label>
+                      <input
+                        type="text"
+                        value={formData.business_name}
+                        onChange={(e) => setFormData({ ...formData, business_name: e.target.value })}
+                        className="w-full px-4 py-3 border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200"
+                        disabled={loading}
+                        placeholder="Enter business name (optional)"
+                      />
+                    </div>
+
+                    <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">{t('role')} *</label>
                       <select
                         value={formData.role}
@@ -797,16 +886,49 @@ export default function UsersPage() {
                   </h3>
 
                   <div className="space-y-4">
-                    <div>
+                    <div className="relative">
                       <label className="block text-sm font-medium text-gray-700 mb-2">{t('address')}</label>
-                      <input
-                        type="text"
-                        value={formData.address}
-                        onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                        className="w-full px-4 py-3 border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200"
-                        disabled={loading}
-                        placeholder="Enter street address (optional)"
-                      />
+                      <div className="relative">
+                        <input
+                          type="text"
+                          value={formData.address}
+                          onChange={handleAddressInputChange}
+                          className="w-full px-4 py-3 border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200"
+                          disabled={loading}
+                          placeholder="Start typing to search for address..."
+                        />
+                        {isSearchingAddress && (
+                          <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                            <div className="w-4 h-4 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+                          </div>
+                        )}
+                      </div>
+
+                      {showAddressSuggestions && addressSuggestions.length > 0 && (
+                        <div
+                          ref={addressSuggestionsRef}
+                          className="absolute z-50 mt-1 w-full bg-white shadow-lg rounded-lg border border-gray-200 max-h-60 overflow-auto"
+                        >
+                          {addressSuggestions.map((suggestion, index) => (
+                            <div
+                              key={index}
+                              className="px-4 py-3 hover:bg-emerald-50 cursor-pointer border-b border-gray-100 last:border-b-0"
+                              onClick={() => handleSelectAddressSuggestion(suggestion)}
+                            >
+                              <div className="text-sm font-medium text-gray-900">{suggestion.address}</div>
+                              {suggestion.city && suggestion.postcode && (
+                                <div className="text-xs text-gray-500 mt-1">
+                                  {suggestion.city}, {suggestion.postcode}
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      <p className="mt-1 text-xs text-gray-500">
+                        Type an address to get suggestions and auto-fill city and zip code
+                      </p>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -852,7 +974,7 @@ export default function UsersPage() {
                 {/* Security & Access Section */}
                 <div className="bg-purple-50 rounded-xl p-5">
                   <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-                    🔒 Security & Access
+                    🔒 {t('securityAndAccess')}
                   </h3>
 
                   <div className="space-y-4">
@@ -906,7 +1028,7 @@ export default function UsersPage() {
             {/* Footer */}
             <div className="modal-footer border-t border-gray-200 p-6 bg-gray-50 flex flex-col sm:flex-row justify-between gap-4">
               <button
-                onClick={() => setIsModalOpen(false)}
+                onClick={closeModal}
                 className="px-6 py-3 border-2 border-gray-300 rounded-xl text-gray-700 hover:bg-white hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all duration-200 font-medium"
                 disabled={loading}
               >

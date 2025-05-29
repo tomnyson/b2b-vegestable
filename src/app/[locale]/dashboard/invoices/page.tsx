@@ -16,6 +16,7 @@ import {
   type CreateInvoiceData,
   type UpdateInvoiceData
 } from '../../../lib/invoice-api';
+import { supabase } from '../../../lib/supabase';
 
 type SortField = 'created_at' | 'status' | 'user.name';
 type SortDirection = 'asc' | 'desc';
@@ -30,6 +31,12 @@ export default function InvoicesPage() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [editingInvoice, setEditingInvoice] = useState<Invoice | null>(null);
+  
+  // Add preview modal state
+  const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
+  const [previewPdfUrl, setPreviewPdfUrl] = useState<string | null>(null);
+  const [previewingInvoice, setPreviewingInvoice] = useState<Invoice | null>(null);
+  const [previewLoading, setPreviewLoading] = useState(false);
 
   // Filtering state
   const [searchTerm, setSearchTerm] = useState('');
@@ -222,6 +229,36 @@ export default function InvoicesPage() {
     setCurrentPage(1);
   };
 
+  // Handle PDF preview
+  const handlePreview = async (invoice: Invoice) => {
+    try {
+      setPreviewLoading(true);
+      setPreviewingInvoice(invoice);
+      
+      // Get the PDF URL from Supabase storage
+      const { data, error } = await supabase.storage
+        .from('products')
+        .createSignedUrl(invoice.path, 60 * 60); // URL valid for 1 hour
+
+      if (error) throw error;
+
+      setPreviewPdfUrl(data.signedUrl);
+      setIsPreviewModalOpen(true);
+    } catch (err) {
+      console.error('Error getting preview URL:', err);
+      toast.error('Failed to load preview. Please try downloading the file instead.');
+    } finally {
+      setPreviewLoading(false);
+    }
+  };
+
+  // Close preview modal
+  const closePreviewModal = () => {
+    setIsPreviewModalOpen(false);
+    setPreviewPdfUrl(null);
+    setPreviewingInvoice(null);
+  };
+
   // Loading state
   if (loading && invoices.length === 0) {
     return (
@@ -379,6 +416,12 @@ export default function InvoicesPage() {
                       className="text-emerald-600 hover:text-emerald-900"
                     >
                       {t('actions.download')}
+                    </button>
+                    <button
+                      onClick={() => handlePreview(invoice)}
+                      className="text-blue-600 hover:text-blue-900"
+                    >
+                      {t('actions.preview')}
                     </button>
                     <button
                       onClick={() => handleEdit(invoice)}
@@ -591,6 +634,49 @@ export default function InvoicesPage() {
                   )}
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Preview Modal */}
+      {isPreviewModalOpen && (
+        <div
+          className="fixed inset-0 bg-opacity-60 flex items-center justify-center z-50 p-6"
+          onClick={closePreviewModal}
+        >
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
+            <div className="p-6 bg-gradient-to-r from-emerald-50 to-teal-50 border-b border-gray-200">
+              <div className="flex justify-between items-center">
+                <h2 className="text-2xl font-bold text-gray-800">
+                  {previewingInvoice ? t('previewInvoice') : t('previewError')}
+                </h2>
+                <button
+                  onClick={closePreviewModal}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <div className="p-6 flex-1 overflow-y-auto">
+              {previewLoading ? (
+                <div className="flex items-center justify-center">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500"></div>
+                </div>
+              ) : previewPdfUrl ? (
+                <iframe
+                  src={previewPdfUrl}
+                  width="100%"
+                  height="600px"
+                  frameBorder="0"
+                ></iframe>
+              ) : (
+                <p className="text-red-700 font-medium">{t('previewError')}</p>
+              )}
             </div>
           </div>
         </div>

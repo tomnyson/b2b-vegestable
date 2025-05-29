@@ -8,7 +8,9 @@ export interface UserProfile {
   email: string;
   name?: string;
   role: UserRole;
-  company_name?: string;
+  business_name?: string;
+  city?: string;
+  zip_code?: string;
   phone?: string;
   address?: string;
   longitude?: number;
@@ -326,8 +328,10 @@ export async function registerUserWithProfile(
       id: authData.user.id,
       email,
       name: userData.name,
-      role: userData.role || 'customer', // Default role
-      company_name: userData.company_name,
+      role: userData.role || 'customer',
+      business_name: userData.business_name,
+      city: userData.city,
+      zip_code: userData.zip_code,
       phone: userData.phone,
       address: userData.address,
       created_at: new Date().toISOString(),

@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import LanguageSwitcher from '../components/LanguageSwitcher';
 import { getAppSettings, AppSettings } from '../lib/settings-api';
+import Loading from '../components/Loading';
 
 export default function HomePage({ params }: { params: { locale: string } }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -163,11 +164,7 @@ export default function HomePage({ params }: { params: { locale: string } }) {
               />
             )}
           </div>
-          <svg className="animate-spin h-6 w-6 text-emerald-600" fill="none" viewBox="0 0 24 24">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-          </svg>
-          <span className="text-gray-600 text-sm">Loading...</span>
+          <Loading />
         </div>
       </div>
     );

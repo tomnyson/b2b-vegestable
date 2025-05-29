@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import { getUser, getUserProfile } from '../../../lib/auth';
 import { AppSettings, getAppSettings, updateAppSettings, uploadLogo, SUPPORTED_LANGUAGES, SUPPORTED_CURRENCIES, getDefaultMenuSettings, getDefaultDeliverySettings } from '../../../lib/settings-api';
+import Loading from '@/app/components/Loading';
 
 export default function AdminSettingsPage() {
   const router = useRouter();
@@ -180,12 +181,7 @@ export default function AdminSettingsPage() {
 
   if (isLoading) {
     return (
-      <div className="p-6">
-        <div className="flex justify-center items-center h-64">
-          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-green-500 border-r-transparent"></div>
-          <span className="ml-2">{t('loading')}</span>
-        </div>
-      </div>
+      <Loading />
     );
   }
 
@@ -361,7 +357,7 @@ export default function AdminSettingsPage() {
         {/* Contact Settings */}
         <div className="bg-white rounded-lg shadow-md p-6">
           <h2 className="text-lg font-medium text-gray-900 mb-4">{t('supportContact')}</h2>
-
+          
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label htmlFor="supportEmail" className="block text-gray-700 text-sm font-medium mb-2">
@@ -376,7 +372,7 @@ export default function AdminSettingsPage() {
                 placeholder={t('supportEmailPlaceholder')}
               />
             </div>
-
+            
             <div>
               <label htmlFor="supportPhone" className="block text-gray-700 text-sm font-medium mb-2">
                 {t('supportPhone')}
@@ -393,6 +389,78 @@ export default function AdminSettingsPage() {
           </div>
         </div>
 
+        {/* Delivery Configuration */}
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <h2 className="text-lg font-medium text-gray-900 mb-4">{t('deliveryConfiguration')}</h2>
+          <p className="text-sm text-gray-600 mb-6">{t('deliveryConfigurationDescription')}</p>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Cut-off Time */}
+            <div>
+              <label htmlFor="orderCutoffTime" className="block text-gray-700 text-sm font-medium mb-2">
+                {t('orderCutoffTime')}
+              </label>
+              <input
+                type="time"
+                id="orderCutoffTime"
+                value={orderCutoffTime}
+                onChange={(e) => setOrderCutoffTime(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"
+              />
+              <p className="mt-1 text-sm text-gray-500">
+                {t('orderCutoffTimeDescription')}
+              </p>
+            </div>
+
+            {/* Delivery Days */}
+            <div>
+              <label className="block text-gray-700 text-sm font-medium mb-2">
+                {t('deliveryDays')}
+              </label>
+              <div className="space-y-2">
+                {[
+                  { value: 1, label: t('monday') },
+                  { value: 2, label: t('tuesday') },
+                  { value: 3, label: t('wednesday') },
+                  { value: 4, label: t('thursday') },
+                  { value: 5, label: t('friday') },
+                  { value: 6, label: t('saturday') },
+                  { value: 0, label: t('sunday') }
+                ].map(day => (
+                  <label key={day.value} className="flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={deliveryDays.includes(day.value)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setDeliveryDays([...deliveryDays, day.value].sort((a, b) => a - b));
+                        } else {
+                          setDeliveryDays(deliveryDays.filter(d => d !== day.value));
+                        }
+                      }}
+                      className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
+                    />
+                    <span className="ml-2 text-sm text-gray-700">{day.label}</span>
+                  </label>
+                ))}
+              </div>
+              <p className="mt-2 text-sm text-gray-500">
+                {t('deliveryDaysDescription')}
+              </p>
+            </div>
+          </div>
+
+          {/* Delivery Logic Explanation */}
+          <div className="mt-6 p-4 bg-blue-50 rounded-lg">
+            <h3 className="text-sm font-medium text-blue-900 mb-2">{t('deliveryLogic')}</h3>
+            <ul className="text-sm text-blue-800 space-y-1">
+              <li>• {t('deliveryLogicBefore', { time: orderCutoffTime })}</li>
+              <li>• {t('deliveryLogicAfter', { time: orderCutoffTime })}</li>
+              <li>• {t('deliveryLogicNonDeliveryDay')}</li>
+            </ul>
+          </div>
+        </div>
+        
         {/* Menu Configuration */}
         <div className="bg-white rounded-lg shadow-md p-6">
           <h2 className="text-lg font-medium text-gray-900 mb-4">{t('menuConfiguration')}</h2>
@@ -534,78 +602,6 @@ export default function AdminSettingsPage() {
                 <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
               </label>
             </div>
-          </div>
-        </div>
-
-        {/* Delivery Configuration */}
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-lg font-medium text-gray-900 mb-4">Delivery Settings</h2>
-          <p className="text-sm text-gray-600 mb-6">Configure the order cut-off time and weekly delivery days</p>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Order Cut-off Time */}
-            <div>
-              <label htmlFor="orderCutoffTime" className="block text-gray-700 text-sm font-medium mb-2">
-                Order Cut-off Time
-              </label>
-              <input
-                type="time"
-                id="orderCutoffTime"
-                value={orderCutoffTime}
-                onChange={(e) => setOrderCutoffTime(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500"
-              />
-              <p className="mt-1 text-sm text-gray-500">
-                Orders placed after this time will be delivered on the next working day
-              </p>
-            </div>
-
-            {/* Delivery Days */}
-            <div>
-              <label className="block text-gray-700 text-sm font-medium mb-2">
-                Delivery Days of the Week
-              </label>
-              <div className="space-y-2">
-                {[
-                  { value: 1, label: 'Monday' },
-                  { value: 2, label: 'Tuesday' },
-                  { value: 3, label: 'Wednesday' },
-                  { value: 4, label: 'Thursday' },
-                  { value: 5, label: 'Friday' },
-                  { value: 6, label: 'Saturday' },
-                  { value: 0, label: 'Sunday' }
-                ].map((day) => (
-                  <label key={day.value} className="flex items-center">
-                    <input
-                      type="checkbox"
-                      checked={deliveryDays.includes(day.value)}
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          setDeliveryDays([...deliveryDays, day.value].sort());
-                        } else {
-                          setDeliveryDays(deliveryDays.filter(d => d !== day.value));
-                        }
-                      }}
-                      className="h-4 w-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
-                    />
-                    <span className="ml-2 text-sm text-gray-700">{day.label}</span>
-                  </label>
-                ))}
-              </div>
-              <p className="mt-2 text-sm text-gray-500">
-                Select the days of the week on which deliveries are available
-              </p>
-            </div>
-          </div>
-
-          {/* Delivery Logic Example */}
-          <div className="mt-6 p-4 bg-gray-50 rounded-md">
-            <h3 className="text-sm font-medium text-gray-900 mb-2">Example delivery logic:</h3>
-            <ul className="text-sm text-gray-600 space-y-1">
-              <li>• Orders placed before {orderCutoffTime} → delivered on the next working day</li>
-              <li>• Orders placed after {orderCutoffTime} → delivered on the day after the next working day</li>
-              <li>• If that day is not a delivery day, the system will automatically shift to the next available delivery day</li>
-            </ul>
           </div>
         </div>
 

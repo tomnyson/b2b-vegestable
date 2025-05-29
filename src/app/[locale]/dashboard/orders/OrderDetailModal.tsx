@@ -38,7 +38,7 @@ interface OrderItemWithProduct extends OrderItem {
 }
 
 export default function OrderDetailModal({ order, onClose }: OrderDetailModalProps) {
-  const t = useTranslations('orderDetail');
+  const t = useTranslations('orders');
   const [activeTab, setActiveTab] = useState<'details' | 'invoice'>('details');
   const [appSettings, setAppSettings] = useState<AppSettings | null>(null);
   const [driver, setDriver] = useState<Driver | null>(null);

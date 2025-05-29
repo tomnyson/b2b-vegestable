@@ -7,7 +7,9 @@ import RouteProtection from '../../../components/RouteProtection';
 import AddProductModal from './AddProductModal';
 import EditProductModal from './EditProductModal';
 import ImportProductModal from './ImportProductModal';
+import Pagination from '@/app/components/Pagination';
 import { Product, getPaginatedProducts, deleteProduct, toggleProductStatus } from '../../../lib/product-api';
+import Loading from '@/app/components/Loading';
 
 type SortField = 'name_en' | 'unit' | 'price' | 'stock' | 'created_at';
 type SortDirection = 'asc' | 'desc';
@@ -34,7 +36,7 @@ export default function ProductsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
-  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [itemsPerPage, setItemsPerPage] = useState(12);
 
   // Debounce search query
   useEffect(() => {
@@ -43,7 +45,7 @@ export default function ProductsPage() {
         setCurrentPage(1);
         setIsSearching(false);
       }
-    }, 500);
+    }, 2000);
     
     return () => clearTimeout(timer);
   }, [searchTerm, isSearching]);
@@ -97,56 +99,8 @@ export default function ProductsPage() {
     setCurrentPage(1);
   };
 
-  // Pagination controls
-  const nextPage = () => {
-    if (currentPage < totalPages) {
-      setCurrentPage(prev => prev + 1);
-    }
-  };
-
-  const prevPage = () => {
-    if (currentPage > 1) {
-      setCurrentPage(prev => prev - 1);
-    }
-  };
-
-  const goToPage = (page: number) => {
-    if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page);
-    }
-  };
-
-  const goToFirstPage = () => {
-    setCurrentPage(1);
-  };
-
-  const goToLastPage = () => {
-    setCurrentPage(totalPages);
-  };
-
   const handleItemsPerPageChange = (newItemsPerPage: number) => {
     setItemsPerPage(newItemsPerPage);
-  };
-
-  // Generate page numbers for pagination
-  const getPageNumbers = () => {
-    const pages = [];
-    const maxVisiblePages = 5;
-    
-    if (totalPages <= maxVisiblePages) {
-      for (let i = 1; i <= totalPages; i++) {
-        pages.push(i);
-      }
-    } else {
-      const startPage = Math.max(1, currentPage - 2);
-      const endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
-      
-      for (let i = startPage; i <= endPage; i++) {
-        pages.push(i);
-      }
-    }
-    
-    return pages;
   };
 
   // Handle search input
@@ -158,9 +112,6 @@ export default function ProductsPage() {
   const handleAddProduct = async (data: any) => {
     try {
       setLoading(true);
-      // We already have the product data from the createProduct call in the modal
-      console.log('Product created:', data);
-      
       // Refresh products list
       const result = await getPaginatedProducts(
         currentPage,
@@ -323,15 +274,14 @@ export default function ProductsPage() {
     );
   };
 
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage);
+  };
+
   // Loading state
   if (loading && products.length === 0) {
     return (
-      <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl border border-white/20 p-8 lg:p-12">
-        <div className="flex flex-col items-center justify-center space-y-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500"></div>
-          <p className="text-lg font-medium text-gray-700">{t('loading')}</p>
-        </div>
-      </div>
+      <Loading /> 
     );
   }
 
@@ -612,143 +562,16 @@ export default function ProductsPage() {
       </div>
 
       {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="bg-white/80 backdrop-blur-lg rounded-lg shadow-2xl border border-white/20 p-4">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-3 lg:space-y-0">
-            {/* Items per page selector */}
-            <div className="flex items-center space-x-3">
-              <div className="flex items-center space-x-2">
-                <span className="text-xs text-gray-700 font-medium">{t('itemsPerPage')}:</span>
-                <select
-                  value={itemsPerPage}
-                  onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
-                  className="border border-gray-300 rounded-lg px-2 py-1 text-xs bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                >
-                  <option value={10}>10</option>
-                  <option value={20}>20</option>
-                  <option value={50}>50</option>
-                  <option value={100}>100</option>
-                </select>
-              </div>
-              
-              <div className="text-xs text-gray-700">
-                {t('showing')} <span className="font-semibold">{Math.min((currentPage - 1) * itemsPerPage + 1, totalCount)}</span> {t('to')}{' '}
-                <span className="font-semibold">{Math.min(currentPage * itemsPerPage, totalCount)}</span> {t('of')}{' '}
-                <span className="font-semibold">{totalCount}</span> {t('products')}
-              </div>
-            </div>
-
-            {/* Page navigation */}
-            <div className="flex items-center space-x-1">
-              {/* First page button */}
-              <button
-                onClick={goToFirstPage}
-                disabled={currentPage === 1}
-                className={`px-2 py-1 rounded-lg border font-medium transition-all duration-200 text-xs ${
-                  currentPage === 1
-                    ? 'border-gray-200 text-gray-400 cursor-not-allowed bg-gray-50'
-                    : 'border-emerald-300 text-emerald-700 hover:bg-emerald-50 hover:border-emerald-400'
-                }`}
-                title={t('first')}
-              >
-                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
-                </svg>
-              </button>
-
-              {/* Previous page button */}
-              <button
-                onClick={prevPage}
-                disabled={currentPage <= 1}
-                className={`px-2 py-1 rounded-lg border font-medium transition-all duration-200 text-xs ${
-                  currentPage <= 1
-                    ? 'border-gray-200 text-gray-400 cursor-not-allowed bg-gray-50'
-                    : 'border-emerald-300 text-emerald-700 hover:bg-emerald-50 hover:border-emerald-400'
-                }`}
-                title={t('previous')}
-              >
-                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
-              </button>
-
-              {/* Page numbers */}
-              <div className="flex items-center space-x-1">
-                {getPageNumbers().map((pageNum) => (
-                  <button
-                    key={pageNum}
-                    onClick={() => goToPage(pageNum)}
-                    className={`px-2 py-1 rounded-lg font-medium transition-all duration-200 text-xs ${
-                      pageNum === currentPage
-                        ? 'bg-emerald-600 text-white border border-emerald-600'
-                        : 'border border-gray-300 text-gray-700 hover:bg-emerald-50 hover:border-emerald-400'
-                    }`}
-                  >
-                    {pageNum}
-                  </button>
-                ))}
-              </div>
-
-              {/* Next page button */}
-              <button
-                onClick={nextPage}
-                disabled={currentPage >= totalPages}
-                className={`px-2 py-1 rounded-lg border font-medium transition-all duration-200 text-xs ${
-                  currentPage >= totalPages
-                    ? 'border-gray-200 text-gray-400 cursor-not-allowed bg-gray-50'
-                    : 'border-emerald-300 text-emerald-700 hover:bg-emerald-50 hover:border-emerald-400'
-                }`}
-                title={t('next')}
-              >
-                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </button>
-
-              {/* Last page button */}
-              <button
-                onClick={goToLastPage}
-                disabled={currentPage === totalPages}
-                className={`px-2 py-1 rounded-lg border font-medium transition-all duration-200 text-xs ${
-                  currentPage === totalPages
-                    ? 'border-gray-200 text-gray-400 cursor-not-allowed bg-gray-50'
-                    : 'border-emerald-300 text-emerald-700 hover:bg-emerald-50 hover:border-emerald-400'
-                }`}
-                title={t('last')}
-              >
-                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" />
-                </svg>
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Show pagination info even when there's only one page */}
-      {totalPages <= 1 && totalCount > 0 && (
-        <div className="bg-white/80 backdrop-blur-lg rounded-lg shadow-2xl border border-white/20 p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <span className="text-xs text-gray-700 font-medium">{t('itemsPerPage')}:</span>
-              <select
-                value={itemsPerPage}
-                onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
-                className="border border-gray-300 rounded-lg px-2 py-1 text-xs bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-              >
-                <option value={10}>10</option>
-                <option value={20}>20</option>
-                <option value={50}>50</option>
-                <option value={100}>100</option>
-              </select>
-            </div>
-            
-            <div className="text-xs text-gray-700">
-              {t('showing')} <span className="font-semibold">{totalCount}</span> {t('products')}
-            </div>
-          </div>
-        </div>
-      )}
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        totalCount={totalCount}
+        itemsPerPage={itemsPerPage}
+        onPageChange={setCurrentPage}
+        onItemsPerPageChange={handleItemsPerPageChange}
+        t={t}
+        itemName="products"
+      />
 
       {/* Add Product Modal */}
       <AddProductModal

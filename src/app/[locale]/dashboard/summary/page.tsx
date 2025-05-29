@@ -10,6 +10,7 @@ import { toast } from 'react-toastify';
 import RouteProtection from '../../../components/RouteProtection';
 import { getAppSettings, AppSettings } from '../../../lib/settings-api';
 import { getOrderFilterRangeByDelivery } from '../../../lib/utils';
+import Loading from '@/app/components/Loading';
 
 interface ProductSummary {
   id: string;
@@ -28,8 +29,12 @@ export default function OrderSummaryPage() {
     startDate: string;
     endDate: string;
   }>({
-    startDate: new Date(new Date().setDate(new Date().getDate() - 7)).toISOString().split('T')[0],
-    endDate: new Date().toISOString().split('T')[0],
+    startDate: (() => {
+      const date = new Date(new Date().setDate(new Date().getDate() - 7));
+      date.setHours(0, 0, 0, 0);
+      return date.toISOString().slice(0, 16);
+    })(),
+    endDate: new Date().toISOString().slice(0, 16),
   });
   const [error, setError] = useState<string | null>(null);
   const [appSettings, setAppSettings] = useState<AppSettings | null>(null);
@@ -72,6 +77,19 @@ export default function OrderSummaryPage() {
       try {
         const settings = await getAppSettings();
         setAppSettings(settings);
+        
+        // Update date range with proper cutoff time after settings are loaded
+        const now = new Date();
+        const sevenDaysAgo = new Date(now.setDate(now.getDate() - 7));
+        sevenDaysAgo.setHours(0, 0, 0, 0);
+        
+        const [cutoffHour, cutoffMinute] = (settings?.order_cutoff_time || '18:00').split(':').map(Number);
+        now.setHours(cutoffHour, cutoffMinute - 2, 0, 0);
+        
+        setDateRange({
+          startDate: sevenDaysAgo.toISOString().slice(0, 16),
+          endDate: now.toISOString().slice(0, 16),
+        });
       } catch (err) {
         console.error('Error loading app settings:', err);
       }
@@ -89,8 +107,8 @@ export default function OrderSummaryPage() {
       // SQL query to aggregate order items by product
       const { data, error } = await supabase
         .rpc('get_product_order_summary', {
-          start_date: dateRange.startDate,
-          end_date: dateRange.endDate
+          start_date: new Date(dateRange.startDate).toISOString(),
+          end_date: new Date(dateRange.endDate).toISOString()
         });
 
       if (error) {
@@ -99,14 +117,19 @@ export default function OrderSummaryPage() {
 
       // If RPC function doesn't exist, use this fallback query
       if (!data) {
-        // Get all orders in the date range
+        // Get order filter range
+        const range = getOrderFilterRangeByDelivery(
+          deliveryFilter || 'today',
+          appSettings?.order_cutoff_time || '18:00',
+          appSettings?.delivery_days || [1, 2, 3, 4, 5, 6]
+        );
+
         const { data: orders, error: orderError } = await supabase
           .from('orders')
           .select('id, order_date')
-          .gte('order_date', `${dateRange.startDate}T00:00:00.000Z`)
-          .lte('order_date', `${dateRange.endDate}T23:59:59.999Z`)
-          .eq('status', 'pending')
-          .or('status.eq.processing');
+          .gte('order_date', range ? range.from.toISOString() : new Date(dateRange.startDate).toISOString())
+          .lte('order_date', range ? range.to.toISOString() : new Date(dateRange.endDate).toISOString())
+          .in('status', ['pending', 'processing']);
 
         if (orderError) throw orderError;
         if (!orders || orders.length === 0) {
@@ -166,7 +189,26 @@ export default function OrderSummaryPage() {
   // Handle date range change
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setDateRange(prev => ({ ...prev, [name]: value }));
+    const date = new Date(value);
+    
+    // If it's the end date, enforce cutoff time as maximum
+    if (name === 'endDate') {
+      const [cutoffHour, cutoffMinute] = (appSettings?.order_cutoff_time || '18:00').split(':').map(Number);
+      const cutoffTime = new Date(date);
+      cutoffTime.setHours(cutoffHour, cutoffMinute - 2, 0, 0);
+      
+      if (date > cutoffTime) {
+        date.setHours(cutoffHour, cutoffMinute - 2, 0, 0);
+      }
+    } else {
+      // For start date, always set to beginning of day
+      date.setHours(0, 0, 0, 0);
+    }
+    
+    setDateRange(prev => ({
+      ...prev,
+      [name]: date.toISOString().slice(0, 16)
+    }));
   };
 
   // Handle form submission
@@ -204,9 +246,16 @@ export default function OrderSummaryPage() {
 
     if (!type) {
       // Clear filter - reset to default date range
+      const now = new Date();
+      const sevenDaysAgo = new Date(now.setDate(now.getDate() - 7));
+      sevenDaysAgo.setHours(0, 0, 0, 0);
+      
+      const [cutoffHour, cutoffMinute] = (appSettings?.order_cutoff_time || '18:00').split(':').map(Number);
+      now.setHours(cutoffHour, cutoffMinute - 2, 0, 0);
+      
       setDateRange({
-        startDate: new Date(new Date().setDate(new Date().getDate() - 7)).toISOString().split('T')[0],
-        endDate: new Date().toISOString().split('T')[0],
+        startDate: sevenDaysAgo.toISOString().slice(0, 16),
+        endDate: now.toISOString().slice(0, 16),
       });
       return;
     }
@@ -218,9 +267,18 @@ export default function OrderSummaryPage() {
     );
 
     if (dateRange) {
+      console.log("dateRange", dateRange);
+      // Ensure start time is 00:00 and end time is cutoff time
+      const startDate = new Date(dateRange.from);
+      startDate.setHours(0, 0, 0, 0);
+      
+      const endDate = new Date(dateRange.to);
+      const [cutoffHour, cutoffMinute] = (appSettings?.order_cutoff_time || '18:00').split(':').map(Number);
+      endDate.setHours(cutoffHour, cutoffMinute - 2, 0, 0);
+      
       setDateRange({
-        startDate: dateRange.from.toISOString().split('T')[0],
-        endDate: dateRange.to.toISOString().split('T')[0],
+        startDate: startDate.toISOString().slice(0, 16),
+        endDate: endDate.toISOString().slice(0, 16),
       });
     }
   };
@@ -228,21 +286,23 @@ export default function OrderSummaryPage() {
   // Handle clearing all filters
   const handleClearFilters = () => {
     setDeliveryFilter(null);
+    const now = new Date();
+    const sevenDaysAgo = new Date(now.setDate(now.getDate() - 7));
+    sevenDaysAgo.setHours(0, 0, 0, 0);
+    
+    const [cutoffHour, cutoffMinute] = (appSettings?.order_cutoff_time || '18:00').split(':').map(Number);
+    now.setHours(cutoffHour, cutoffMinute - 2, 0, 0);
+    
     setDateRange({
-      startDate: new Date(new Date().setDate(new Date().getDate() - 7)).toISOString().split('T')[0],
-      endDate: new Date().toISOString().split('T')[0],
+      startDate: sevenDaysAgo.toISOString().slice(0, 16),
+      endDate: now.toISOString().slice(0, 16),
     });
   };
 
   // Loading state
   if (isLoading && summaryData.length === 0) {
     return (
-      <div className="bg-white/80 backdrop-blur-lg rounded-lg shadow-2xl border border-white/20 p-4 lg:p-6">
-        <div className="flex flex-col items-center justify-center space-y-4">
-          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-emerald-500"></div>
-          <p className="text-sm font-medium text-gray-700">{t('loading')}</p>
-        </div>
-      </div>
+      <Loading />
     );
   }
 
@@ -352,11 +412,13 @@ export default function OrderSummaryPage() {
                 {t('startDate')}
               </label>
               <input
-                type="date"
+                type="datetime-local"
                 id="startDate"
                 name="startDate"
                 value={dateRange.startDate}
                 onChange={handleDateChange}
+                min="2020-01-01T00:00"
+                max={dateRange.endDate}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200 text-sm"
               />
             </div>
@@ -366,11 +428,18 @@ export default function OrderSummaryPage() {
                 {t('endDate')}
               </label>
               <input
-                type="date"
+                type="datetime-local"
                 id="endDate"
                 name="endDate"
                 value={dateRange.endDate}
                 onChange={handleDateChange}
+                min={dateRange.startDate}
+                max={(() => {
+                  const date = new Date();
+                  const [cutoffHour, cutoffMinute] = (appSettings?.order_cutoff_time || '18:00').split(':').map(Number);
+                  date.setHours(cutoffHour, cutoffMinute - 2, 0, 0);
+                  return date.toISOString().slice(0, 16);
+                })()}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200 text-sm"
               />
             </div>

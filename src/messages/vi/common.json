@@ -122,13 +122,6 @@
       "orderDetails": "Chi tiết đơn hàng",
       "noOrders": "Không tìm thấy đơn hàng"
     },
-    "summary": {
-      "title": "Tóm tắt đơn hàng",
-      "subtitle": "Xem phân tích và báo cáo đơn hàng toàn diện",
-      "dailySummary": "Tóm tắt hàng ngày",
-      "weeklySummary": "Tóm tắt hàng tuần",
-      "monthlySummary": "Tóm tắt hàng tháng"
-    },
     "users": {
       "title": "Quản lý người dùng",
       "subtitle": "Quản lý tài khoản khách hàng và quyền hạn",
@@ -270,6 +263,7 @@
   },
   "orders": {
     "title": "Quản lý đơn hàng",
+    "deliveryDate": "Ngày giao hàng",
     "loading": "Đang tải đơn hàng...",
     "loadingError": "Lỗi khi tải đơn hàng",
     "search": "Tìm kiếm",
@@ -342,29 +336,10 @@
     "tomorrowDeliveries": "Giao Hàng Ngày Mai",
     "clearDeliveryFilter": "Xóa Bộ Lọc Giao Hàng"
   },
-  "summary": {
-    "title": "Tổng Kết Đơn Hàng",
-    "subtitle": "Tổng hợp số lượng sản phẩm từ tất cả đơn hàng",
-    "startDate": "Ngày Bắt Đầu",
-    "endDate": "Ngày Kết Thúc",
-    "filter": "Lọc",
-    "loading": "Đang tải dữ liệu...",
-    "error": "Không thể tải dữ liệu. Vui lòng thử lại.",
-    "authError": "Lỗi xác thực",
-    "productQuantitiesSummary": "Tổng Kết Số Lượng Sản Phẩm",
-    "totalQuantitiesNeeded": "Tổng số lượng cần từ kho",
-    "noOrdersFound": "Không tìm thấy đơn hàng trong khoảng thời gian đã chọn.",
-    "product": "Sản Phẩm",
-    "sku": "Mã SKU",
-    "totalQuantity": "Tổng Số Lượng",
-    "notAvailable": "N/A",
-    "printSummary": "In Tổng Kết",
-    "todayDeliveries": "Giao Hàng Hôm Nay",
-    "tomorrowDeliveries": "Giao Hàng Ngày Mai",
-    "clearDeliveryFilter": "Xóa Bộ Lọc Giao Hàng",
-    "clearFilters": "Xóa Tất Cả Bộ Lọc"
-  },
   "users": {
+    "businessName": "Tên công ty",
+    "personalInformation": "Thông tin cá nhân",
+    "securityAndAccess": "Bảo mật và Truy cập",
     "title": "Quản lý người dùng",
     "addUser": "Thêm người dùng",
     "editUser": "Chỉnh sửa người dùng",
@@ -449,6 +424,7 @@
   },
   "drivers": {
     "title": "Quản lý tài xế",
+    "routePlaceholder": "Tìm kiếm tuyến đường",
     "addDriver": "Thêm tài xế",
     "editDriver": "Chỉnh sửa tài xế",
     "addNewDriver": "Thêm tài xế mới",
@@ -977,9 +953,12 @@
     "download": "Tải xuống",
     "results": "Kết quả",
     "deleteConfirm": "Bạn có chắc chắn muốn xóa hóa đơn này không?",
+    "previewInvoice": "Xem Trước Hóa Đơn",
+    "previewError": "Không thể tải xem trước",
     "actions": {
       "search": "Tìm kiếm",
       "download": "Tải xuống",
+      "preview": "Xem Trước",
       "edit": "Chỉnh sửa",
       "delete": "Xóa",
       "cancel": "Hủy",
@@ -1069,6 +1048,12 @@
       "newsletterDesc": "Đăng ký nhận bản tin hàng tuần để nhận tin tức và cập nhật."
     },
     "orders": {
+      "close": "Đóng",
+      "product": "Sản phẩm",
+      "sku": "Mã SKU",
+      "quantity": "Số lượng",
+      "price": "Giá",
+      "total": "Tổng",
       "tab": "Đơn hàng",
       "title": "Lịch sử đơn hàng của bạn",
       "noOrders": "Bạn chưa đặt đơn hàng nào.",
@@ -1096,10 +1081,11 @@
       "saveSuccess": "Cập nhật hồ sơ thành công!",
       "saveError": "Không thể cập nhật hồ sơ. Vui lòng kiểm tra lại thông tin và thử lại.",
       "addressAdded": "Thêm địa chỉ thành công.",
-      "addressUpdated": "Cập nhật địa chỉ thành công.",
+      "addressUpdated": "Địa chỉ đã được cập nhật thành công.",
       "addressDeleted": "Xóa địa chỉ thành công.",
       "defaultAddressSet": "Đã cập nhật địa chỉ mặc định.",
-      "addressSuggestionError": "Không thể lấy gợi ý địa chỉ. Bạn vẫn có thể nhập địa chỉ thủ công."
+      "addressSuggestionError": "Không thể tìm kiếm gợi ý địa chỉ. Bạn vẫn có thể nhập địa chỉ thủ công.",
+      "addressAutoFilled": "Chi tiết địa chỉ đã được tự động điền!"
     },
     "labels": {
       "pending": "Chờ xử lý",
@@ -1122,7 +1108,14 @@
       "noInvoices": "Bạn chưa tạo hóa đơn nào.",
       "viewDetails": "Xem chi tiết",
       "download": "Tải xuống"
-    }
+    },
+    "businessName": "Tên Doanh Nghiệp",
+    "businessNamePlaceholder": "Nhập tên doanh nghiệp (tùy chọn)",
+    "cityPlaceholder": "Thành phố (tùy chọn)",
+    "zipCode": "Mã Bưu Điện",
+    "zipCodePlaceholder": "Mã bưu điện (tùy chọn)",
+    "addressPlaceholder": "Bắt đầu gõ để tìm kiếm địa chỉ...",
+    "addressHelpText": "Gõ địa chỉ để nhận gợi ý và tự động điền thành phố và mã bưu điện"
   },
   "common": {
     "labels": {
@@ -1136,5 +1129,37 @@
     "actions": {
       "cancel": "Hủy"
     }
+  },
+  "summary": {
+    "title": "Tổng quan đơn hàng",
+    "subtitle": "Tổng hợp số lượng của tất cả sản phẩm trong các đơn hàng",
+    "startDate": "Ngày bắt đầu",
+    "endDate": "Ngày kết thúc",
+    "filter": "Lọc",
+    "loading": "Đang tải tổng quan đơn hàng...",
+    "error": "Lỗi khi tải tổng quan đơn hàng",
+    "todayDeliveries": "Giao hôm nay",
+    "tomorrowDeliveries": "Giao ngày mai",
+    "clearDeliveryFilter": "Xóa bộ lọc giao hàng",
+    "clearFilters": "Xóa tất cả bộ lọc",
+    "product": "Sản phẩm",
+    "sku": "Mã SKU",
+    "totalQuantity": "Tổng số lượng",
+    "notAvailable": "Không khả dụng",
+    "printSummary": "In tổng quan đơn hàng",
+    "productQuantitiesSummary": "Tổng quan số lượng sản phẩm",
+    "totalQuantitiesNeeded": "Tổng số lượng cần lấy từ kho",
+    "noOrdersFound": "Không tìm thấy đơn hàng nào trong khoảng thời gian đã chọn."
+  },
+  "auth": {
+    "loginRequired": "Vui lòng đăng nhập để đặt hàng",
+    "signIn": "Đăng nhập",
+    "register": "Đăng ký",
+    "loginToCheckout": "Đăng nhập để thanh toán",
+    "createAccount": "Tạo tài khoản",
+    "alreadyHaveAccount": "Đã có tài khoản?",
+    "dontHaveAccount": "Chưa có tài khoản?",
+    "authenticating": "Đang xác thực tài khoản..."
   }
+
 } 

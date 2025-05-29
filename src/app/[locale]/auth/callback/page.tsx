@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { useRouter, useSearchParams, useParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { supabase } from '@/lib/supabase'; // hoặc đường dẫn tới file supabase client của bạn
 
 export default function AuthCallbackPage() {
@@ -9,6 +10,7 @@ export default function AuthCallbackPage() {
   const searchParams = useSearchParams();
   const params = useParams();
   const locale = Array.isArray(params?.locale) ? params?.locale[0] : params?.locale || 'en';
+  const t = useTranslations('auth');
 
   useEffect(() => {
     const checkSession = async () => {
@@ -37,7 +39,7 @@ export default function AuthCallbackPage() {
 
   return (
     <div className="flex justify-center items-center min-h-screen">
-      <div className="text-gray-600 text-sm">Đang xác thực tài khoản...</div>
+      <div className="text-gray-600 text-sm">{t('authenticating')}</div>
     </div>
   );
 }

@@ -3,6 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { User, getPaginatedUsers, createUser, updateUser, deleteUser, toggleUserStatus, updateUserPassword } from '../../../lib/users-api';
+import Switch from '../../../components/Switch';
+import Loading from '../../../components/Loading';
 
 type SortField = 'name' | 'email' | 'phone' | 'status';
 type SortDirection = 'asc' | 'desc';
@@ -225,24 +227,19 @@ export default function DriversPage() {
     }
   };
 
-  const handleToggleStatus = async (id: string, currentStatus: 'active' | 'inactive') => {
+  // Handle status toggle
+  const handleToggleStatus = async (id: string, newStatus: 'active' | 'inactive') => {
     try {
       setLoading(true);
-      await toggleUserStatus(id, currentStatus);
-      
-      // Refresh drivers list
-      const result = await getPaginatedUsers(
-        currentPage,
-        itemsPerPage,
-        sortField,
-        sortDirection,
-        searchTerm || undefined,
-        'driver'
+      await toggleUserStatus(id, newStatus);
+
+      // Update the local state
+      setDrivers(prevDrivers =>
+        prevDrivers.map(driver =>
+          driver.id === id ? { ...driver, status: newStatus } : driver
+        )
       );
-      
-      setDrivers(result.users as Driver[]);
-      setTotalPages(result.totalPages);
-      setTotalCount(result.totalCount);
+
     } catch (err: any) {
       console.error('Error toggling driver status:', err);
       alert(`${t('statusError')}: ${err.message}`);
@@ -274,12 +271,7 @@ export default function DriversPage() {
   // Loading state
   if (loading && drivers.length === 0) {
     return (
-      <div className="bg-white/80 backdrop-blur-lg rounded-lg shadow-2xl border border-white/20 p-6 lg:p-8">
-        <div className="flex flex-col items-center justify-center space-y-4">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-500"></div>
-          <p className="text-base font-medium text-gray-700">{t('loading')}</p>
-        </div>
-      </div>
+      <Loading />
     );
   }
 
@@ -385,15 +377,11 @@ export default function DriversPage() {
                         <h4 className="text-base font-semibold text-gray-900">{driver.name}</h4>
                         <p className="text-xs text-gray-600">{driver.email}</p>
                       </div>
-                      <span
-                        className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                          driver.status === 'active'
-                            ? 'bg-emerald-100 text-emerald-800'
-                            : 'bg-red-100 text-red-800'
-                        }`}
-                      >
-                        {driver.status === 'active' ? t('active') : t('inactive')}
-                      </span>
+                      <Switch
+                        checked={driver.status === 'active'}
+                        onChange={(checked) => handleToggleStatus(driver.id, checked ? 'active' : 'inactive')}
+                        disabled={loading}
+                      />
                     </div>
                     
                     <div className="grid grid-cols-2 gap-3 text-xs text-gray-600">
@@ -412,13 +400,6 @@ export default function DriversPage() {
                         disabled={loading}
                       >
                         {t('edit')}
-                      </button>
-                      <button
-                        onClick={() => handleToggleStatus(driver.id, driver.status)}
-                        className="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-lg hover:bg-yellow-200 transition-colors font-medium text-xs disabled:opacity-50"
-                        disabled={loading}
-                      >
-                        {driver.status === 'active' ? t('deactivate') : t('activate')}
                       </button>
                       <button
                         onClick={() => handleDelete(driver.id)}
@@ -495,32 +476,28 @@ export default function DriversPage() {
               {drivers.length > 0 ? (
                 drivers.map((driver) => (
                   <tr key={driver.id} className="hover:bg-emerald-50/50 transition-colors duration-200">
-                    <td className="px-4 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
+                    <td className="px-4 py-2 whitespace-nowrap text-sm font-semibold text-gray-900">
                       {driver.name}
                     </td>
-                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-600">
+                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-600">
                       {driver.email}
                     </td>
-                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-600">
+                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-600">
                       {driver.phone || '-'}
                     </td>
-                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-600">
+                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-600">
                       <span className="px-3 py-1 text-gray-800 rounded-full text-xs font-medium">
                         {driver.assigned_route}
                       </span>
                     </td>
-                    <td className="px-4 py-4 whitespace-nowrap text-center">
-                      <span
-                        className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                          driver.status === 'active'
-                            ? 'bg-emerald-100 text-emerald-800'
-                            : 'bg-red-100 text-red-800'
-                        }`}
-                      >
-                        {driver.status === 'active' ? t('active') : t('inactive')}
-                      </span>
+                    <td className="px-4 py-2 whitespace-nowrap text-center">
+                      <Switch
+                        checked={driver.status === 'active'}
+                        onChange={(checked) => handleToggleStatus(driver.id, checked ? 'active' : 'inactive')}
+                        disabled={loading}
+                      />
                     </td>
-                    <td className="px-4 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <td className="px-4 py-2 whitespace-nowrap text-right text-sm font-medium">
                       <div className="flex items-center justify-end space-x-2">
                         <button
                           onClick={() => handleEdit(driver)}
@@ -530,16 +507,6 @@ export default function DriversPage() {
                         >
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                          </svg>
-                        </button>
-                        <button
-                          onClick={() => handleToggleStatus(driver.id, driver.status)}
-                          className="text-yellow-600 hover:text-yellow-900 p-2 hover:bg-yellow-50 rounded-lg transition-colors disabled:opacity-50"
-                          disabled={loading}
-                          title={driver.status === 'active' ? t('deactivate') : t('activate')}
-                        >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 9l4-4 4 4m0 6l-4 4-4-4" />
                           </svg>
                         </button>
                         <button
@@ -574,8 +541,8 @@ export default function DriversPage() {
       </div>
 
       {/* Pagination */}
-      <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl border border-white/20 p-6">
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
+      <div className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-2xl border border-white/20 p-4">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-2 lg:space-y-0">
           <div className="text-sm text-gray-700">
             {t('showing')} <span className="font-semibold">{drivers.length}</span> {t('of')}{' '}
             <span className="font-semibold">{totalCount}</span> {t('drivers')}
@@ -590,7 +557,7 @@ export default function DriversPage() {
                   : 'border-emerald-300 text-emerald-700 hover:bg-emerald-50 hover:border-emerald-400'
               }`}
             >
-              <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 mr-1 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
               {t('previous')}
@@ -612,7 +579,7 @@ export default function DriversPage() {
               }`}
             >
               {t('next')}
-              <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 ml-1 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
             </button>

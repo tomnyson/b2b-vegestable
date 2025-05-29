@@ -90,33 +90,47 @@ export function getOrderFilterRangeByDelivery(
 ): { from: Date; to: Date } | null {
   const now = new Date();
 
-  // Parse cutoffTime (VD: '18:00')
   const [cutoffHour, cutoffMinute] = cutoffTime.split(':').map(Number);
 
   const yesterday = new Date(now);
-  yesterday.setDate(yesterday.getDate() - 1);
+  yesterday.setDate(now.getDate() - 1);
 
   const startYesterday = set(yesterday, { hours: 0, minutes: 0, seconds: 0, milliseconds: 0 });
-  const endYesterdayCutoff = set(yesterday, { hours: cutoffHour - 1, minutes: 59, seconds: 59 });
+  const endYesterdayCutoff = set(yesterday, {
+    hours: cutoffHour,
+    minutes: cutoffMinute - 1,
+    seconds: 59,
+    milliseconds: 999
+  });
 
-  const startYesterdayCutoff = set(yesterday, { hours: cutoffHour, minutes: 0, seconds: 0 });
-  const endTodayCutoff = set(now, { hours: cutoffHour - 1, minutes: 59, seconds: 59 });
+  const startYesterdayCutoff = set(yesterday, {
+    hours: cutoffHour,
+    minutes: cutoffMinute,
+    seconds: 0,
+    milliseconds: 0
+  });
+
+  const endTodayCutoff = set(now, {
+    hours: cutoffHour,
+    minutes: cutoffMinute - 1,
+    seconds: 59,
+    milliseconds: 999
+  });
 
   if (type === 'today') {
     return {
       from: startYesterday,
-      to: endYesterdayCutoff,
+      to: endYesterdayCutoff
     };
   } else if (type === 'tomorrow') {
     return {
       from: startYesterdayCutoff,
-      to: endTodayCutoff,
+      to: endTodayCutoff
     };
   }
 
   return null;
 }
-
 export function getNextDeliveryDate(
   orderDate: Date,
   cutoffTime: string | undefined,

@@ -8,7 +8,9 @@ export interface CustomerDetails {
   email: string;
   phone: string;
   address: string;
-  company_name?: string;
+  city: string;
+  zip_code: string;
+  business_name?: string;
   default_payment_method?: string;
   created_at?: string;
   newsletter_subscribed?: boolean;
@@ -57,7 +59,9 @@ export async function getCustomerDetailsByUserId(userId: string): Promise<Custom
           email: profileData.email || userDetails.email || '',
           phone: profileData.phone || userDetails.phone || '',
           address: profileData.address || '',
-          company_name: profileData.company_name,
+          city: profileData.city || '',
+          zip_code: profileData.zip_code || '',
+          business_name: profileData.business_name || '',
           addresses: profileData.addresses
         };
       }
