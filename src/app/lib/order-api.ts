@@ -74,10 +74,10 @@ export async function createOrder(orderData: CreateOrderData): Promise<Order> {
     // 🟩 Add: Get delivery settings
     const { data: settings } = await supabase
       .from('settings')
-      .select('cutoff_time, delivery_days')
+      .select('order_cutoff_time, delivery_days')
       .single();
 
-    const cutoffTime = settings?.cutoff_time || '18:00';
+    const cutoffTime = settings?.order_cutoff_time || '18:00';
     const deliveryDays = settings?.delivery_days || [1, 2, 3, 4, 5, 6];
 
     const deliveryDate = getNextDeliveryDate(new Date(), cutoffTime, deliveryDays);
