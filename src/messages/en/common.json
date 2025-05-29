@@ -199,6 +199,8 @@
   },
   "orders": {
     "title": "Order Management",
+    "driverAssignSuccess": "Driver assigned successfully",
+    "totalOrders": "{total} total orders",
     "deliveryDate": "Delivery Date",
     "loading": "Loading orders...",
     "loadingError": "Error loading orders",

@@ -263,6 +263,8 @@
   },
   "orders": {
     "title": "Quản lý đơn hàng",
+    "driverAssignSuccess": "Phân công tài xế thành công",
+    "totalOrders": "{total} đơn hàng",
     "deliveryDate": "Ngày giao hàng",
     "loading": "Đang tải đơn hàng...",
     "loadingError": "Lỗi khi tải đơn hàng",

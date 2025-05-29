@@ -983,6 +983,8 @@
   },
   "orders": {
     "title": "Bestellverwaltung",
+    "driverAssignSuccess": "Fahrer erfolgreich zugewiesen",
+    "totalOrders": "{total} Gesamte Bestellungen",
     "deliveryDate": "Lieferdatum",
     "loading": "Bestellungen werden geladen...",
     "loadingError": "Fehler beim Laden der Bestellungen",

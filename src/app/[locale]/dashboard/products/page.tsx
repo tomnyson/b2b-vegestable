@@ -16,6 +16,7 @@ type SortDirection = 'asc' | 'desc';
 
 export default function ProductsPage() {
   const t = useTranslations('products');
+  const tCommon = useTranslations('common');
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -569,7 +570,7 @@ export default function ProductsPage() {
         itemsPerPage={itemsPerPage}
         onPageChange={setCurrentPage}
         onItemsPerPageChange={handleItemsPerPageChange}
-        t={t}
+        t={tCommon}
         itemName="products"
       />
 

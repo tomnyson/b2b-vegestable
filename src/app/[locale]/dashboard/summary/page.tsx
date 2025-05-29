@@ -189,7 +189,19 @@ export default function OrderSummaryPage() {
   // Handle date range change
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+    
+    // Validate the input value
+    if (!value) {
+      return; // Don't process empty values
+    }
+    
     const date = new Date(value);
+    
+    // Check if the date is valid
+    if (isNaN(date.getTime())) {
+      console.error('Invalid date value:', value);
+      return; // Don't process invalid dates
+    }
     
     // If it's the end date, enforce cutoff time as maximum
     if (name === 'endDate') {
@@ -247,7 +259,8 @@ export default function OrderSummaryPage() {
     if (!type) {
       // Clear filter - reset to default date range
       const now = new Date();
-      const sevenDaysAgo = new Date(now.setDate(now.getDate() - 7));
+      const sevenDaysAgo = new Date(now.getTime()); // Create a copy to avoid mutating now
+      sevenDaysAgo.setDate(now.getDate() - 7);
       sevenDaysAgo.setHours(0, 0, 0, 0);
       
       const [cutoffHour, cutoffMinute] = (appSettings?.order_cutoff_time || '18:00').split(':').map(Number);
@@ -268,14 +281,21 @@ export default function OrderSummaryPage() {
 
     if (dateRange) {
       console.log("dateRange", dateRange);
-      // Ensure start time is 00:00 and end time is cutoff time
+      // Ensure start time is 00:00 and end time is cutoff time (with new logic)
       const startDate = new Date(dateRange.from);
-      startDate.setHours(0, 0, 0, 0);
-      
       const endDate = new Date(dateRange.to);
+
+      // Validate dates before proceeding
+      if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+        console.error('Invalid date range from getOrderFilterRangeByDelivery:', dateRange);
+        return;
+      }
+
       const [cutoffHour, cutoffMinute] = (appSettings?.order_cutoff_time || '18:00').split(':').map(Number);
-      endDate.setHours(cutoffHour, cutoffMinute - 2, 0, 0);
-      
+
+      startDate.setHours(0, 0, 0, 0);
+      endDate.setHours(cutoffHour, cutoffMinute - 1, 59, 999);
+
       setDateRange({
         startDate: startDate.toISOString().slice(0, 16),
         endDate: endDate.toISOString().slice(0, 16),
@@ -287,7 +307,8 @@ export default function OrderSummaryPage() {
   const handleClearFilters = () => {
     setDeliveryFilter(null);
     const now = new Date();
-    const sevenDaysAgo = new Date(now.setDate(now.getDate() - 7));
+    const sevenDaysAgo = new Date(now.getTime()); // Create a copy to avoid mutating now
+    sevenDaysAgo.setDate(now.getDate() - 7);
     sevenDaysAgo.setHours(0, 0, 0, 0);
     
     const [cutoffHour, cutoffMinute] = (appSettings?.order_cutoff_time || '18:00').split(':').map(Number);
