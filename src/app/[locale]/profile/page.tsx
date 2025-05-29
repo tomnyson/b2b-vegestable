@@ -7,6 +7,7 @@ import { toast } from 'react-toastify';
 import { getUser, updateUserProfile, UserProfile } from '../../lib/auth';
 import { getUserOrders, Order, getOrderById, cancelOrder, generateInvoice } from '../../lib/order-api';
 import { getCustomerDetailsFromAuth, CustomerDetails, getUserAddresses } from '../../lib/customer-api';
+import Loading from '@/app/components/Loading';
 // import { getProductById } from '../../lib/product-api'; // Not used in the provided code
 import Header from '../../components/Header';
 import OrderDetailModal from '../../components/OrderDetailModal';
@@ -50,6 +51,7 @@ export default function ProfilePage() {
   const searchParams = useSearchParams();
   const locale = useLocale();
   const t = useTranslations('profile');
+  const tInvoices = useTranslations('invoices');
 
   // User data states
   const [user, setUser] = useState<User | null>(null);
@@ -271,7 +273,7 @@ export default function ProfilePage() {
       longitude: suggestion.longitude,
       latitude: suggestion.latitude
     });
-    
+
     // Auto-fill city and zip code if available
     if (suggestion.city || suggestion.postcode) {
       setFormData(prev => ({
@@ -281,7 +283,7 @@ export default function ProfilePage() {
       }));
       toast.success('Address details auto-filled!');
     }
-    
+
     setShowSuggestions(false);
     setSuggestions([]);
   };
@@ -318,7 +320,7 @@ export default function ProfilePage() {
     setShowSuggestions(false);
     setAddressCoordinates({});
 
-          toast.success(t('messages.addressAdded'));
+    toast.success(t('messages.addressAdded'));
   };
 
   const handleRemoveAddress = (id: string) => {
@@ -329,7 +331,7 @@ export default function ProfilePage() {
       }
       return updated;
     });
-          toast.info(t('messages.addressDeleted'));
+    toast.info(t('messages.addressDeleted'));
   };
 
   const handleSetDefaultAddress = (id: string) => {
@@ -337,7 +339,7 @@ export default function ProfilePage() {
       ...addr,
       isDefault: addr.id === id
     })));
-          toast.success(t('messages.defaultAddressSet'));
+    toast.success(t('messages.defaultAddressSet'));
   };
 
   const handleStartEditAddress = (id: string) => {
@@ -412,7 +414,7 @@ export default function ProfilePage() {
     setEditingAddressId(null);
     setEditAddress('');
     setAddressCoordinates({});
-          toast.success(t('messages.addressUpdated'));
+    toast.success(t('messages.addressUpdated'));
   };
 
   const handleCancelEditAddress = () => {
@@ -519,9 +521,9 @@ export default function ProfilePage() {
 
     } catch (error: any) {
       console.error('Error cancelling order:', error);
-              const msg = error.message || t('orders.cancelError');
-        setOrderActionError(msg);
-        toast.error(msg);
+      const msg = error.message || t('orders.cancelError');
+      setOrderActionError(msg);
+      toast.error(msg);
     } finally {
       setOrderActionLoading(false);
     }
@@ -878,8 +880,8 @@ export default function ProfilePage() {
                     type="submit"
                     disabled={isSaving}
                     className={`w-full flex justify-center items-center py-4 px-6 border border-transparent rounded-xl text-base font-semibold transition-all duration-200 ${isSaving
-                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                        : 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white hover:from-emerald-600 hover:to-teal-700 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5'
+                      ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                      : 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white hover:from-emerald-600 hover:to-teal-700 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5'
                       }`}
                   >
                     {isSaving ? (
@@ -932,7 +934,7 @@ export default function ProfilePage() {
                 ) : (
                   <div className="overflow-x-auto">
                     <table className="min-w-full divide-y divide-gray-200">
-                      <thead className="bg-gray-50">
+                      <thead className="bg-gradient-to-r from-emerald-50 to-teal-50">
                         <tr>
                           <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             {t('labels.orderId')}
@@ -968,8 +970,8 @@ export default function ProfilePage() {
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
                               <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${order.status === 'completed' ? 'bg-green-100 text-green-800' :
-                                  order.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                                    'bg-red-100 text-red-800'
+                                order.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                                  'bg-red-100 text-red-800'
                                 }`}>
                                 {t(`orders.status.${order.status}`)}
                               </span>
@@ -987,8 +989,8 @@ export default function ProfilePage() {
                                     onClick={() => handleBuyAgain(order)}
                                     disabled={isBuyingAgain}
                                     className={`inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md transition-colors ${isBuyingAgain
-                                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                        : 'text-blue-700 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
+                                      ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                      : 'text-blue-700 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
                                       }`}
                                     title={t('orders.buyAgain')}
                                   >
@@ -1021,7 +1023,12 @@ export default function ProfilePage() {
         );
       case 'invoices':
         return (
-          <InvoicesTab />
+          <div className="bg-white rounded-lg shadow overflow-hidden">
+            <div className="p-6">
+              <h2 className="text-xl font-semibold text-gray-900 mb-6">{tInvoices('title')}</h2>
+              <InvoicesTab />
+            </div>
+          </div>
         );
       case 'notifications':
         return (
@@ -1074,28 +1081,9 @@ export default function ProfilePage() {
   };
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-100 to-blue-100">
-        <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl border border-white/20 p-8 flex flex-col items-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-emerald-500 mb-4"></div>
-          <p className="text-gray-600 font-medium">{t('loading')}</p>
-        </div>
-      </div>
-    );
+    return <Loading />
   }
 
-    if (!user && !isLoading) { 
-    // This case should ideally be handled by redirect in fetchUserData,
-    // but as a fallback or if fetchUserData fails before redirect.
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-100 to-blue-100">
-        <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl border border-white/20 p-8 flex flex-col items-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-emerald-500 mb-4"></div>
-          <p className="text-gray-600 font-medium">Redirecting to login...</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <>
@@ -1103,11 +1091,11 @@ export default function ProfilePage() {
       <div className="min-h-screen bg-gradient-to-br from-gray-100 to-blue-100 py-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto">
           {user && (
-            <div className="bg-white/60 backdrop-blur-md rounded-3xl shadow-xl p-6 mb-8 border border-white/30">
-              <h1 className="text-2xl font-bold text-gray-800">
+            <div className="bg-white/60 bg-gradient-to-r from-emerald-500 to-teal-600  backdrop-blur-md rounded-xl shadow-xl p-6 mb-8 border border-white/30">
+              <h1 className="text-2xl font-bold text-white">
                 {t('welcome')}, {customerDetails?.name || user?.email || t('guest')}!
               </h1>
-              <p className="text-gray-600 mt-1">{t('manageInfo')}</p>
+              <p className="text-white mt-1">{t('manageInfo')}</p>
             </div>
           )}
 
@@ -1135,8 +1123,8 @@ export default function ProfilePage() {
                         key={tab.id}
                         onClick={() => setActiveTab(tab.id)}
                         className={`${activeTab === tab.id
-                            ? 'border-emerald-500 text-emerald-600'
-                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                          ? 'border-emerald-500 text-emerald-600'
+                          : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                           } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors duration-150 outline-none focus:ring-2 focus:ring-emerald-400 rounded-t-md`}
                         aria-current={activeTab === tab.id ? 'page' : undefined}
                       >

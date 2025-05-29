@@ -981,7 +981,10 @@
       "to": "đến",
       "of": "trong",
       "allStatuses": "Tất cả trạng thái"
-    }
+    },
+    "totalInvoices": "Tổng số hóa đơn",
+    "noInvoicesFound": "Không tìm thấy hóa đơn",
+    "searchPlaceholder": "Tìm kiếm theo tên khách hàng hoặc email..."
   },
   "profile": {
     "tab": "Hồ sơ",

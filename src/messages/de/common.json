@@ -277,7 +277,10 @@
         "to": "bis",
         "of": "von",
         "allStatuses": "Alle Status"
-      }
+      },
+      "totalInvoices": "Rechnungen insgesamt",
+      "noInvoicesFound": "Keine Rechnungen gefunden",
+      "searchPlaceholder": "Nach Kundenname oder E-Mail suchen..."
     }
   },
   "messages": {

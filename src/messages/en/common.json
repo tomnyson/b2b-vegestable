@@ -786,7 +786,10 @@
       "to": "to",
       "of": "of",
       "allStatuses": "All Statuses"
-    }
+    },
+    "totalInvoices": "Total Invoices",
+    "noInvoicesFound": "No invoices found",
+    "searchPlaceholder": "Search by customer name or email..."
   },
   "home": {
     "navigation": {
@@ -1108,7 +1111,7 @@
       "actions": "Actions"
     }
   },
-  "common": { 
+  "common": {
     "labels": {
       "date": "Date",
       "status": "Status",
