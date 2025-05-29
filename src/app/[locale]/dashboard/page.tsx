@@ -254,12 +254,6 @@ export default function DashboardPage() {
               Welcome to {appSettings?.company_name ? `${appSettings.company_name}'s` : 'your'} B2B Vegetable management dashboard
             </p>
           </div>
-          <div className="mt-4 lg:mt-0 flex items-center space-x-2 text-xs text-gray-500">
-            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <span>Last updated: {new Date().toLocaleString()}</span>
-          </div>
         </div>
       </div>
       

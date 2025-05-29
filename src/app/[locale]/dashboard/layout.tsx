@@ -290,19 +290,12 @@ export default function DashboardLayout({
             <p className="text-xs font-medium text-gray-500 mb-3 uppercase tracking-wide">
               {t('labels.language')}
             </p>
-              <LanguageSwitcher />
+              <LanguageSwitcher className="left-0" />
           </div>
 }
           {/* User Profile */}
           <div className="p-6 border-t border-gray-100 bg-gray-50/50">
             <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center shadow-lg">
-                  <span className="text-sm font-bold text-white">
-                    {userProfile?.name?.[0] || user?.email?.[0] || 'A'}
-                  </span>
-                </div>
-              </div>
               {sidebarOpen && (
                 <div className="ml-3 flex-1 min-w-0">
                   <p className="text-sm font-semibold text-gray-900 truncate">
@@ -363,12 +356,8 @@ export default function DashboardLayout({
               {appSettings?.company_name || t('appName')}
             </span>
           </div>
-
-          <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center">
-            <span className="text-sm font-bold text-white">
-              {userProfile?.name?.[0] || user?.email?.[0] || 'A'}
-            </span>
-          </div>
+          <div></div>
+          
         </div>
       </div>
 

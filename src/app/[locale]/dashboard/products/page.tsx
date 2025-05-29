@@ -10,6 +10,7 @@ import ImportProductModal from './ImportProductModal';
 import Pagination from '@/app/components/Pagination';
 import { Product, getPaginatedProducts, deleteProduct, toggleProductStatus } from '../../../lib/product-api';
 import Loading from '@/app/components/Loading';
+import Switch from '@/app/components/Switch';
 
 type SortField = 'name_en' | 'unit' | 'price' | 'stock' | 'created_at';
 type SortDirection = 'asc' | 'desc';
@@ -406,19 +407,11 @@ export default function ProductsPage() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between mb-2">
                         <h4 className="text-base font-semibold text-gray-900 truncate">{product.name_en}</h4>
-                        <button
-                          onClick={() => handleToggleStatus(product.id, product.is_active)}
-                          className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 ${
-                            product.is_active ? 'bg-emerald-600' : 'bg-gray-200'
-                          }`}
-                          title={product.is_active ? t('deactivate') : t('activate')}
-                        >
-                          <span
-                            className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform duration-200 ${
-                              product.is_active ? 'translate-x-5' : 'translate-x-1'
-                            }`}
+                          <Switch
+                            checked={product.is_active}
+                            onChange={() => handleToggleStatus(product.id, product.is_active)}
+                            size="sm"
                           />
-                        </button>
                       </div>
                       
                       <div className="grid grid-cols-2 gap-4 text-xs text-gray-600 mb-3">
@@ -507,19 +500,11 @@ export default function ProductsPage() {
                       {product.unit}
                     </td>
                     <td className="px-4 py-2 whitespace-nowrap text-center">
-                      <button
-                        onClick={() => handleToggleStatus(product.id, product.is_active)}
-                        className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 ${
-                          product.is_active ? 'bg-emerald-600' : 'bg-gray-200'
-                        }`}
-                        title={product.is_active ? t('deactivate') : t('activate')}
-                      >
-                        <span
-                          className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform duration-200 ${
-                            product.is_active ? 'translate-x-5' : 'translate-x-1'
-                          }`}
-                        />
-                      </button>
+                      <Switch
+                        checked={product.is_active} 
+                        onChange={() => handleToggleStatus(product.id, product.is_active)}
+                        size="sm"
+                      />
                     </td>
                     <td className="px-4 py-2 whitespace-nowrap text-right text-sm font-medium">
                       <div className="flex items-center justify-end space-x-2">

@@ -70,63 +70,36 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
       {/* Language Toggle Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center space-x-2 px-4 py-2.5 bg-white/80 backdrop-blur-sm border border-gray-200 rounded-xl hover:bg-white hover:border-gray-300 transition-all duration-200 shadow-sm min-w-[120px] relative z-[1000]"
-        aria-label="Select Language"
+        className="flex items-center space-x-1 px-2 py-1 text-sm hover:bg-gray-50 transition"
       >
-        <span className="text-lg">
-          {currentLanguage.flag}
-        </span>
-        <span className="text-sm font-medium text-gray-600">
-          {currentLanguage.code.toUpperCase()}
-        </span>
-        <svg 
-          className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
-          fill="none" 
-          stroke="currentColor" 
-          viewBox="0 0 24 24"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-        </svg>
+        <span>{currentLanguage.flag}</span>
+        <span className="font-semibold">{currentLanguage.code.toUpperCase()}</span>
+        {isOpen ? (
+          <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" />
+          </svg>
+        ) : (
+          <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+          </svg>
+        )}
       </button>
 
       {/* Language Dropdown */}
       {isOpen && (
-        <div className="top-[calc(100%+0.5rem)] right-0 mt-2 w-64 bg-white/95 backdrop-blur-lg border border-gray-200 rounded-xl shadow-2xl z-[1001] overflow-hidden">
-          <div className="py-2">
-            <div className="px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider border-b border-gray-100">
-              {t('language')}
-            </div>
-            {SUPPORTED_LANGUAGES.map((language) => (
-              <button
-                key={language.code}
-                onClick={() => handleLanguageSelect(language.code)}
-                className={`w-full px-4 py-3 text-left hover:bg-emerald-50 transition-colors duration-200 flex items-center justify-between ${
-                  currentLocale === language.code 
-                    ? 'bg-emerald-50 text-emerald-700' 
-                    : 'text-gray-700'
-                }`}
-              >
-                <div className="flex items-center space-x-3 flex-1 min-w-0">
-                  <span className="text-lg w-6 text-center flex-shrink-0">
-                    {language.flag}
-                  </span>
-                  <div className="flex-1 min-w-0">
-                    <div className="font-medium text-sm truncate">
-                      {language.name}
-                    </div>
-                    <div className="text-xs text-gray-500 truncate">
-                      {language.code.toUpperCase()} → {LANGUAGE_CURRENCY_MAP[language.code]}
-                    </div>
-                  </div>
-                </div>
-                {currentLocale === language.code && (
-                  <svg className="w-4 h-4 text-emerald-600 flex-shrink-0 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                )}
-              </button>
-            ))}
-          </div>
+        <div className="absolute top-full right-0 mt-1 w-24 bg-white border border-gray-200 rounded shadow-lg z-50">
+          {SUPPORTED_LANGUAGES.map((language) => (
+            <button
+              key={language.code}
+              onClick={() => handleLanguageSelect(language.code)}
+              className={`w-full px-2 py-1 text-left text-sm flex items-center space-x-2 hover:bg-gray-100 ${
+                currentLocale === language.code ? 'font-bold text-emerald-700' : 'text-gray-700'
+              }`}
+            >
+              <span className="w-5">{language.flag}</span>
+              <span>{language.code.toUpperCase()}</span>
+            </button>
+          ))}
         </div>
       )}
     </div>
