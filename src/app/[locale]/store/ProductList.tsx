@@ -5,6 +5,8 @@ import { useTranslations, useLocale } from 'next-intl';
 import { Product } from '../../lib/product-api';
 import { formatPriceSync } from '../../lib/settings-api';
 import Image from 'next/image';
+import Pagination from '@/app/components/Pagination';
+import Loading from '@/app/components/Loading';
 
 interface ProductListProps {
   products: Product[];
@@ -21,6 +23,7 @@ interface ProductListProps {
   isSearching?: boolean; // Optional prop to show search loading state
   itemsPerPage: number;
   onItemsPerPageChange: (value: number) => void;
+  totalCount: number;
 
 }
 
@@ -57,9 +60,11 @@ const ProductList: React.FC<ProductListProps> = ({
   currency,
   isSearching,
   itemsPerPage,
-  onItemsPerPageChange
+  onItemsPerPageChange,
+  totalCount
 }) => {
   const t = useTranslations('store');
+  const tCommon = useTranslations('common');
   const locale = useLocale();
   // State for quantity inputs
   const [quantities, setQuantities] = useState<Record<string, number>>({});
@@ -125,12 +130,7 @@ const ProductList: React.FC<ProductListProps> = ({
 
   if (loading) {
     return (
-      <div className="p-4 sm:p-6 lg:p-8 xl:p-12">
-        <div className="flex flex-col items-center justify-center space-y-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500"></div>
-          <p className="text-base sm:text-lg font-medium text-gray-700 text-center">{t('products.loading')}</p>
-        </div>
-      </div>
+      <Loading/>
     );
   }
 
@@ -154,7 +154,7 @@ const ProductList: React.FC<ProductListProps> = ({
       {/* Search and Filter Controls */}
       <div className="mb-6 sm:mb-8 space-y-4 sm:space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0 gap-4">
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent leading-tight">{t('products.title')}</h2>
+          <h2 className="text-xl sm:text-xl lg:text-2xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent leading-tight">{t('products.title')}</h2>
           <div className="flex items-center justify-between sm:justify-end space-x-4">
             {/* Order History Link */}
             <a
@@ -195,25 +195,6 @@ const ProductList: React.FC<ProductListProps> = ({
             )}
           </div>
         </div>
-      </div>
-
-      {/* Items per page dropdown */}
-      <div className="flex justify-end mb-4">
-        <label htmlFor="itemsPerPage" className="mr-2 text-sm text-gray-700 font-medium">
-          {t('pagination.itemsPerPage')}:
-        </label>
-        <select
-          id="itemsPerPage"
-          value={itemsPerPage}
-          onChange={(e) => onItemsPerPageChange(Number(e.target.value))}
-          className="px-3 py-2 border border-gray-300 rounded-lg bg-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-        >
-          {[10, 20, 50, 100].map((size) => (
-            <option key={size} value={size}>
-              {size}
-            </option>
-          ))}
-        </select>
       </div>
 
       {/* Products Display */}
@@ -334,7 +315,7 @@ const ProductList: React.FC<ProductListProps> = ({
                       <tr key={product.id} className="hover:bg-emerald-50/70 transition-all duration-300 hover:shadow-lg">
                         <td className="px-6 py-2">
                           <div className="flex items-center space-x-3">
-                            <div className="h-16 w-16 relative rounded-xl overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 flex-shrink-0 shadow-lg">
+                            <div className="h-10 w-10 relative rounded-sm overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 flex-shrink-0 shadow-lg">
                               {product.image_url ? (
                                 <Image
                                   src={product.image_url}
@@ -352,7 +333,7 @@ const ProductList: React.FC<ProductListProps> = ({
                               )}
                             </div>
                             <div className="min-w-0 flex-1">
-                              <div className="text-base font-bold text-gray-900 break-words leading-tight">
+                              <div className="text-base font-medium text-gray-900 break-words leading-tight">
                                 {product.name_en}
                               </div>
                             </div>
@@ -393,7 +374,7 @@ const ProductList: React.FC<ProductListProps> = ({
                         <td className="px-4 py-2 text-center">
                           <button
                             onClick={() => handleAddToCart(product)}
-                            className={`inline-flex items-center px-4 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 space-x-2 whitespace-nowrap
+                            className={`inline-flex items-center px-4 py-2.5 rounded-sm font-medium text-sm transition-all duration-200 space-x-2 whitespace-nowrap
                                 bg-gradient-to-r from-emerald-500 to-teal-600 text-white hover:from-emerald-600 hover:to-teal-700 shadow-lg hover:shadow-xl`
                             }
                           >
@@ -423,94 +404,18 @@ const ProductList: React.FC<ProductListProps> = ({
         </div>
       )}
 
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="mt-6 sm:mt-8 flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
-          <div className="text-xs sm:text-sm text-gray-700 text-center lg:text-left">
-            {t('pagination.showing')} <span className="font-semibold">{currentPage}</span> {t('pagination.of')}{' '}
-            <span className="font-semibold">{totalPages}</span>
-          </div>
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        totalCount={totalCount}
+        itemsPerPage={itemsPerPage}
+        onPageChange={onPageChange}
+        onItemsPerPageChange={onItemsPerPageChange}
+        t={tCommon}
+        itemName="products"
+      />
 
-          <div className="flex flex-col sm:flex-row items-center justify-center space-y-3 sm:space-y-0 sm:space-x-4">
-            {/* Page Number Selector */}
-            <div className="flex items-center space-x-2">
-              <span className="text-xs sm:text-sm text-gray-600">{t('pagination.goToPage')}:</span>
-              <select
-                value={currentPage}
-                onChange={(e) => onPageChange(Number(e.target.value))}
-                className="px-3 py-2 border border-gray-300 rounded-lg bg-white text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200"
-              >
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
-                  <option key={pageNum} value={pageNum}>
-                    {pageNum}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Navigation Buttons */}
-            <div className="flex items-center justify-center space-x-1 sm:space-x-2">
-              <button
-                onClick={() => onPageChange(Math.max(1, currentPage - 1))}
-                disabled={currentPage <= 1}
-                className={`px-3 sm:px-4 py-2 rounded-lg border font-medium text-xs sm:text-sm transition-all duration-200 flex items-center space-x-1 ${currentPage <= 1
-                  ? 'border-gray-200 text-gray-400 cursor-not-allowed bg-gray-50'
-                  : 'border-emerald-300 text-emerald-700 hover:bg-emerald-50 hover:border-emerald-400'
-                  }`}
-              >
-                <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
-                <span className="hidden sm:inline">{t('pagination.previous')}</span>
-              </button>
-
-              <div className="flex items-center space-x-1">
-                {[...Array(Math.min(totalPages, 5))].map((_, idx) => {
-                  let pageNum;
-                  if (totalPages <= 5) {
-                    pageNum = idx + 1;
-                  } else {
-                    if (currentPage <= 3) {
-                      pageNum = idx + 1;
-                    } else if (currentPage >= totalPages - 2) {
-                      pageNum = totalPages - 4 + idx;
-                    } else {
-                      pageNum = currentPage - 2 + idx;
-                    }
-                  }
-
-                  return (
-                    <button
-                      key={pageNum}
-                      onClick={() => onPageChange(pageNum)}
-                      className={`px-2.5 sm:px-3 py-2 rounded-lg font-medium text-xs sm:text-sm transition-all duration-200 ${currentPage === pageNum
-                        ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg'
-                        : 'bg-white text-gray-700 hover:bg-emerald-50 border border-gray-200'
-                        }`}
-                    >
-                      {pageNum}
-                    </button>
-                  );
-                })}
-              </div>
-
-              <button
-                onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
-                disabled={currentPage >= totalPages}
-                className={`px-3 sm:px-4 py-2 rounded-lg border font-medium text-xs sm:text-sm transition-all duration-200 flex items-center space-x-1 ${currentPage >= totalPages
-                  ? 'border-gray-200 text-gray-400 cursor-not-allowed bg-gray-50'
-                  : 'border-emerald-300 text-emerald-700 hover:bg-emerald-50 hover:border-emerald-400'
-                  }`}
-              >
-                <span className="hidden sm:inline">{t('pagination.next')}</span>
-                <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      
     </div>
   );
 };

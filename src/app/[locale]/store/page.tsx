@@ -23,10 +23,11 @@ export default function StorePage() {
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [itemsPerPage, setItemsPerPage] = useState(20);
   const [searchTerm, setSearchTerm] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const [popularProductIds, setPopularProductIds] = useState<string[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
 
   // Authentication state
   const [user, setUser] = useState<any>(null);
@@ -68,6 +69,7 @@ export default function StorePage() {
       
       setProducts(result.products);
       setTotalPages(result.totalPages);
+      setTotalCount(result.totalCount);
     } catch (err: any) {
       console.error('Error loading products:', err);
       setError(err.message || t('productsError'));
@@ -460,7 +462,7 @@ export default function StorePage() {
           </div> */}
           
           {/* Welcome Banner */}
-          {user && (
+          {/* {user && (
             <div className="bg-gradient-to-r from-emerald-500 to-teal-600 rounded-xl shadow-2xl border border-white/20 p-6 lg:p-8 mb-8 text-white">
               <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
                 <div>
@@ -478,7 +480,7 @@ export default function StorePage() {
                 </div>
               </div>
             </div>
-          )}
+          )} */}
           
           <div className="flex flex-col xl:flex-row gap-8">
             {/* Left Column - Product Listing */}
@@ -499,6 +501,7 @@ export default function StorePage() {
                   isSearching={isSearching}
                   itemsPerPage={itemsPerPage}
                   onItemsPerPageChange={setItemsPerPage}
+                  totalCount={totalCount}
                 />
               </div>
             </div>

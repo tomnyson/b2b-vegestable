@@ -6,6 +6,7 @@ import { Product } from '../../lib/product-api';
 import { formatPriceSync } from '../../lib/settings-api';
 import Image from 'next/image';
 
+
 interface ShoppingCartProps {
   items: { product: Product; quantity: number }[];
   total: number;
@@ -130,7 +131,7 @@ const ShoppingCart: React.FC<ShoppingCartProps> = ({
           {/* Cart Items */}
           <div className="space-y-2">
             {items.map(({ product, quantity }) => (
-              <div key={product.id} className="bg-white/50 backdrop-blur-sm rounded-xl border border-white/20 p-2 hover:shadow-lg transition-all duration-200">
+              <div key={product.id} className="bg-white/50 backdrop-blur-sm rounded-sm border border-white/20 p-2 hover:shadow-lg transition-all duration-200">
                 <div className="flex items-start">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between">
@@ -139,11 +140,11 @@ const ShoppingCart: React.FC<ShoppingCartProps> = ({
                         <p className="text-xs text-gray-500">{product.unit}</p>
                       </div>
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center bg-gray-100 rounded-xl">
+                        <div className="flex items-center bg-gray-100 rounded-sm">
                           <button
                             onClick={() => onUpdateQuantity(product.id, quantity - 1)}
                             disabled={quantity <= 1}
-                            className="p-2 rounded-l-xl hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="p-2 rounded-sm hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                           >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
@@ -161,7 +162,7 @@ const ShoppingCart: React.FC<ShoppingCartProps> = ({
                         </div>
                         <button
                           onClick={() => onRemoveItem(product.id)}
-                          className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-xl transition-colors"
+                          className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-sm transition-colors"
                           aria-label={t('cart.remove')}
                         >
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -177,8 +178,8 @@ const ShoppingCart: React.FC<ShoppingCartProps> = ({
             ))}
           </div>
           {/* Cart Summary */}
-          <div className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-xl p-2 mb-2 border border-emerald-100">
-            <div className="flex items-center justify-between mb-3">
+          <div className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-sm p-2 mb-2 border border-emerald-100">
+            <div className="flex items-center justify-between">
               <span className="text-sm font-medium text-gray-700">{t('cart.totalItems')}</span>
               <span className="text-lg font-bold text-emerald-700">{items.reduce((acc, item) => acc + item.quantity, 0)}</span>
             </div>
@@ -196,7 +197,7 @@ const ShoppingCart: React.FC<ShoppingCartProps> = ({
             <textarea
               id="order-notes"
               rows={3}
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl bg-white/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200 text-sm resize-none"
+              className="w-full px-4 py-3 border border-gray-300 rounded-sm bg-white/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200 text-sm resize-none"
               placeholder={t('cart.orderNotesPlaceholder')}
               value={orderNotes}
               onChange={(e) => onOrderNotesChange(e.target.value)}
@@ -210,7 +211,7 @@ const ShoppingCart: React.FC<ShoppingCartProps> = ({
         type="button"
         onClick={handleCheckout}
         disabled={isCartEmpty}
-        className={`w-full flex justify-center items-center px-6 py-4 rounded-xl text-base font-semibold transition-all duration-200 ${isCartEmpty
+        className={`w-full flex justify-center items-center px-6 py-4 rounded-sm text-base font-semibold transition-all duration-200 ${isCartEmpty
             ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
             : 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white hover:from-emerald-600 hover:to-teal-700 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5'
           }`}
@@ -223,8 +224,8 @@ const ShoppingCart: React.FC<ShoppingCartProps> = ({
 
       {/* Order Confirmation Modal */}
       {showConfirmation && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white/90 backdrop-blur-lg rounded-3xl shadow-2xl border border-white/20 p-6 lg:p-8 max-w-md w-full max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
+          <div className="bg-white/90 backdrop-blur-lg rounded-2xl shadow-2xl border border-white/20 p-6 lg:p-8 max-w-md w-full max-h-[90vh] overflow-y-auto">
             <div className="mb-6">
               <h3 className="text-xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent mb-2">
                 {t('cart.confirmOrder')}
@@ -237,7 +238,7 @@ const ShoppingCart: React.FC<ShoppingCartProps> = ({
               <h4 className="font-semibold text-sm text-gray-700 mb-3">{t('cart.orderItems')}</h4>
               <div className="space-y-2">
                 {items.map(({ product, quantity }) => (
-                  <div key={product.id} className="bg-gray-50 rounded-xl p-3">
+                  <div key={product.id} className="bg-gray-50 rounded-sm p-3">
                     <div className="flex justify-between items-start">
                       <div className="flex-1">
                         <span className="text-sm font-medium text-gray-900">{product.name_en}</span>
@@ -267,7 +268,7 @@ const ShoppingCart: React.FC<ShoppingCartProps> = ({
 
             {/* Order Notes */}
             {orderNotes && (
-              <div className="mb-6 bg-gray-50 rounded-xl p-4">
+              <div className="mb-6 bg-gray-50 rounded-sm p-4">
                 <h4 className="font-semibold text-sm text-gray-700 mb-2">{t('cart.yourNotes')}</h4>
                 <p className="text-sm text-gray-600">{orderNotes}</p>
               </div>
@@ -282,7 +283,7 @@ const ShoppingCart: React.FC<ShoppingCartProps> = ({
                   {showAddressSelection ? (
                     <div className="space-y-3">
                       <select
-                        className="w-full min-w-[280px] px-4 py-3 border border-gray-300 rounded-xl bg-white/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm"
+                        className="w-full min-w-[280px] px-4 py-3 border border-gray-300 rounded-sm bg-white/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm"
                         value={customerInfo.address}
                         onChange={handleAddressChange}
                       >
@@ -300,7 +301,7 @@ const ShoppingCart: React.FC<ShoppingCartProps> = ({
                       </button>
                     </div>
                   ) : (
-                    <div className="bg-gray-50 rounded-xl p-4 flex items-center justify-between">
+                    <div className="bg-gray-50 rounded-sm p-4 flex items-center justify-between">
                       <p className="text-sm text-gray-700 flex-1">{customerInfo.address}</p>
                       <button
                         className="text-sm text-emerald-600 hover:text-emerald-800 font-medium ml-3"
@@ -312,7 +313,7 @@ const ShoppingCart: React.FC<ShoppingCartProps> = ({
                   )}
                 </div>
               ) : (
-                <div className="bg-gray-50 rounded-xl p-4">
+                <div className="bg-gray-50 rounded-sm p-4">
                   <p className="text-sm text-gray-700">{customerInfo.address || t('cart.noAddress')}</p>
                 </div>
               )}
@@ -322,13 +323,13 @@ const ShoppingCart: React.FC<ShoppingCartProps> = ({
             <div className="flex flex-col-reverse lg:flex-row lg:justify-end lg:space-x-3 space-y-3 space-y-reverse lg:space-y-0">
               <button
                 onClick={() => setShowConfirmation(false)}
-                className="w-full lg:w-auto px-6 py-3 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-xl transition-all duration-200"
+                className="w-full lg:w-auto px-6 py-3 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-sm transition-all duration-200"
               >
                 {t('cart.cancel')}
               </button>
               <button
                 onClick={handleConfirmOrder}
-                className="w-full lg:w-auto px-6 py-3 text-sm font-medium text-white bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center space-x-2"
+                className="w-full lg:w-auto px-6 py-3 text-sm font-medium text-white bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 rounded-sm shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center space-x-2"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
